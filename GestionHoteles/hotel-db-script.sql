@@ -99,7 +99,7 @@ INSERT INTO usuarios (nombre, rol, nombre_usuario, contraseña) VALUES
 ('Ana Gómez', 'Mantenimiento', 'mantenimiento', '123');
 
 -- Clientes de prueba
-INSERT INTO clientes (nombre, numero_documento, telefono, email, direccion) VALUES 
+INSERT INTO clientes (nombre, dni, telefono, email, direccion) VALUES 
 ('Pedro Martínez', '12345678A', '666111222', 'pedro@mail.com', 'Calle Mayor 1'),
 ('Laura García', '87654321C', '666333444', 'laura@mail.com', 'Avd. Principal 23'),
 ('Miguel Fernández', '87654321B', '666555666', 'miguel@mail.com', 'Plaza Central 5'),
