@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "sqlite3.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -84,28 +83,6 @@ char LOG_FILE[100] = "actividad.log";
 int usuario_actual = 0; // ID del usuario que ha iniciado sesión
 
 int main() {
-	sqlite3 *db;
-
-	int result = sqlite3_open("hoteles.sqlite", &db);
-	if (result != SQLITE_OK) {
-		printf("Error al abrir la BBDD\n");
-		return result;
-	}
-
-	printf("BBDD abierta\n");
-
-
-
-	result = sqlite3_close(db);
-	if (result != SQLITE_OK) {
-		printf("Error al abrir la BBDD\n");
-		printf("%s\n", sqlite3_errmsg(db));
-		return result;
-	}
-
-	printf("BBDD cerrada\n") ;
-
-
     int opcion;
     bool ejecutar = true;
 
@@ -390,4 +367,3 @@ void registrarActividad(int id_usuario, const char* operacion) {
 
     fclose(log);
 }
-
