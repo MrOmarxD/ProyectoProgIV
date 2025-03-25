@@ -84,27 +84,28 @@ char LOG_FILE[100] = "actividad.log";
 int usuario_actual = 0; // ID del usuario que ha iniciado sesión
 
 int main() {
-	sqlite3 *db;
+    sqlite3 *db;
 
-	int result = sqlite3_open("hoteles.sqlite", &db);
-	if (result != SQLITE_OK) {
-		printf("Error al abrir la BBDD\n");
-		return result;
-	}
+    int result = sqlite3_open("hoteles.sqlite", &db);
+    if (result != SQLITE_OK) {
+        printf("Error al abrir la BBDD\n");
+        fflush(stdout);
+        return result;
+    }
 
-	printf("BBDD abierta\n");
+    printf("BBDD abierta\n");
+    fflush(stdout);
 
+    result = sqlite3_close(db);
+    if (result != SQLITE_OK) {
+        printf("Error al cerrar la BBDD\n");
+        printf("%s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return result;
+    }
 
-
-	result = sqlite3_close(db);
-	if (result != SQLITE_OK) {
-		printf("Error al abrir la BBDD\n");
-		printf("%s\n", sqlite3_errmsg(db));
-		return result;
-	}
-
-	printf("BBDD cerrada\n") ;
-
+    printf("BBDD cerrada\n");
+    fflush(stdout);
 
     int opcion;
     bool ejecutar = true;
@@ -112,43 +113,23 @@ int main() {
     printf("\n=============================================================\n");
     printf("      SISTEMA DE GESTIÓN DE HOTELES - GRUPO 12\n");
     printf("=============================================================\n");
+    fflush(stdout);
 
-    /* Verificar archivos de configuración */
-    FILE* config = fopen(CONFIG_FILE, "r");
-    if (config == NULL) {
-        printf("Primera ejecución detectada. Configurando sistema...\n");
-        /* Aquí iría el código para configuración inicial */
-        configuracionSistema();
-    } else {
-        fclose(config);
-    }
+    // Verificar archivos de configuración...
 
-    /* Simulación de inicio de sesión */
-    char usuario[20], password[20];
-    bool login_exitoso = false;
+    // Simulación de inicio de sesión...
 
-    do {
-        printf("\nInicio de sesión\n");
-        printf("Usuario: ");
-        scanf("%s", usuario);
-        printf("Contraseña: ");
-        scanf("%s", password);
-
-        /* Aquí iría la validación real contra la base de datos */
-        if (strcmp(usuario, "admin") == 0 && strcmp(password, "admin") == 0) {
-            login_exitoso = true;
-            usuario_actual = 1; // Suponemos que el admin tiene ID 1
-            registrarActividad(usuario_actual, "Inicio de sesión");
-        } else {
-            printf("Credenciales incorrectas. Intente nuevamente.\n");
-        }
-    } while (!login_exitoso);
-
-    /* Bucle principal del programa */
+    // Bucle principal del programa...
     while (ejecutar) {
         mostrarMenuPrincipal();
         printf("Seleccione una opción: ");
-        scanf("%d", &opcion);
+        fflush(stdout);
+        if (scanf("%d", &opcion) != 1) {
+                    while (getchar() != '\n'); // Limpiar el búfer de entrada
+                    printf("Entrada no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+                    continue;
+                }
 
         switch (opcion) {
             case 1:
@@ -182,11 +163,13 @@ int main() {
                 break;
             default:
                 printf("Opción no válida. Intente nuevamente.\n");
+                fflush(stdout);
         }
     }
 
     return 0;
 }
+
 
 void mostrarMenuPrincipal() {
     printf("\n=============================================================\n");
@@ -202,6 +185,7 @@ void mostrarMenuPrincipal() {
     printf("8. Configuración del Sistema\n");
     printf("0. Salir\n");
     printf("=============================================================\n");
+    fflush(stdout);
 }
 
 /* Implementación básica de las funciones de gestión */
@@ -215,12 +199,15 @@ void gestionUsuarios() {
     printf("4. Listar usuarios\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
+
 
     registrarActividad(usuario_actual, "Acceso a gestión de usuarios");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void gestionClientes() {
@@ -232,12 +219,14 @@ void gestionClientes() {
     printf("4. Listar todos los clientes\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a gestión de clientes");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void gestionPersonal() {
@@ -249,12 +238,14 @@ void gestionPersonal() {
     printf("4. Listar personal\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a gestión de personal");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void gestionHabitaciones() {
@@ -266,12 +257,14 @@ void gestionHabitaciones() {
     printf("4. Listar habitaciones\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a gestión de habitaciones");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void gestionReservas() {
@@ -284,12 +277,14 @@ void gestionReservas() {
     printf("5. Listar reservas activas\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a gestión de reservas");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void gestionFacturacion() {
@@ -301,16 +296,19 @@ void gestionFacturacion() {
     printf("4. Generar informe de facturación\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a facturación");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 void verRegistrosActividad() {
     printf("\n--- REGISTROS DE ACTIVIDAD ---\n");
+    fflush(stdout);
 
     FILE* log = fopen(LOG_FILE, "r");
     if (log == NULL) {
@@ -329,6 +327,7 @@ void verRegistrosActividad() {
     fclose(log);
     printf("----------------------------------------------------------\n");
     printf("Presione Enter para continuar...");
+    fflush(stdout);
     getchar(); // Capturar el enter anterior
     getchar(); // Esperar a que el usuario presione Enter
 }
@@ -342,12 +341,14 @@ void configuracionSistema() {
     printf("4. Restaurar desde copia de seguridad\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
     registrarActividad(usuario_actual, "Acceso a configuración del sistema");
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
+    fflush(stdout);
 }
 
 /* Implementación básica de las funciones de archivo */
