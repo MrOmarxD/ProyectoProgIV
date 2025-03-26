@@ -4,79 +4,19 @@
 #include <string.h>
 #include <stdbool.h>
 
-
-typedef struct {
-    int id;
-    char nombre[50];
-    char rol[20];
-    char usuario[20];
-    char password[20];
-} Usuario;
-
-typedef struct {
-    char dni[10];
-    char nombre[50];
-    char apellidos[50];
-    char telefono[15];
-    char email[50];
-} Cliente;
-
-typedef struct {
-    int id;
-    char nombre[50];
-    char cargo[30];
-    char turno[20];
-    float salario;
-} Personal;
-
-typedef struct {
-    int id;
-    char tipo[20];
-    float precio;
-    char estado[15]; // Disponible, Ocupada, Mantenimiento
-    int capacidad;
-} Habitacion;
-
-typedef struct {
-    int id;
-    char dni_cliente[10];
-    int id_habitacion;
-    char fecha_entrada[11];
-    char fecha_salida[11];
-    float monto;
-} Reserva;
-
-typedef struct {
-    int id;
-    int id_reserva;
-    char dni_cliente[10];
-    float monto;
-    char metodo_pago[20];
-    char fecha[11];
-} Factura;
-
-typedef struct {
-    int id;
-    int id_usuario;
-    char fecha[20];
-    char operacion[100];
-} Registro;
+#include "modulos/gestorUsuarios.h"
+#include "modulos/gestorClientes.h"
+#include "modulos/gestorPersonal.h"
+#include "modulos/gestorHabitaciones.h"
+#include "modulos/gestorReservas.h"
+#include "modulos/gestorFacturas.h"
+#include "modulos/gestorRegistros.h"
 
 /* Prototipos de funciones */
 void mostrarMenuPrincipal();
-void gestionUsuarios();
-void gestionClientes();
-void gestionPersonal();
-void gestionHabitaciones();
-void gestionReservas();
-void gestionFacturacion();
-void verRegistrosActividad();
 void configuracionSistema();
 
 /* Funciones para manejo de archivos */
-bool guardarDatos(const char* archivo, void* datos, size_t tamano, int cantidad);
-bool cargarDatos(const char* archivo, void* datos, size_t tamano, int* cantidad);
-void registrarActividad(int id_usuario, const char* operacion);
 
 /* Variables globales */
 char CONFIG_FILE[100] = "config.dat";
@@ -189,149 +129,6 @@ void mostrarMenuPrincipal() {
 }
 
 /* Implementación básica de las funciones de gestión */
-
-void gestionUsuarios() {
-    int opcion;
-    printf("\n--- GESTIÓN DE USUARIOS ---\n");
-    printf("1. Crear nuevo usuario\n");
-    printf("2. Modificar usuario existente\n");
-    printf("3. Eliminar usuario\n");
-    printf("4. Listar usuarios\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-
-    registrarActividad(usuario_actual, "Acceso a gestión de usuarios");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void gestionClientes() {
-    int opcion;
-    printf("\n--- GESTIÓN DE CLIENTES ---\n");
-    printf("1. Registrar nuevo cliente\n");
-    printf("2. Modificar datos de cliente\n");
-    printf("3. Buscar cliente\n");
-    printf("4. Listar todos los clientes\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    registrarActividad(usuario_actual, "Acceso a gestión de clientes");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void gestionPersonal() {
-    int opcion;
-    printf("\n--- GESTIÓN DE PERSONAL ---\n");
-    printf("1. Contratar nuevo empleado\n");
-    printf("2. Modificar datos de empleado\n");
-    printf("3. Dar de baja a empleado\n");
-    printf("4. Listar personal\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    registrarActividad(usuario_actual, "Acceso a gestión de personal");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void gestionHabitaciones() {
-    int opcion;
-    printf("\n--- GESTIÓN DE HABITACIONES ---\n");
-    printf("1. Añadir nueva habitación\n");
-    printf("2. Modificar habitación\n");
-    printf("3. Cambiar estado de habitación\n");
-    printf("4. Listar habitaciones\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    registrarActividad(usuario_actual, "Acceso a gestión de habitaciones");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void gestionReservas() {
-    int opcion;
-    printf("\n--- GESTIÓN DE RESERVAS ---\n");
-    printf("1. Crear nueva reserva\n");
-    printf("2. Modificar reserva\n");
-    printf("3. Cancelar reserva\n");
-    printf("4. Buscar reservas por cliente\n");
-    printf("5. Listar reservas activas\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    registrarActividad(usuario_actual, "Acceso a gestión de reservas");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void gestionFacturacion() {
-    int opcion;
-    printf("\n--- FACTURACIÓN ---\n");
-    printf("1. Generar nueva factura\n");
-    printf("2. Buscar factura\n");
-    printf("3. Listar facturas por fecha\n");
-    printf("4. Generar informe de facturación\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    registrarActividad(usuario_actual, "Acceso a facturación");
-
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
-    fflush(stdout);
-}
-
-void verRegistrosActividad() {
-    printf("\n--- REGISTROS DE ACTIVIDAD ---\n");
-    fflush(stdout);
-
-    FILE* log = fopen(LOG_FILE, "r");
-    if (log == NULL) {
-        printf("No hay registros de actividad disponibles.\n");
-        return;
-    }
-
-    char linea[200];
-    printf("Últimas actividades registradas:\n");
-    printf("----------------------------------------------------------\n");
-
-    while (fgets(linea, sizeof(linea), log) != NULL) {
-        printf("%s", linea);
-    }
-
-    fclose(log);
-    printf("----------------------------------------------------------\n");
-    printf("Presione Enter para continuar...");
-    fflush(stdout);
-    getchar(); // Capturar el enter anterior
-    getchar(); // Esperar a que el usuario presione Enter
-}
-
 void configuracionSistema() {
     int opcion;
     printf("\n--- CONFIGURACIÓN DEL SISTEMA ---\n");
@@ -350,45 +147,3 @@ void configuracionSistema() {
     printf("Funcionalidad en desarrollo...\n");
     fflush(stdout);
 }
-
-/* Implementación básica de las funciones de archivo */
-
-bool guardarDatos(const char* archivo, void* datos, size_t tamano, int cantidad) {
-    FILE* file = fopen(archivo, "wb");
-    if (file == NULL) {
-        return false;
-    }
-
-    size_t escritos = fwrite(datos, tamano, cantidad, file);
-    fclose(file);
-
-    return escritos == cantidad;
-}
-
-bool cargarDatos(const char* archivo, void* datos, size_t tamano, int* cantidad) {
-    FILE* file = fopen(archivo, "rb");
-    if (file == NULL) {
-        *cantidad = 0;
-        return false;
-    }
-
-    *cantidad = fread(datos, tamano, 100, file); // Suponemos un máximo de 100 registros
-    fclose(file);
-
-    return true;
-}
-
-void registrarActividad(int id_usuario, const char* operacion) {
-    FILE* log = fopen(LOG_FILE, "a");
-    if (log == NULL) {
-        printf("Error al registrar actividad.\n");
-        return;
-    }
-
-    /* Obtener fecha y hora actual */
-
-
-
-    fclose(log);
-}
-
