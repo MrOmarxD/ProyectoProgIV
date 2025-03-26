@@ -9,6 +9,6 @@ typedef struct {
     char email[50];
 } Cliente;
 
-void gestionClientes();
+void gestionClientes(int usuario_actual, char LOG_FILE);
 
 #endif /* MODULOS_GESTORCLIENTES_H_ */

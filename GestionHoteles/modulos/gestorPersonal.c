@@ -1,6 +1,8 @@
 #include "gestorPersonal.h"
+#include "gestorRegistros.h"
+#include <stdio.h>
 
-void gestionPersonal() {
+void gestionPersonal(int usuario_actual, char LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE PERSONAL ---\n");
     printf("1. Contratar nuevo empleado\n");
@@ -9,9 +11,10 @@ void gestionPersonal() {
     printf("4. Listar personal\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
-    registrarActividad(usuario_actual, "Acceso a gestión de personal");
+    registrarActividad(usuario_actual, "Acceso a gestión de personal", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");

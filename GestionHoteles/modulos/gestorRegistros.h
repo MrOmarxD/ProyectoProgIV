@@ -10,8 +10,8 @@ typedef struct {
     char operacion[100];
 } Registro;
 
-void registrarActividad(int id_usuario, const char* operacion);
-void verRegistrosActividad();
+void registrarActividad(int id_usuario, const char* operacion, char LOG_FILE);
+void verRegistrosActividad(int usuario_actual, char LOG_FILE);
 bool guardarDatos(const char* archivo, void* datos, size_t tamano, int cantidad);
 bool cargarDatos(const char* archivo, void* datos, size_t tamano, int* cantidad);
 

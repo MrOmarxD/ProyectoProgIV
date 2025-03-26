@@ -9,6 +9,6 @@ typedef struct {
     float salario;
 } Personal;
 
-void gestionPersonal();
+void gestionPersonal(int usuario_actual, char LOG_FILE);
 
 #endif /* MODULOS_GESTORPERSONAL_H_ */

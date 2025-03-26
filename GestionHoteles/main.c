@@ -73,32 +73,32 @@ int main() {
 
         switch (opcion) {
             case 1:
-                gestionUsuarios();
+                gestionUsuarios(usuario_actual, LOG_FILE);
                 break;
             case 2:
-                gestionClientes();
+                gestionClientes(usuario_actual, LOG_FILE);
                 break;
             case 3:
-                gestionPersonal();
+                gestionPersonal(usuario_actual, LOG_FILE);
                 break;
             case 4:
-                gestionHabitaciones();
+                gestionHabitaciones(usuario_actual, LOG_FILE);
                 break;
             case 5:
-                gestionReservas();
+                gestionReservas(usuario_actual, LOG_FILE);
                 break;
             case 6:
-                gestionFacturacion();
+                gestionFacturacion(usuario_actual, LOG_FILE);
                 break;
             case 7:
-                verRegistrosActividad();
+                verRegistrosActividad(usuario_actual, LOG_FILE);
                 break;
             case 8:
-                configuracionSistema();
+                configuracionSistema(usuario_actual, LOG_FILE);
                 break;
             case 0:
                 printf("Cerrando sesión y saliendo del sistema...\n");
-                registrarActividad(usuario_actual, "Cierre de sesión");
+                registrarActividad(usuario_actual, "Cierre de sesión", LOG_FILE);
                 ejecutar = false;
                 break;
             default:
@@ -141,7 +141,7 @@ void configuracionSistema() {
     fflush(stdout);
     scanf("%d", &opcion);
 
-    registrarActividad(usuario_actual, "Acceso a configuración del sistema");
+    registrarActividad(usuario_actual, "Acceso a configuración del sistema", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");

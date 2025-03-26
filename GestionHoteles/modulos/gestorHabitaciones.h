@@ -9,6 +9,6 @@ typedef struct {
     int capacidad;
 } Habitacion;
 
-void gestionHabitaciones();
+void gestionHabitaciones(int usuario_actual, char LOG_FILE);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

@@ -10,6 +10,6 @@ typedef struct {
     char fecha[11];
 } Factura;
 
-void gestionFacturacion();
+void gestionFacturacion(int usuario_actual, char LOG_FILE);
 
 #endif /* MODULOS_GESTORFACTURAS_H_ */

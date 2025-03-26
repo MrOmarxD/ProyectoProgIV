@@ -1,7 +1,8 @@
 #include "gestorFacturas.h"
 #include "gestorRegistros.h"
+#include <stdio.h>
 
-void gestionFacturacion() {
+void gestionFacturacion(int usuario_actual, char LOG_FILE) {
     int opcion;
     printf("\n--- FACTURACIÓN ---\n");
     printf("1. Generar nueva factura\n");
@@ -10,9 +11,10 @@ void gestionFacturacion() {
     printf("4. Generar informe de facturación\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
+    fflush(stdout);
     scanf("%d", &opcion);
 
-    registrarActividad(usuario_actual, "Acceso a facturación");
+    registrarActividad(usuario_actual, "Acceso a facturación", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
