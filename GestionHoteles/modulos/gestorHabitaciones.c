@@ -14,6 +14,30 @@ void gestionHabitaciones(int usuario_actual, char LOG_FILE) {
     fflush(stdout);
     scanf("%d", &opcion);
 
+    switch (opcion) {
+                case 1:
+                	printf("Añadir nueva habitación\n");
+                	fflush(stdout);
+                    break;
+                case 2:
+                	printf("Modificar habitación\n");
+                	fflush(stdout);
+                    break;
+                case 3:
+                	printf("Cambiar estado de habitación\n");
+                	fflush(stdout);
+                    break;
+                case 4:
+                	printf("Listar habitaciones\n");
+                	fflush(stdout);
+                    break;
+                case 0:
+                	main();
+                default:
+                    printf("Opción no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+            }
+
     registrarActividad(usuario_actual, "Acceso a gestión de habitaciones", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */

@@ -62,8 +62,6 @@ int main() {
     // Bucle principal del programa...
     while (ejecutar) {
         mostrarMenuPrincipal();
-        printf("Seleccione una opción: ");
-        fflush(stdout);
         if (scanf("%d", &opcion) != 1) {
                     while (getchar() != '\n'); // Limpiar el búfer de entrada
                     printf("Entrada no válida. Intente nuevamente.\n");
@@ -125,6 +123,7 @@ void mostrarMenuPrincipal() {
     printf("8. Configuración del Sistema\n");
     printf("0. Salir\n");
     printf("=============================================================\n");
+    printf("Seleccione una opción: ");
     fflush(stdout);
 }
 

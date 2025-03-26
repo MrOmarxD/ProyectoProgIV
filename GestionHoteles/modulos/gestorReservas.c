@@ -15,6 +15,34 @@ void gestionReservas(int usuario_actual, char LOG_FILE) {
     fflush(stdout);
     scanf("%d", &opcion);
 
+    switch (opcion) {
+                case 1:
+                	printf("Crear nueva reserva\n");
+                	fflush(stdout);
+                    break;
+                case 2:
+                	printf("Modificar reserva\n");
+                	fflush(stdout);
+                    break;
+                case 3:
+                	printf("Cancelar reserva\n");
+                	fflush(stdout);
+                    break;
+                case 4:
+                	printf("Buscar reservas por cliente\n");
+                	fflush(stdout);
+                    break;
+                case 5:
+                	printf("Listar reservas activas\n");
+                	fflush(stdout);
+                    break;
+                case 0:
+                	main();
+                default:
+                    printf("Opción no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+            }
+
     registrarActividad(usuario_actual, "Acceso a gestión de reservas", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */

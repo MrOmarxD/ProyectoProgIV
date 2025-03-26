@@ -14,6 +14,30 @@ void gestionUsuarios(int usuario_actual, char LOG_FILE) {
     fflush(stdout);
     scanf("%d", &opcion);
 
+    switch (opcion) {
+                case 1:
+                	printf("Crear nuevo usuario\n");
+                	fflush(stdout);
+                    break;
+                case 2:
+                	printf("Modificar usuario existente\n");
+                	fflush(stdout);
+                    break;
+                case 3:
+                	printf("Eliminar usuario\n");
+                	fflush(stdout);
+                    break;
+                case 4:
+                	printf("Listar usuarios\n");
+                	fflush(stdout);
+                    break;
+                case 0:
+                	main();
+                default:
+                    printf("Opción no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+            }
+
 
     registrarActividad(usuario_actual, "Acceso a gestión de usuarios", LOG_FILE);
 

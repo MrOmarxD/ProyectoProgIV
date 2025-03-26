@@ -14,6 +14,30 @@ void gestionClientes(int usuario_actual, char LOG_FILE) {
     fflush(stdout);
     scanf("%d", &opcion);
 
+    switch (opcion) {
+                case 1:
+                	printf("Registrar nuevo cliente\n");
+                	fflush(stdout);
+                    break;
+                case 2:
+                	printf("Modificar datos de cliente\n");
+                	fflush(stdout);
+                    break;
+                case 3:
+                	printf("Buscar cliente\n");
+                	fflush(stdout);
+                    break;
+                case 4:
+                	printf("Listar todos los clientes\n");
+                	fflush(stdout);
+                    break;
+                case 0:
+                	main();
+                default:
+                    printf("Opción no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+            }
+
     registrarActividad(usuario_actual, "Acceso a gestión de clientes", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */
