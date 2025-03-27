@@ -1,8 +1,9 @@
 #include "gestorClientes.h"
 #include "gestorRegistros.h"
+#include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionClientes(int usuario_actual, char LOG_FILE) {
+void gestionClientes(int usuario_actual, char LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE CLIENTES ---\n");
     printf("1. Registrar nuevo cliente\n");
@@ -32,7 +33,7 @@ void gestionClientes(int usuario_actual, char LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 0:
-                	main();
+                	mostrarMenuPrincipal(ejecutar, usuario_actual, LOG_FILE);
                 default:
                     printf("Opción no válida. Intente nuevamente.\n");
                     fflush(stdout);

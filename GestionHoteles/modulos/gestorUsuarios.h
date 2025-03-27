@@ -1,5 +1,6 @@
 #ifndef GESTORUSUARIOS_H
 #define GESTORUSUARIOS_H
+#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -9,6 +10,6 @@ typedef struct {
     char password[20];
 } Usuario;
 
-void gestionUsuarios(int usuario_actual, char LOG_FILE);
+void gestionUsuarios(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORUSUARIOS_H */

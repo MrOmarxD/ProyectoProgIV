@@ -1,5 +1,6 @@
 #ifndef GESTORRESERVAS_H_
 #define GESTORRESERVAS_H_
+#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -10,6 +11,6 @@ typedef struct {
     float monto;
 } Reserva;
 
-void gestionReservas(int usuario_actual, char LOG_FILE);
+void gestionReservas(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORRESERVAS_H_ */

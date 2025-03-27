@@ -1,5 +1,6 @@
 #ifndef GESTORCLIENTES_H
 #define GESTORCLIENTES__
+#include <stdbool.h>
 
 typedef struct {
     char dni[10];
@@ -9,6 +10,6 @@ typedef struct {
     char email[50];
 } Cliente;
 
-void gestionClientes(int usuario_actual, char LOG_FILE);
+void gestionClientes(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORCLIENTES_H_ */

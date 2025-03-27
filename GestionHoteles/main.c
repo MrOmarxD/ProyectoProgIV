@@ -11,9 +11,10 @@
 #include "modulos/gestorReservas.h"
 #include "modulos/gestorFacturas.h"
 #include "modulos/gestorRegistros.h"
+#include "modulos/menuPrincipal.h"
 
 /* Prototipos de funciones */
-void mostrarMenuPrincipal();
+
 void configuracionSistema();
 
 /* Funciones para manejo de archivos */
@@ -26,7 +27,7 @@ int usuario_actual = 0; // ID del usuario que ha iniciado sesión
 int main() {
     sqlite3 *db;
 
-    int result = sqlite3_open("hoteles.sqlite", &db);
+    int result = sqlite3_open("hotelesBD.sqlite", &db);
     if (result != SQLITE_OK) {
         printf("Error al abrir la BBDD\n");
         fflush(stdout);
@@ -61,71 +62,25 @@ int main() {
 
     // Bucle principal del programa...
     while (ejecutar) {
-        mostrarMenuPrincipal();
-        if (scanf("%d", &opcion) != 1) {
-                    while (getchar() != '\n'); // Limpiar el búfer de entrada
-                    printf("Entrada no válida. Intente nuevamente.\n");
-                    fflush(stdout);
-                    continue;
-                }
+       /* if (scanf("%d", &opcion) != 1) {
+                            while (getchar() != '\n'); // Limpiar el búfer de entrada
+                            printf("Entrada no válida. Intente nuevamente.\n");
+                            fflush(stdout);
+                            continue;
+                        }*/
+        mostrarMenuPrincipal(ejecutar, usuario_actual, LOG_FILE);
 
-        switch (opcion) {
-            case 1:
-                gestionUsuarios(usuario_actual, LOG_FILE);
-                break;
-            case 2:
-                gestionClientes(usuario_actual, LOG_FILE);
-                break;
-            case 3:
-                gestionPersonal(usuario_actual, LOG_FILE);
-                break;
-            case 4:
-                gestionHabitaciones(usuario_actual, LOG_FILE);
-                break;
-            case 5:
-                gestionReservas(usuario_actual, LOG_FILE);
-                break;
-            case 6:
-                gestionFacturacion(usuario_actual, LOG_FILE);
-                break;
-            case 7:
-                verRegistrosActividad(usuario_actual, LOG_FILE);
-                break;
-            case 8:
-                configuracionSistema(usuario_actual, LOG_FILE);
-                break;
-            case 0:
-                printf("Cerrando sesión y saliendo del sistema...\n");
-                registrarActividad(usuario_actual, "Cierre de sesión", LOG_FILE);
-                ejecutar = false;
-                break;
-            default:
-                printf("Opción no válida. Intente nuevamente.\n");
-                fflush(stdout);
-        }
+
+
+
+
     }
 
     return 0;
 }
 
 
-void mostrarMenuPrincipal() {
-    printf("\n=============================================================\n");
-    printf("               MENÚ PRINCIPAL\n");
-    printf("=============================================================\n");
-    printf("1. Gestión de Usuarios\n");
-    printf("2. Gestión de Clientes\n");
-    printf("3. Gestión de Personal\n");
-    printf("4. Gestión de Habitaciones\n");
-    printf("5. Gestión de Reservas\n");
-    printf("6. Facturación\n");
-    printf("7. Ver Registros de Actividad\n");
-    printf("8. Configuración del Sistema\n");
-    printf("0. Salir\n");
-    printf("=============================================================\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-}
+
 
 /* Implementación básica de las funciones de gestión */
 void configuracionSistema() {
@@ -139,6 +94,30 @@ void configuracionSistema() {
     printf("Seleccione una opción: ");
     fflush(stdout);
     scanf("%d", &opcion);
+
+    switch (opcion) {
+                case 1:
+                	printf("Cambiar rutas de archivos\n");
+                	fflush(stdout);
+                    break;
+                case 2:
+                	printf("Configurar parámetros de conexión\n");
+                	fflush(stdout);
+                    break;
+                case 3:
+                	printf("Hacer copia de seguridad\n");
+                	fflush(stdout);
+                    break;
+                case 4:
+                	printf("Restaurar desde copia de seguridad\n");
+                	fflush(stdout);
+                    break;
+                case 0:
+                	main();
+                default:
+                    printf("Opción no válida. Intente nuevamente.\n");
+                    fflush(stdout);
+            }
 
     registrarActividad(usuario_actual, "Acceso a configuración del sistema", LOG_FILE);
 

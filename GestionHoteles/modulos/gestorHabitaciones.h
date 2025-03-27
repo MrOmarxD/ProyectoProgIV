@@ -1,5 +1,6 @@
 #ifndef GESTORHABITACIONES_H_
 #define GESTORHABITACIONES_H_
+#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -9,6 +10,6 @@ typedef struct {
     int capacidad;
 } Habitacion;
 
-void gestionHabitaciones(int usuario_actual, char LOG_FILE);
+void gestionHabitaciones(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

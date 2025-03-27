@@ -1,5 +1,6 @@
 #ifndef GESTORFACTURAS_H_
 #define GESTORFACTURAS_H_
+#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -10,6 +11,6 @@ typedef struct {
     char fecha[11];
 } Factura;
 
-void gestionFacturacion(int usuario_actual, char LOG_FILE);
+void gestionFacturacion(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORFACTURAS_H_ */

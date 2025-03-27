@@ -1,5 +1,6 @@
 #ifndef MGESTORPERSONAL_H_
 #define GESTORPERSONAL_H_
+#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -9,6 +10,6 @@ typedef struct {
     float salario;
 } Personal;
 
-void gestionPersonal(int usuario_actual, char LOG_FILE);
+void gestionPersonal(int usuario_actual, char LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORPERSONAL_H_ */
