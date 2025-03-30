@@ -10,6 +10,6 @@ typedef struct {
     int capacidad;
 } Habitacion;
 
-void gestionHabitaciones(int usuario_actual, char LOG_FILE, bool ejecutar);
+void gestionHabitaciones(int usuario_actual, const char* LOG_FILE, bool ejecutar);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

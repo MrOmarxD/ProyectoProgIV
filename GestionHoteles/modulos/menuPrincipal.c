@@ -1,8 +1,6 @@
 #include "menuPrincipal.h"
-#include "gestorRegistros.h"
-#include <stdio.h>
 
-void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, char LOG_FILE) {
+void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, const char* LOG_FILE) {
 	int opcion;
     printf("\n=============================================================\n");
     printf("               MENÚ PRINCIPAL\n");
@@ -23,22 +21,22 @@ void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, char LOG_FILE) {
 
             switch (opcion) {
                 case 1:
-                    gestionUsuarios(usuario_actual, LOG_FILE);
+                    gestionUsuarios(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 2:
-                    gestionClientes(usuario_actual, LOG_FILE);
+                    gestionClientes(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 3:
-                    gestionPersonal(usuario_actual, LOG_FILE);
+                    gestionPersonal(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 4:
-                    gestionHabitaciones(usuario_actual, LOG_FILE);
+                    gestionHabitaciones(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 5:
-                    gestionReservas(usuario_actual, LOG_FILE);
+                    gestionReservas(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 6:
-                    gestionFacturacion(usuario_actual, LOG_FILE);
+                    gestionFacturacion(usuario_actual, LOG_FILE, ejecutar);
                     break;
                 case 7:
                     verRegistrosActividad(usuario_actual, LOG_FILE);

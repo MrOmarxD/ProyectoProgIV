@@ -1,9 +1,6 @@
 #include "gestorPersonal.h"
-#include "gestorRegistros.h"
-#include "menuPrincipal.h"
-#include <stdio.h>
 
-void gestionPersonal(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionPersonal(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE PERSONAL ---\n");
     printf("1. Contratar nuevo empleado\n");

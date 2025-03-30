@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionReservas(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionReservas(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE RESERVAS ---\n");
     printf("1. Crear nueva reserva\n");

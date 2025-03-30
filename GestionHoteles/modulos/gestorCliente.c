@@ -1,9 +1,6 @@
 #include "gestorClientes.h"
-#include "gestorRegistros.h"
-#include "menuPrincipal.h"
-#include <stdio.h>
 
-void gestionClientes(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionClientes(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE CLIENTES ---\n");
     printf("1. Registrar nuevo cliente\n");

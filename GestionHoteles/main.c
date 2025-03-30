@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 #include "modulos/gestorUsuarios.h"
-#include "modulos/gestorClientes.h"
-#include "modulos/gestorPersonal.h"
+//#include "modulos/gestorClientes.h"
+//#include "modulos/gestorPersonal.h"
 #include "modulos/gestorHabitaciones.h"
 #include "modulos/gestorReservas.h"
 #include "modulos/gestorFacturas.h"
@@ -21,7 +21,7 @@ void configuracionSistema();
 
 /* Variables globales */
 char CONFIG_FILE[100] = "config.dat";
-char LOG_FILE[100] = "actividad.log";
+const char* LOG_FILE = "actividad.log";
 int usuario_actual = 0; // ID del usuario que ha iniciado sesión
 
 int main() {

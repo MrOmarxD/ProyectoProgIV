@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionHabitaciones(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionHabitaciones(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE HABITACIONES ---\n");
     printf("1. Añadir nueva habitación\n");

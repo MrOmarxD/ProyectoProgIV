@@ -1,7 +1,6 @@
 #include "gestorRegistros.h"
-#include <stdio.h>
 
-void verRegistrosActividad(int usuario_actual, char LOG_FILE) {
+void verRegistrosActividad(int usuario_actual, const char* LOG_FILE) {
     printf("\n--- REGISTROS DE ACTIVIDAD ---\n");
 
     FILE* log = fopen(LOG_FILE, "r");
@@ -26,7 +25,7 @@ void verRegistrosActividad(int usuario_actual, char LOG_FILE) {
     getchar(); // Esperar a que el usuario presione Enter
 }
 
-void registrarActividad(int id_usuario, const char* operacion, char LOG_FILE) {
+void registrarActividad(int id_usuario, const char* operacion, const char* LOG_FILE) {
     FILE* log = fopen(LOG_FILE, "a");
     if (log == NULL) {
         printf("Error al registrar actividad.\n");

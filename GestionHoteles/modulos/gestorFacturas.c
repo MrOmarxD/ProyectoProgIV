@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionFacturacion(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionFacturacion(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- FACTURACIÓN ---\n");
     printf("1. Generar nueva factura\n");

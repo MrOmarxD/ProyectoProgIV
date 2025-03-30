@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionUsuarios(int usuario_actual, char LOG_FILE, bool ejecutar) {
+void gestionUsuarios(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
     int opcion;
     printf("\n--- GESTIÓN DE USUARIOS ---\n");
     printf("1. Crear nuevo usuario\n");
