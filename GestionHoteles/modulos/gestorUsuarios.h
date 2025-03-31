@@ -10,6 +10,6 @@ typedef struct {
     char password[20];
 } Usuario;
 
-void gestionUsuarios(int usuario_actual, const char* LOG_FILE, bool ejecutar);
+void gestionUsuarios(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORUSUARIOS_H */

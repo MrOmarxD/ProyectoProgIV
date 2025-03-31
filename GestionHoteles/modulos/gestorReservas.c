@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionReservas(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
+void gestionReservas(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE RESERVAS ---\n");
     printf("1. Crear nueva reserva\n");
@@ -38,7 +38,7 @@ void gestionReservas(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
                 	fflush(stdout);
                     break;
                 case 0:
-                	mostrarMenuPrincipal(ejecutar, usuario_actual, LOG_FILE);
+                	mostrarMenuPrincipal(usuario_actual, LOG_FILE);
                 default:
                     printf("Opción no válida. Intente nuevamente.\n");
                     fflush(stdout);

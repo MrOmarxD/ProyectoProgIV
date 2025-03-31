@@ -1,6 +1,6 @@
 #include "gestorPersonal.h"
 
-void gestionPersonal(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
+void gestionPersonal(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE PERSONAL ---\n");
     printf("1. Contratar nuevo empleado\n");
@@ -30,7 +30,7 @@ void gestionPersonal(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
                 	fflush(stdout);
                     break;
                 case 0:
-                	mostrarMenuPrincipal(ejecutar, usuario_actual, LOG_FILE);
+                	mostrarMenuPrincipal(usuario_actual, LOG_FILE);
                 default:
                     printf("Opción no válida. Intente nuevamente.\n");
                     fflush(stdout);

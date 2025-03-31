@@ -11,6 +11,6 @@ typedef struct {
     char fecha[11];
 } Factura;
 
-void gestionFacturacion(int usuario_actual, const char* LOG_FILE, bool ejecutar);
+void gestionFacturacion(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORFACTURAS_H_ */

@@ -13,6 +13,6 @@ typedef struct {
     float salario;
 } Personal;
 
-void gestionPersonal(int usuario_actual, const char* LOG_FILE, bool ejecutar);
+void gestionPersonal(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORPERSONAL_H_ */

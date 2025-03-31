@@ -11,6 +11,6 @@ typedef struct {
     float monto;
 } Reserva;
 
-void gestionReservas(int usuario_actual, const char* LOG_FILE, bool ejecutar);
+void gestionReservas(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORRESERVAS_H_ */

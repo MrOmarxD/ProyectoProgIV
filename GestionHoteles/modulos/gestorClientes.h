@@ -13,6 +13,6 @@ typedef struct {
     char email[50];
 }Cliente;
 
-void gestionClientes(int usuario_actual, const char* LOG_FILE, bool ejecutar);
+void gestionClientes(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORCLIENTES_H_ */

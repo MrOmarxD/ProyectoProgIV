@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, const char* LOG_FILE);
+int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE);
 
 
 

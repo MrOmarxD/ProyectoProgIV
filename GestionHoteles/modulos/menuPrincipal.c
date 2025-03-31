@@ -1,6 +1,6 @@
 #include "menuPrincipal.h"
 
-void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, const char* LOG_FILE) {
+int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE) {
 	int opcion;
     printf("\n=============================================================\n");
     printf("               MENÚ PRINCIPAL\n");
@@ -21,22 +21,22 @@ void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, const char* LOG_FIL
 
             switch (opcion) {
                 case 1:
-                    gestionUsuarios(usuario_actual, LOG_FILE, ejecutar);
+                    gestionUsuarios(usuario_actual, LOG_FILE);
                     break;
                 case 2:
-                    gestionClientes(usuario_actual, LOG_FILE, ejecutar);
+                    gestionClientes(usuario_actual, LOG_FILE);
                     break;
                 case 3:
-                    gestionPersonal(usuario_actual, LOG_FILE, ejecutar);
+                    gestionPersonal(usuario_actual, LOG_FILE);
                     break;
                 case 4:
-                    gestionHabitaciones(usuario_actual, LOG_FILE, ejecutar);
+                    gestionHabitaciones(usuario_actual, LOG_FILE);
                     break;
                 case 5:
-                    gestionReservas(usuario_actual, LOG_FILE, ejecutar);
+                    gestionReservas(usuario_actual, LOG_FILE);
                     break;
                 case 6:
-                    gestionFacturacion(usuario_actual, LOG_FILE, ejecutar);
+                    gestionFacturacion(usuario_actual, LOG_FILE);
                     break;
                 case 7:
                     verRegistrosActividad(usuario_actual, LOG_FILE);
@@ -48,10 +48,7 @@ void mostrarMenuPrincipal(bool ejecutar, int usuario_actual, const char* LOG_FIL
                     printf("Cerrando sesión y saliendo del sistema...\n");
                     fflush(stdout);
                     registrarActividad(usuario_actual, "Cierre de sesión", LOG_FILE);
-                    ejecutar = false;
+                    return 0;
                     break;
-                default:
-                    printf("Opción no válida. Intente nuevamente.\n");
-                    fflush(stdout);
             }
 }

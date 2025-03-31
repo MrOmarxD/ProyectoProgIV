@@ -3,7 +3,7 @@
 #include "menuPrincipal.h"
 #include <stdio.h>
 
-void gestionHabitaciones(int usuario_actual, const char* LOG_FILE, bool ejecutar) {
+void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE HABITACIONES ---\n");
     printf("1. Añadir nueva habitación\n");
@@ -33,7 +33,7 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE, bool ejecutar
                 	fflush(stdout);
                     break;
                 case 0:
-                	mostrarMenuPrincipal(ejecutar, usuario_actual, LOG_FILE);
+                	mostrarMenuPrincipal(usuario_actual, LOG_FILE);
                 default:
                     printf("Opción no válida. Intente nuevamente.\n");
                     fflush(stdout);
