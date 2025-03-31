@@ -1,7 +1,4 @@
 #include "gestorUsuarios.h"
-#include "gestorRegistros.h"
-#include "menuPrincipal.h"
-#include <stdio.h>
 
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     int opcion;
@@ -29,7 +26,7 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 4:
-                	printf("Listar usuarios\n");
+                	listaUsuarios();
                 	fflush(stdout);
                     break;
                 case 0:
@@ -42,6 +39,4 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
     registrarActividad(usuario_actual, "Acceso a gestión de usuarios", LOG_FILE);
 
-    /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
 }
