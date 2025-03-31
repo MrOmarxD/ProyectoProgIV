@@ -2,6 +2,7 @@
 #define GESTORRESERVAS_H_
 #include <stdbool.h>
 
+
 typedef struct {
     int id;
     char dni_cliente[10];

@@ -1,5 +1,6 @@
 #include "gestorClientes.h"
 
+
 void gestionClientes(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE CLIENTES ---\n");

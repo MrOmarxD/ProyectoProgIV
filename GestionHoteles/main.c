@@ -12,6 +12,8 @@
 #include "modulos/gestorFacturas.h"
 #include "modulos/gestorRegistros.h"
 #include "modulos/menuPrincipal.h"
+#include "gestorUsuarios.h"
+#include "gestorClientes.h"
 
 /* Prototipos de funciones */
 
@@ -28,14 +30,16 @@ int main() {
 
 	abrirBd();
 
-
+	int respuesta = 99;
     int ejecutar = 1;
 
     printf("\n=============================================================\n");
     printf("      SISTEMA DE GESTIÓN DE HOTELES - GRUPO 12\n");
     printf("=============================================================\n");
     fflush(stdout);
-
+    printf("Si eres usuario pulsa el 1, si eres administrador pulsa 2 y si no estas registrado pulsa 0:\n");
+    scanf("%i",&respuesta);
+    if(respuesta == 1){
     // Verificar archivos de configuración...
 
     // Simulación de inicio de sesión...
@@ -48,11 +52,36 @@ int main() {
                             fflush(stdout);
                             continue;
                         }*/
-        ejecutar = mostrarMenuPrincipal(usuario_actual, LOG_FILE);
+        ejecutar = gestionClientes(usuario_actual, LOG_FILE);
 
     }
     cerrarBd();
-    return 0;
+    return 0;}
+    else if(respuesta == 2){
+    while (ejecutar != 0) {
+           /* if (scanf("%d", &opcion) != 1) {
+                                while (getchar() != '\n'); // Limpiar el búfer de entrada
+                                printf("Entrada no válida. Intente nuevamente.\n");
+                                fflush(stdout);
+                                continue;
+                            }*/
+            ejecutar = gestionUsuarios(usuario_actual, LOG_FILE);
+
+        }
+        cerrarBd();
+        return 0;}
+    else{ while (ejecutar != 0) {
+        /* if (scanf("%d", &opcion) != 1) {
+                             while (getchar() != '\n'); // Limpiar el búfer de entrada
+                             printf("Entrada no válida. Intente nuevamente.\n");
+                             fflush(stdout);
+                             continue;
+                         }*/
+         ejecutar = mostrarMenuPrincipal(usuario_actual, LOG_FILE);
+
+     }
+     cerrarBd();
+     return 0;}
 }
 
 

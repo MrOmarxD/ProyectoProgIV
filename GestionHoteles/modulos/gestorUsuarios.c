@@ -1,4 +1,5 @@
 #include "gestorUsuarios.h"
+#include <crearNuevoUsuario.c>
 
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     int opcion;
@@ -15,10 +16,12 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     switch (opcion) {
                 case 1:
                 	printf("Crear nuevo usuario\n");
+                	//crearUsuario(&usuario_actual);
                 	fflush(stdout);
                     break;
                 case 2:
                 	printf("Modificar usuario existente\n");
+                	//modificarUsuario(&usuario_actual);
                 	fflush(stdout);
                     break;
                 case 3:
