@@ -1,4 +1,4 @@
-#include "menuPrincipal.h"
+#include "gestorMenus.h"
 
 int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE) {
 	int opcion;

@@ -1,5 +1,5 @@
-#ifndef GESTORCLIENTES_H_
-#define GESTORCLIENTES_H_
+#ifndef GESTORCLIENTES_H
+#define GESTORCLIENTES_H
 
 #include "gestorRegistros.h"
 #include <stdio.h>
@@ -15,4 +15,4 @@ typedef struct {
 
 void gestionClientes(int usuario_actual, const char* LOG_FILE);
 
-#endif /* MODULOS_GESTORCLIENTES_H_ */
+#endif /* GESTORCLIENTES_H */

@@ -1,5 +1,4 @@
 #include "gestorUsuarios.h"
-#include <crearNuevoUsuario.c>
 
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     int opcion;
@@ -16,7 +15,7 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     switch (opcion) {
                 case 1:
                 	printf("Crear nuevo usuario\n");
-                	//crearUsuario(&usuario_actual);
+                	crearUsuario(&usuario_actual);
                 	fflush(stdout);
                     break;
                 case 2:
@@ -42,4 +41,53 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
     registrarActividad(usuario_actual, "Acceso a gestión de usuarios", LOG_FILE);
 
+}
+
+void crearUsuario(Usuario *user) {
+    printf("Ingrese nombre completo: ");
+    fgets(user->nombre, 50, stdin);
+    user->nombre[strcspn(user->nombre, "\n")] = '\0'; // Eliminar el salto de línea
+
+    printf("Elija el rol del nuevo Uusario\n");
+	printf("1. Administrador\n");
+	printf("2. Recepcionista\n");
+	printf("3. Limpieza\n");
+	printf("4. Mantenimiento\n");
+	printf("Seleccione una opcion: ");
+	int opcion;
+	do{
+		scanf("%d", &opcion);
+		switch(opcion) {
+			case 1:
+				printf("\nHa seleccionado: Administrador\n");
+				user->rol["Administrador"];
+				break;
+			case 2:
+				printf("\nHa seleccionado: Recepcionista\n");
+				user->rol["Recepcionista"];
+				break;
+			case 3:
+				printf("\nHa seleccionado: Limpieza\n");
+				user->rol["Limpieza"];
+				break;
+			case 4:
+				printf("\nHa seleccionado: Mantenimiento\n");
+				user->rol["Mantenimiento"];
+				break;
+			default:
+				printf("\nOpcion no valida. Por favor, intente de nuevo.\n");
+				opcion = 0;
+				break;
+		}
+	}while(opcion == 0);
+
+    printf("Ingrese nombre de usuario: ");
+    fgets(user->usuario, 20, stdin);
+    user->usuario[strcspn(user->usuario, "\n")] = '\0';
+
+    printf("Ingrese contraseña: ");
+    fgets(user->password, 20, stdin);
+    user->password[strcspn(user->password, "\n")] = '\0';
+
+    printf("\nUsuario creado exitosamente!\n");
 }

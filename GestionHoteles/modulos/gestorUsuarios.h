@@ -1,10 +1,10 @@
-#ifndef GESTORUSUARIOS_H_
-#define GESTORUSUARIOS_H_
+#ifndef GESTORUSUARIOS_H
+#define GESTORUSUARIOS_H
 #include <stdbool.h>
 #include "gestorRegistros.h"
-#include "menuPrincipal.h"
 #include "../bd/gestionBD.h"
 #include <stdio.h>
+#include "gestorMenus.h"
 
 typedef struct {
     int id;
@@ -15,5 +15,6 @@ typedef struct {
 } Usuario;
 
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE);
+void crearUsuario(Usuario *user);
 
-#endif /* MODULOS_GESTORUSUARIOS_H */
+#endif /* GESTORUSUARIOS_H */

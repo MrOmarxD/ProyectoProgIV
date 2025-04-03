@@ -1,5 +1,5 @@
-#ifndef MENUPRINCIPAL_H_
-#define MENUPRINCIPAL_H_
+#ifndef GESTORMENUS_H
+#define GESTORMENUS_H
 
 #include "gestorUsuarios.h"
 #include "gestorClientes.h"
@@ -11,7 +11,8 @@
 #include <stdbool.h>
 
 int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE);
+int mostrarMenuPrincipalCliente(int usuario_actual, const char* LOG_FILE);
 
 
 
-#endif /* MODULOS_MENUPRINCIPAL_H_ */
+#endif /* GESTORMENUS_H */

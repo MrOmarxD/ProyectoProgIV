@@ -1,7 +1,7 @@
 #include "gestorFacturas.h"
 #include "gestorRegistros.h"
-#include "menuPrincipal.h"
 #include <stdio.h>
+#include "gestorMenus.h"
 
 void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
     int opcion;

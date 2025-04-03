@@ -1,4 +1,4 @@
-#include "menuPrincipal.h"
+#include "gestorMenus.h"
 
 int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE) {
 	int opcion;
@@ -51,4 +51,9 @@ int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE) {
                     return 0;
                     break;
             }
+}
+
+int mostrarMenuPrincipalCliente(int usuario_actual, const char* LOG_FILE){
+	printf("En Proceso...");
+	return 0;
 }
