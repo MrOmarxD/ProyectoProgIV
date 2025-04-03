@@ -36,6 +36,7 @@ int main() {
 
     do{
 		printf("Si eres usuario pulsa el 1, si eres administrador pulsa 2:\n");
+		fflush(stdout);
 		scanf("%i",&respuesta);
 
 		switch (respuesta) {

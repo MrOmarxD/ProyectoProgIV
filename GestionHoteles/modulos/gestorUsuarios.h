@@ -2,7 +2,7 @@
 #define GESTORUSUARIOS_H
 #include <stdbool.h>
 #include "gestorRegistros.h"
-#include "../bd/gestionBD.h"
+//#include "../bd/gestionBD.h"
 #include <stdio.h>
 #include "gestorMenus.h"
 

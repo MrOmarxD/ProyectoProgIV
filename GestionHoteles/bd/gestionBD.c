@@ -46,6 +46,34 @@ void listaUsuarios(){
 		sqlite3_finalize(stmt);
 }
 
+void crearUsuarios(Usuario *user){
+	char sql1[] = "insert into usuarios (id, nombre, rol, nombre_usuario, contraseña) values (NULL, ?, ?, ?, ?)";
+		char nombre[50];
+		char rol[20];
+		char usuario[20];
+		char password[20];
+
+		strcpy(nombre, user->nombre);
+		strcpy(rol, user->rol);
+		strcpy(usuario, user->usuario);
+		strcpy(password, user->password);
+
+		sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL) ;
+		sqlite3_bind_text(stmt, 1, nombre, strlen(nombre), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 2, rol, strlen(rol), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 3, usuario, strlen(usuario), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 4, password, strlen(password), SQLITE_STATIC);
+
+		result = sqlite3_step(stmt);
+		if (result != SQLITE_DONE) {
+			printf("Error insertando el usuario\n");
+		}else{
+			printf("Usuario %s insertado\n", nombre);
+		}
+
+		sqlite3_finalize(stmt);
+}
+
 
 
 
