@@ -8,7 +8,9 @@
 
 int abrirBd();
 int cerrarBd();
+int comprobarUsuario(const char *usuario);
 void crearUsuarioBD(Usuario *user);
+void modificarUsuarioBD(Usuario *user);
 
 
 

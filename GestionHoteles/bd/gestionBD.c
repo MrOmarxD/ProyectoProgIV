@@ -44,6 +44,23 @@ void listaUsuarios(){
 		printf("\n");
 
 		sqlite3_finalize(stmt);
+		main();
+}
+
+int comprobarUsuario(const char *usuario){
+	char sql2[] = "select count(*) from usuarios where nombre_usuario = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+		sqlite3_bind_text(stmt, 1, usuario, strlen(usuario), SQLITE_STATIC);
+
+		result = sqlite3_step(stmt);
+		    int count = 0;
+		    if (result == SQLITE_ROW) {
+		        count = sqlite3_column_int(stmt, 0);
+		    }
+
+		    sqlite3_finalize(stmt);
+		    return count > 0;
 }
 
 void crearUsuarioBD(Usuario *user){
@@ -74,8 +91,12 @@ void crearUsuarioBD(Usuario *user){
 		}
 
 		sqlite3_finalize(stmt);
+		main();
 }
 
+void modificarUsuarioBD(Usuario *user){
+
+}
 
 
 

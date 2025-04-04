@@ -45,67 +45,81 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
 void crearUsuario(Usuario *user) {
     printf("Ingrese nombre completo: \n");
-	fflush(stdout);
+    fflush(stdout);
 
-	// Limpiar el buffer de entrada
     while (getchar() != '\n');
 
     fgets(user->nombre, 50, stdin);
     user->nombre[strcspn(user->nombre, "\n")] = '\0'; // Eliminar el salto de línea
 
+    int opcion;
+    do {
+        printf("Elija el rol del nuevo Usuario\n");
+        printf("1. Administrador\n");
+        printf("2. Recepcionista\n");
+        printf("3. Limpieza\n");
+        printf("4. Mantenimiento\n");
+        printf("Seleccione una opcion: ");
+        fflush(stdout);
+        scanf("%d", &opcion);
 
-	int opcion;
-	do{
-	    printf("Elija el rol del nuevo Usario\n");
-		printf("1. Administrador\n");
-		printf("2. Recepcionista\n");
-		printf("3. Limpieza\n");
-		printf("4. Mantenimiento\n");
-		printf("Seleccione una opcion: ");
-		fflush(stdout);
-		scanf("%d", &opcion);
-		switch(opcion) {
-			case 1:
-				printf("\nHa seleccionado: Administrador\n\n");
-				fflush(stdout);
-				strcpy(user->rol, "Administrador");
-				break;
-			case 2:
-				printf("\nHa seleccionado: Recepcionista\n\n");
-				fflush(stdout);
-				strcpy(user->rol, "Recepcionista");
-				break;
-			case 3:
-				printf("\nHa seleccionado: Limpieza\n\n");
-				fflush(stdout);
-				strcpy(user->rol, "Limpieza");
-				break;
-			case 4:
-				printf("\nHa seleccionado: Mantenimiento\n\n");
-				fflush(stdout);
-				strcpy(user->rol, "Mantenimiento");
-				break;
-			default:
-				printf("\nOpcion no valida. Por favor, intente de nuevo.\n");
-				fflush(stdout);
-				opcion = 0;
-				break;
-		}
-	}while(opcion == 0);
+        // Limpiar el buffer de entrada
+        while (getchar() != '\n');
 
-    printf("Ingrese nombre de usuario: ");
-	fflush(stdout);
+        switch(opcion) {
+            case 1:
+                printf("\nHa seleccionado: Administrador\n\n");
+                fflush(stdout);
+                strcpy(user->rol, "Administrador");
+                break;
+            case 2:
+                printf("\nHa seleccionado: Recepcionista\n\n");
+                fflush(stdout);
+                strcpy(user->rol, "Recepcionista");
+                break;
+            case 3:
+                printf("\nHa seleccionado: Limpieza\n\n");
+                fflush(stdout);
+                strcpy(user->rol, "Limpieza");
+                break;
+            case 4:
+                printf("\nHa seleccionado: Mantenimiento\n\n");
+                fflush(stdout);
+                strcpy(user->rol, "Mantenimiento");
+                break;
+            default:
+                printf("\nOpcion no valida. Por favor, intente de nuevo.\n");
+                fflush(stdout);
+                opcion = 0;
+                break;
+        }
+    } while(opcion == 0);
 
-	// Limpiar el buffer de entrada
-	while (getchar() != '\n');
+    do {
+        printf("Ingrese nombre de usuario: ");
+        fflush(stdout);
 
-    fgets(user->usuario, 20, stdin);
-    user->usuario[strcspn(user->usuario, "\n")] = '\0';
+        fgets(user->usuario, 20, stdin);
+        user->usuario[strcspn(user->usuario, "\n")] = '\0';
+
+        if (comprobarUsuario(user->usuario)) {
+            printf("El nombre de usuario ya existe. Por favor, elija otro.\n\n");
+            fflush(stdout);
+        } else {
+            break;
+        }
+    } while (1);
 
     printf("Ingrese contraseña: ");
-	fflush(stdout);
+    fflush(stdout);
+
     fgets(user->password, 20, stdin);
     user->password[strcspn(user->password, "\n")] = '\0';
 
     crearUsuarioBD(user);
 }
+
+void modificarUsuario(Usuario *user) {
+
+}
+
