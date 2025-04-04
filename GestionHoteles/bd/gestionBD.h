@@ -11,8 +11,8 @@ int cerrarBd();
 int comprobarUsuario(const char *usuario);
 void crearUsuarioBD(Usuario *user);
 void modificarUsuarioBD(Usuario *user);
-
-
-
+void listaUsuarios();
+void eliminarUsuarioBD();
+int comprobarUsuario(const char *usuario);
 
 #endif /* GESTIONBD_H_ */

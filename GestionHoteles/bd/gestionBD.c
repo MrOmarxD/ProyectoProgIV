@@ -47,6 +47,37 @@ void listaUsuarios(){
 		main();
 }
 
+void eliminarUsuarioBD() {
+    char nombreUsuario[50];
+
+    printf("\n--- ELIMINAR USUARIO ---\n");
+    printf("Ingrese el nombre de usuario a eliminar: ");
+    fflush(stdout);
+    scanf("%49s", nombreUsuario);  // Limitamos la entrada a 49 caracteres + el terminador nulo
+
+    if (!comprobarUsuario(nombreUsuario)) {
+        printf("El usuario '%s' no existe en la base de datos.\n", nombreUsuario);
+        fflush(stdout);
+        return;
+    }
+
+    char sql[] = "DELETE FROM usuarios WHERE nombre_usuario = ?";
+
+    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+
+    sqlite3_bind_text(stmt, 1, nombreUsuario, strlen(nombreUsuario), SQLITE_STATIC);
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error al eliminar el usuario: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+    } else {
+        printf("Usuario '%s' eliminado correctamente\n", nombreUsuario);
+        fflush(stdout);
+    }
+
+    sqlite3_finalize(stmt);
+}
+
 int comprobarUsuario(const char *usuario){
 	char sql2[] = "select count(*) from usuarios where nombre_usuario = ?";
 
