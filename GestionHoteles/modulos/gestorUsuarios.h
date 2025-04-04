@@ -4,6 +4,7 @@
 #include "gestorRegistros.h"
 //#include "../bd/gestionBD.h"
 #include <stdio.h>
+#include <string.h>
 #include "gestorMenus.h"
 
 typedef struct {

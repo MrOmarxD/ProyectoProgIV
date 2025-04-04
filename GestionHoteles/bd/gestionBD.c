@@ -46,7 +46,7 @@ void listaUsuarios(){
 		sqlite3_finalize(stmt);
 }
 
-void crearUsuarios(Usuario *user){
+void crearUsuarioBD(Usuario *user){
 	char sql1[] = "insert into usuarios (id, nombre, rol, nombre_usuario, contraseña) values (NULL, ?, ?, ?, ?)";
 		char nombre[50];
 		char rol[20];
@@ -67,8 +67,10 @@ void crearUsuarios(Usuario *user){
 		result = sqlite3_step(stmt);
 		if (result != SQLITE_DONE) {
 			printf("Error insertando el usuario\n");
+			fflush(stdout);
 		}else{
 			printf("Usuario %s insertado\n", nombre);
+			fflush(stdout);
 		}
 
 		sqlite3_finalize(stmt);

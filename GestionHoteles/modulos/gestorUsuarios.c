@@ -14,7 +14,7 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
     switch (opcion) {
                 case 1:
-                	printf("Crear nuevo usuario\n");
+                	printf("\n---CREAR NUEVO USUARIO---\n");
                 	crearUsuario(&usuario_actual);
                 	fflush(stdout);
                     break;
@@ -45,39 +45,43 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
 void crearUsuario(Usuario *user) {
     printf("Ingrese nombre completo: \n");
-
 	fflush(stdout);
+
+	// Limpiar el buffer de entrada
+    while (getchar() != '\n');
+
     fgets(user->nombre, 50, stdin);
     user->nombre[strcspn(user->nombre, "\n")] = '\0'; // Eliminar el salto de línea
 
-    printf("Elija el rol del nuevo Uusario\n");
-	printf("1. Administrador\n");
-	printf("2. Recepcionista\n");
-	printf("3. Limpieza\n");
-	printf("4. Mantenimiento\n");
-	printf("Seleccione una opcion: ");
-	fflush(stdout);
+
 	int opcion;
 	do{
+	    printf("Elija el rol del nuevo Usario\n");
+		printf("1. Administrador\n");
+		printf("2. Recepcionista\n");
+		printf("3. Limpieza\n");
+		printf("4. Mantenimiento\n");
+		printf("Seleccione una opcion: ");
+		fflush(stdout);
 		scanf("%d", &opcion);
 		switch(opcion) {
 			case 1:
-				printf("\nHa seleccionado: Administrador\n");
+				printf("\nHa seleccionado: Administrador\n\n");
 				fflush(stdout);
 				strcpy(user->rol, "Administrador");
 				break;
 			case 2:
-				printf("\nHa seleccionado: Recepcionista\n");
+				printf("\nHa seleccionado: Recepcionista\n\n");
 				fflush(stdout);
 				strcpy(user->rol, "Recepcionista");
 				break;
 			case 3:
-				printf("\nHa seleccionado: Limpieza\n");
+				printf("\nHa seleccionado: Limpieza\n\n");
 				fflush(stdout);
 				strcpy(user->rol, "Limpieza");
 				break;
 			case 4:
-				printf("\nHa seleccionado: Mantenimiento\n");
+				printf("\nHa seleccionado: Mantenimiento\n\n");
 				fflush(stdout);
 				strcpy(user->rol, "Mantenimiento");
 				break;
@@ -91,6 +95,10 @@ void crearUsuario(Usuario *user) {
 
     printf("Ingrese nombre de usuario: ");
 	fflush(stdout);
+
+	// Limpiar el buffer de entrada
+	while (getchar() != '\n');
+
     fgets(user->usuario, 20, stdin);
     user->usuario[strcspn(user->usuario, "\n")] = '\0';
 
@@ -99,6 +107,5 @@ void crearUsuario(Usuario *user) {
     fgets(user->password, 20, stdin);
     user->password[strcspn(user->password, "\n")] = '\0';
 
-    printf("\nUsuario creado exitosamente!\n");
-	fflush(stdout);
+    crearUsuarioBD(user);
 }

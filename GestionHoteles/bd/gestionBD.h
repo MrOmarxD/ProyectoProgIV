@@ -8,7 +8,7 @@
 
 int abrirBd();
 int cerrarBd();
-void crearUsuario(Usuario *user);
+void crearUsuarioBD(Usuario *user);
 
 
 
