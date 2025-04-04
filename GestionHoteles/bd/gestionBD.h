@@ -14,5 +14,6 @@ void modificarUsuarioBD(Usuario *user);
 void listaUsuarios();
 void eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);
+int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
 
 #endif /* GESTIONBD_H_ */

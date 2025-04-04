@@ -19,12 +19,11 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 2:
-                	printf("Modificar usuario existente\n");
-                	//modificarUsuario(&usuario_actual);
+                	modificarUsuario(&usuario_actual);
                 	fflush(stdout);
                     break;
                 case 3:
-                	printf("Eliminar usuario\n");
+                	eliminarUsuarioBD();
                 	fflush(stdout);
                     break;
                 case 4:
@@ -120,6 +119,78 @@ void crearUsuario(Usuario *user) {
 }
 
 void modificarUsuario(Usuario *user) {
+    char nombreUsuario[20];
 
+	printf("\n--- MODEFICAR USUARIO ---\n");
+	printf("Ingrese el nombre de usuario a modificar: ");
+    fflush(stdout);
+
+    while (getchar() != '\n');
+
+    fgets(nombreUsuario, 20, stdin);
+    nombreUsuario[strcspn(nombreUsuario, "\n")] = '\0';
+
+    if (!recuperarUsuarioBD(nombreUsuario, user)) {
+        return;
+    }
+
+    printf("Usuario encontrado. Dejar en blanco para no modificar.\n");
+
+    printf("Nombre completo actual: %s\n", user->nombre);
+    printf("Ingrese nuevo nombre completo: ");
+    fflush(stdout);
+    char nuevoNombre[50];
+
+    fgets(nuevoNombre, 50, stdin);
+    nuevoNombre[strcspn(nuevoNombre, "\n")] = '\0';
+    if (strlen(nuevoNombre) > 0) {
+        strcpy(user->nombre, nuevoNombre);
+    }
+
+    printf("Rol actual: %s\n", user->rol);
+    printf("Elija el nuevo rol del Usuario Dejar en blanco para no modificar.\n");
+    printf("1. Administrador\n");
+    printf("2. Recepcionista\n");
+    printf("3. Limpieza\n");
+    printf("4. Mantenimiento\n");
+    printf("Seleccione una opcion: ");
+    fflush(stdout);
+    int opcion;
+    if (scanf("%d", &opcion) == 1) {
+        while (getchar() != '\n'); // Limpiar el buffer de entrada
+        switch(opcion) {
+            case 1:
+                strcpy(user->rol, "Administrador");
+                break;
+            case 2:
+                strcpy(user->rol, "Recepcionista");
+                break;
+            case 3:
+                strcpy(user->rol, "Limpieza");
+                break;
+            case 4:
+                strcpy(user->rol, "Mantenimiento");
+                break;
+            default:
+                printf("No se modificará el rol.\n");
+                fflush(stdout);
+                break;
+        }
+    } else {
+        while (getchar() != '\n'); // Limpiar el buffer de entrada
+    }
+
+    printf("Ingrese nueva contraseña: ");
+    fflush(stdout);
+    char nuevaPassword[20];
+
+
+    fgets(nuevaPassword, 20, stdin);
+    nuevaPassword[strcspn(nuevaPassword, "\n")] = '\0';
+    if (strlen(nuevaPassword) > 0) {
+        strcpy(user->password, nuevaPassword);
+    }
+
+    modificarUsuarioBD(user);
 }
 
