@@ -18,6 +18,7 @@ void listaUsuarios();
 void eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
+void buscarUsuarioBD(const char *nombreUsuario);
 
 void crearClienteBD(Cliente *client);
 int comprobarCliente(const char *cliente);

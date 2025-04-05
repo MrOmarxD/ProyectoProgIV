@@ -18,5 +18,6 @@ typedef struct {
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE);
 void crearUsuario(Usuario *user);
 void modificarUsuario(Usuario *user);
+void buscarUsuario(Usuario *usuario);
 
 #endif /* GESTORUSUARIOS_H */

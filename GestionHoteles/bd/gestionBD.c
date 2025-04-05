@@ -187,6 +187,30 @@ int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user) {
     }
 }
 
+void buscarUsuarioBD(const char *nombreUsuario){
+	char sql2[] = "SELECT nombre, rol, nombre_usuario, contraseña, turno, salario FROM usuarios WHERE nombre_usuario = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+		sqlite3_bind_text(stmt, 1, nombreUsuario, strlen(nombreUsuario), SQLITE_STATIC);
+
+		printf("\n");
+		do {
+			result = sqlite3_step(stmt);
+			if (result == SQLITE_ROW) {
+				printf("%s, %s, %s, %s, %s, %d\n", (char*) 	sqlite3_column_text(stmt, 0),
+															sqlite3_column_text(stmt, 1),
+															sqlite3_column_text(stmt, 2),
+															sqlite3_column_text(stmt, 3),
+															sqlite3_column_text(stmt, 4),
+															sqlite3_column_int(stmt, 5));
+			}
+		} while (result == SQLITE_ROW);
+		printf("\n");
+
+		sqlite3_finalize(stmt);
+}
+
 // FUNCIONALIDAD PARA CLIENTE ----------------------------------------------------------------------------------------------------------------------------------------
 
 void crearClienteBD(Cliente *client){

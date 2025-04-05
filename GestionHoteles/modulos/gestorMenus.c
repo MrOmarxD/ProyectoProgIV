@@ -12,12 +12,11 @@ int mostrarMenuPrincipal() {
     printf("=============================================================\n");
     printf("1. Gestión de Usuarios\n");
     printf("2. Gestión de Clientes\n");
-    printf("3. Gestión de Personal\n");
-    printf("4. Gestión de Habitaciones\n");
-    printf("5. Gestión de Reservas\n");
-    printf("6. Facturación\n");
-    printf("7. Ver Registros de Actividad\n");
-    printf("8. Configuración del Sistema\n");
+    printf("3. Gestión de Habitaciones\n");
+    printf("4. Gestión de Reservas\n");
+    printf("5. Facturación\n");
+    printf("6. Ver Registros de Actividad\n");
+    printf("7. Configuración del Sistema\n");
     printf("0. Salir\n");
     printf("=============================================================\n");
     printf("Seleccione una opción: ");
@@ -32,21 +31,18 @@ int mostrarMenuPrincipal() {
                     gestionClientes(usuario_actual, LOG_FILE);
                     break;
                 case 3:
-                    gestionPersonal(usuario_actual, LOG_FILE);
-                    break;
-                case 4:
                     gestionHabitaciones(usuario_actual, LOG_FILE);
                     break;
-                case 5:
+                case 4:
                     gestionReservas(usuario_actual, LOG_FILE);
                     break;
-                case 6:
+                case 5:
                     gestionFacturacion(usuario_actual, LOG_FILE);
                     break;
-                case 7:
+                case 6:
                     verRegistrosActividad(usuario_actual, LOG_FILE);
                     break;
-                case 8:
+                case 7:
                     configuracionSistema();
                     break;
                 case 0:

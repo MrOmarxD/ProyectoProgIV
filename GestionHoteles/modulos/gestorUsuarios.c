@@ -8,6 +8,7 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     printf("2. Modificar usuario existente\n");
     printf("3. Eliminar usuario\n");
     printf("4. Listar usuarios\n");
+    printf("5. Buscar usuario\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
     fflush(stdout);
@@ -31,6 +32,10 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
                 	listaUsuarios();
                 	fflush(stdout);
                     break;
+                case 5:
+                	buscarUsuario(&usuario);
+					fflush(stdout);
+					break;
                 case 0:
                 	mostrarMenuPrincipal();
                 	break;
@@ -274,5 +279,20 @@ void modificarUsuario(Usuario *user) {
     }
 
     modificarUsuarioBD(user);
+}
+
+void buscarUsuario(Usuario *usuario){
+	char nombre_usuario[20];
+
+	printf("\n--- BUSCAR USUARIO ---\n");
+	printf("Ingrese el nombre de usuario que quiera buscar: ");
+	fflush(stdout);
+
+	while (getchar() != '\n');
+
+	fgets(nombre_usuario, 20, stdin);
+	nombre_usuario[strcspn(nombre_usuario, "\n")] = '\0';
+
+	buscarUsuarioBD(nombre_usuario);
 }
 

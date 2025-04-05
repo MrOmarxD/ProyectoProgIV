@@ -3,7 +3,6 @@
 
 #include "gestorUsuarios.h"
 #include "gestorClientes.h"
-#include "gestorPersonal.h"
 #include "gestorHabitaciones.h"
 #include "gestorReservas.h"
 #include "gestorFacturas.h"
