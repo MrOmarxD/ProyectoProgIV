@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include "../modulos/gestorUsuarios.h"
+#include "../modulos/gestorClientes.h"
 
 void abrirBd();
 void cerrarBd();

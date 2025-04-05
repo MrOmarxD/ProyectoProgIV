@@ -5,14 +5,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef struct {
-    int id;
-    char nombre[50];
-    char cargo[30];
-    char turno[20];
-    float salario;
-} Personal;
-
 void gestionPersonal(int usuario_actual, const char* LOG_FILE);
 
 #endif /* MODULOS_GESTORPERSONAL_H_ */

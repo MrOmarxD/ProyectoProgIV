@@ -1,11 +1,9 @@
 #include "gestorPersonal.h"
 
+//CLASE LA USAREMOS PARA INICIAR SESION
 void gestionPersonal(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- GESTIÓN DE PERSONAL ---\n");
-    printf("1. Contratar nuevo empleado\n");
-    printf("2. Modificar datos de empleado\n");
-    printf("3. Dar de baja a empleado\n");
     printf("4. Listar personal\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");

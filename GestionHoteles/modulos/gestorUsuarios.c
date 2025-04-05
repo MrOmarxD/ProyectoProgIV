@@ -1,6 +1,7 @@
 #include "gestorUsuarios.h"
 
 void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
+	Usuario usuario;
     int opcion;
     printf("\n--- GESTIÓN DE USUARIOS ---\n");
     printf("1. Crear nuevo usuario\n");
@@ -15,11 +16,11 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
     switch (opcion) {
                 case 1:
                 	printf("\n---CREAR NUEVO USUARIO---\n");
-                	crearUsuario(&usuario_actual);
+                	crearUsuario(&usuario);
                 	fflush(stdout);
                     break;
                 case 2:
-                	modificarUsuario(&usuario_actual);
+                	modificarUsuario(&usuario);
                 	fflush(stdout);
                     break;
                 case 3:
@@ -40,7 +41,6 @@ void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
 
 
     registrarActividad(usuario_actual, "Acceso a gestión de usuarios", LOG_FILE);
-
 }
 
 void crearUsuario(Usuario *user) {
@@ -95,20 +95,65 @@ void crearUsuario(Usuario *user) {
         }
     } while(opcion == 0);
 
-    do {
-        printf("Ingrese nombre de usuario: ");
-        fflush(stdout);
+    int turno;
+	do {
+		printf("Elija el turno del nuevo Usuario\n");
+		printf("1. Mañana\n");
+		printf("2. Tarde\n");
+		printf("3. Noche\n");
+		printf("Seleccione un turno: ");
+		fflush(stdout);
+		scanf("%d", &turno);
 
-        fgets(user->usuario, 20, stdin);
-        user->usuario[strcspn(user->usuario, "\n")] = '\0';
+		// Limpiar el buffer de entrada
+		while (getchar() != '\n');
 
-        if (comprobarUsuario(user->usuario)) {
-            printf("El nombre de usuario ya existe. Por favor, elija otro.\n\n");
-            fflush(stdout);
-        } else {
-            break;
-        }
-    } while (1);
+		switch(turno) {
+			case 1:
+				printf("\nHa seleccionado: Mañana\n\n");
+				fflush(stdout);
+				strcpy(user->turno, "Mañana");
+				break;
+			case 2:
+				printf("\nHa seleccionado: Tarde\n\n");
+				fflush(stdout);
+				strcpy(user->turno, "Tarde");
+				break;
+			case 3:
+				printf("\nHa seleccionado: Noche\n\n");
+				fflush(stdout);
+				strcpy(user->turno, "Noche");
+				break;
+			default:
+				printf("\nTurno no valida. Por favor, intente de nuevo.\n");
+				fflush(stdout);
+				turno = 0;
+				break;
+			}
+      } while(turno == 0);
+
+	printf("Ingrese salario en euros €: ");
+	fflush(stdout);
+	char salarioStr[20];
+	fgets(salarioStr, 20, stdin);
+	salarioStr[strcspn(salarioStr, "\n")] = '\0'; // Eliminar el salto de línea
+	sscanf(salarioStr, "%d", &user->salario);
+
+	do {
+		printf("Ingrese nombre de usuario: ");
+		fflush(stdout);
+
+		fgets(user->usuario, 20, stdin);
+		user->usuario[strcspn(user->usuario, "\n")] = '\0';
+
+		if (comprobarUsuario(user->usuario)) {
+			printf("El nombre de usuario ya existe. Por favor, elija otro.\n\n");
+			fflush(stdout);
+		} else {
+			break;
+		}
+	} while (1);
+
 
     printf("Ingrese contraseña: ");
     fflush(stdout);
@@ -180,6 +225,42 @@ void modificarUsuario(Usuario *user) {
     } else {
         while (getchar() != '\n'); // Limpiar el buffer de entrada
     }
+
+    printf("Turno actual: %s\n", user->turno);
+	printf("Elija el nuevo turno del Usuario Dejar en blanco para no modificar.\n");
+	printf("1. Mañana\n");
+	printf("2. Tarde\n");
+	printf("3. Noche\n");
+	printf("Seleccione una opcion: ");
+	fflush(stdout);
+	int turno;
+	if (scanf("%d", &turno) == 1) {
+		while (getchar() != '\n'); // Limpiar el buffer de entrada
+		switch(turno) {
+			case 1:
+				strcpy(user->turno, "Mañana");
+				break;
+			case 2:
+				strcpy(user->turno, "Tarde");
+				break;
+			case 3:
+				strcpy(user->turno, "Noche");
+				break;
+			default:
+				printf("No se modificará el turno.\n");
+				fflush(stdout);
+				break;
+		}
+	} else {
+		while (getchar() != '\n'); // Limpiar el buffer de entrada
+	}
+
+	printf("Ingrese nuevo salario en euros €: ");
+	fflush(stdout);
+	char salarioStr[20];
+	fgets(salarioStr, 20, stdin);
+	salarioStr[strcspn(salarioStr, "\n")] = '\0'; // Eliminar el salto de línea
+	sscanf(salarioStr, "%d", &user->salario);
 
     printf("Ingrese nueva contraseña: ");
     fflush(stdout);
