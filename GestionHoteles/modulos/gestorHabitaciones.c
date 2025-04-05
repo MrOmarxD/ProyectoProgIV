@@ -272,42 +272,53 @@ void modificarHabitacion(Habitacion *habitacion){
 
 
 void establecerEstadoHabitacion(Habitacion *habitacion){
-	int estado;
-	do {
-		printf("Elija el estado de la Habitacion\n");
-		printf("1. Disponible\n");
-		printf("2. Ocupada\n");
-		printf("3. Mantenimiento\n");
-		printf("Seleccione una opcion: ");
-		fflush(stdout);
-		scanf("%d", &estado);
+	char numero[20];
 
-		// Limpiar el buffer de entrada
-		while (getchar() != '\n');
+		printf("\n--- MODEFICAR USUARIO ---\n");
+			printf("Ingrese el numero de la habitacion a modificar: ");
+		    fflush(stdout);
 
-		switch(estado) {
-			case 1:
-				printf("\nHa seleccionado: Disponible\n\n");
-				fflush(stdout);
-				strcpy(habitacion->estado, "Disponible");
-				break;
-			case 2:
-				printf("\nHa seleccionado: Ocupada\n\n");
-				fflush(stdout);
-				strcpy(habitacion->estado, "Ocupada");
-				break;
-			case 3:
-				printf("\nHa seleccionado: Mantenimiento\n\n");
-				fflush(stdout);
-				strcpy(habitacion->tipo, "Mantenimiento");
-				break;
-			default:
-				printf("\nEstado no valida. Por favor, intente de nuevo.\n");
-				fflush(stdout);
-				estado = 0;
-				break;
-		}
-	} while(estado == 0);
+		    while (getchar() != '\n');
+
+		    fgets(numero, 20, stdin);
+		    numero[strcspn(numero, "\n")] = '\0';
+
+		    if (!recuperarHabitacionBD(numero, habitacion)) {
+		        return;
+		    }
+
+		    printf("Habitacion encontrada. Dejar en blanco para no modificar.\n");
+
+
+		    int estado;
+			printf("Estado actual: %s\n", habitacion->estado);
+			printf("Elija el nuevo estado de la habitacion.\n");
+			printf("1. Disponible\n");
+			printf("2. Ocupada\n");
+			printf("3. Mantenimiento\n");
+			printf("Seleccione una opcion: ");
+			fflush(stdout);
+			if (scanf("%d", &estado) == 1) {
+				while (getchar() != '\n'); // Limpiar el buffer de entrada
+				switch(estado) {
+					case 1:
+						strcpy(habitacion->estado, "Disponible");
+						break;
+					case 2:
+						strcpy(habitacion->estado, "Ocupada");
+						break;
+					case 3:
+						strcpy(habitacion->estado, "Mantenimiento");
+						break;
+					default:
+						printf("No se modificará el estado.\n");
+						fflush(stdout);
+						break;
+				}
+			} else {
+				while (getchar() != '\n'); // Limpiar el buffer de entrada
+			}
+			modificarHabitacionBD(habitacion);
 }
 
 void buscarHabitacion(Habitacion *habitacion){
