@@ -4,6 +4,7 @@
 #include "sqlite3.h"
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "../modulos/gestorUsuarios.h"
 
 int abrirBd();

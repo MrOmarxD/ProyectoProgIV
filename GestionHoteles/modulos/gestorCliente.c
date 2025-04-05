@@ -15,7 +15,7 @@ void gestionClientes(int usuario_actual, const char* LOG_FILE) {
 
     switch (opcion) {
                 case 1:
-                	printf("Registrar nuevo cliente\n");
+                	crearCliente(&usuario_actual);
                 	fflush(stdout);
                     break;
                 case 2:
@@ -42,3 +42,52 @@ void gestionClientes(int usuario_actual, const char* LOG_FILE) {
     /* Aquí iría la implementación de cada opción */
     printf("Funcionalidad en desarrollo...\n");
 }
+
+void crearCliente(Cliente *client) {
+    printf("Ingrese DNI: ");
+    fflush(stdout);
+
+    while (getchar() != '\n');
+
+    fgets(client->dni, 50, stdin);
+    client->dni[strcspn(client->dni, "\n")] = '\0'; // Eliminar el salto de línea
+
+    printf("Ingrese nombre completo: ");
+    fflush(stdout);
+
+    //while (getchar() != '\n');
+
+    fgets(client->nombre, 50, stdin);
+    client->nombre[strcspn(client->nombre, "\n")] = '\0'; // Eliminar el salto de línea
+
+    printf("Ingrese apellido: ");
+    fflush(stdout);
+
+    //while (getchar() != '\n');
+
+    fgets(client->apellido, 50, stdin);
+    client->apellido[strcspn(client->apellido, "\n")] = '\0'; // Eliminar el salto de línea
+
+    printf("Ingrese telefono: ");
+    fflush(stdout);
+
+    //while (getchar() != '\n');
+
+    fgets(client->telefono, 50, stdin);
+    client->telefono[strcspn(client->telefono, "\n")] = '\0'; // Eliminar el salto de línea
+
+    printf("Ingrese email: ");
+    fflush(stdout);
+
+    //while (getchar() != '\n');
+
+    fgets(client->email, 50, stdin);
+    client->email[strcspn(client->email, "\n")] = '\0'; // Eliminar el salto de línea
+
+
+
+
+    crearClienteBD(client);
+}
+
+
