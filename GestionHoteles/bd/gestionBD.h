@@ -42,8 +42,6 @@ void buscarHabitacionBD(const char *numHabitacion);
 
 // Funciones Facturas
 void crearFacturaBD(Factura *factura);
-int buscarFacturaBD(int id_factura, Factura *factura);
-int listarFacturasPorFechaBD(const char *fecha);
-int generarInformeFacturacionBD(const char *fecha_inicio, const char *fecha_fin);
+int buscarFacturaBD(const char *numero_factura, Factura *factura);
 
 #endif /* GESTIONBD_H_ */

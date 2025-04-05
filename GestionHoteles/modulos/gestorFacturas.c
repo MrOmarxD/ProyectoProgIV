@@ -159,20 +159,25 @@ void generarNuevaFactura(int* usuario_actual) {
 }
 
 void buscarFactura(int* usuario_actual) {
-    int id_factura;
+    char *numero_factura = (char *)malloc(20 * sizeof(char));
+    if (numero_factura == NULL) {
+        printf("Error: No se pudo asignar memoria.\n");
+        exit(1);
+    }
+
     Factura factura_encontrada;
     Cliente cliente;
-    
-    printf("\n--- BUSCAR FACTURA ---\n");
-    printf("Ingrese el ID de la factura: ");
+
+    printf("\n--- BUSCAR Factura ---\n");
+    printf("Ingrese el numero de factura que quiera buscar: ");
     fflush(stdout);
-    scanf("%d", &id_factura);
-    
-    // Buscar la factura en la base de datos
-    printf("\nBuscando factura %d...\n", id_factura);
-    fflush(stdout);
-    
-    if (buscarFacturaBD(id_factura, &factura_encontrada)) {
+
+    while (getchar() != '\n');
+
+    fgets(numero_factura, 20, stdin);
+    numero_factura[strcspn(numero_factura, "\n")] = '\0';
+
+    if (buscarFacturaBD(numero_factura, &factura_encontrada)) {
         if (recuperarClienteBD(factura_encontrada.dni_cliente, &cliente)) {
             printf("\n=== FACTURA ENCONTRADA ===\n");
             printf("ID: %d\n", factura_encontrada.id);
@@ -181,139 +186,19 @@ void buscarFactura(int* usuario_actual) {
             printf("Monto: %.2f €\n", factura_encontrada.monto);
             printf("Metodo de Pago: %s\n", factura_encontrada.metodo_pago);
             printf("Fecha: %s\n", factura_encontrada.fecha);
-            printf("Fecha: %s\n", factura_encontrada.numero_Factura);
-            printf("Fecha: %s\n", factura_encontrada.estado);
+            printf("Numero Factura: %s\n", factura_encontrada.numero_Factura);
+            printf("Estado: %s\n", factura_encontrada.estado);
             printf("=========================\n");
             fflush(stdout);
-            
-            char opcion;
-            printf("\n¿Desea generar un archivo con esta factura? (s/n): ");
-            fflush(stdout);
-            
-            while (getchar() != '\n');
-            scanf("%c", &opcion);
-            
-            if (opcion == 's' || opcion == 'S') {
-                char nombre_archivo[50];
-                sprintf(nombre_archivo, "factura_%d.txt", factura_encontrada.id);
-                
-                FILE* archivo = fopen(nombre_archivo, "w");
-                if (archivo == NULL) {
-                    printf("Error al crear el archivo de factura.\n");
-                    fflush(stdout);
-                    return;
-                }
-                
-                fprintf(archivo, "===================================\n");
-                fprintf(archivo, "           FACTURA #%d\n", factura_encontrada.id);
-                fprintf(archivo, "===================================\n\n");
-                fprintf(archivo, "ID de Factura: %d\n", factura_encontrada.id);
-                fprintf(archivo, "DNI del Cliente: %s\n", factura_encontrada.dni_cliente);
-                fprintf(archivo, "Nombre: %s %s\n", cliente.nombre, cliente.apellido);
-                fprintf(archivo, "Fecha: %s\n", factura_encontrada.fecha);
-                fprintf(archivo, "Metodo de Pago: %s\n\n", factura_encontrada.metodo_pago);
-                fprintf(archivo, "-----------------------------------\n");
-                fprintf(archivo, "Monto Total: %.2f €\n", factura_encontrada.monto);
-                fprintf(archivo, "===================================\n");
-                
-                fclose(archivo);
-                
-                printf("\nFactura guardada en '%s'.\n", nombre_archivo);
-                fflush(stdout);
-            }
         } else {
             printf("Error: No se pudo encontrar informacion del cliente con DNI %s.\n", factura_encontrada.dni_cliente);
             fflush(stdout);
         }
     } else {
-        printf("No se encontrado ninguna factura con el ID %d.\n", id_factura);
+        printf("No se encontrado ninguna factura con el numero %s.\n", factura_encontrada.numero_Factura);
         fflush(stdout);
     }
-}
-
-void listarFacturasPorFecha(int* usuario_actual) {
-    char fecha[11];
-    
-    printf("\n--- LISTAR FACTURAS POR FECHA ---\n");
-    printf("Ingrese la fecha (DD/MM/AAAA): ");
-    fflush(stdout);
-    
-    while (getchar() != '\n');
-    
-    fgets(fecha, 11, stdin);
-    fecha[strcspn(fecha, "\n")] = '\0';
-    
-    int count = listarFacturasPorFechaBD(fecha);
-    
-    if (count > 0) {
-        printf("---------------------------------------------------\n");
-        printf("Total: %d facturas encontradas\n", count);
-    } else {
-        printf("---------------------------------------------------\n");
-        printf("No se encontraron facturas para el %s\n", fecha);
-    }
-    fflush(stdout);
-}
-
-void generarInformeFacturacion(int* usuario_actual) {
-    char fecha_inicio[11], fecha_fin[11];
-    
-    printf("\n--- GENERAR INFORME DE FACTURACI�N ---\n");
-    printf("Fecha de inicio (DD/MM/AAAA): ");
-    fflush(stdout);
-    
-    while (getchar() != '\n');
-    
-    fgets(fecha_inicio, 11, stdin);
-    fecha_inicio[strcspn(fecha_inicio, "\n")] = '\0';
-    
-    printf("Fecha de fin (DD/MM/AAAA): ");
-    fflush(stdout);
-    
-    fgets(fecha_fin, 11, stdin);
-    fecha_fin[strcspn(fecha_fin, "\n")] = '\0';
-    
-    char nombre_archivo[50];
-    sprintf(nombre_archivo, "informe_%s_%s.txt", fecha_inicio, fecha_fin);
-    
-    FILE* archivo = fopen(nombre_archivo, "w");
-    if (archivo == NULL) {
-        printf("Error al crear el archivo de informe.\n");
-        fflush(stdout);
-        cerrarBd();
-        return;
-    }
-    
-    time_t t = time(NULL);
-    struct tm *tm = localtime(&t);
-    char fecha_actual[20];
-    sprintf(fecha_actual, "%02d/%02d/%04d %02d:%02d", tm->tm_mday, tm->tm_mon + 1, 
-            tm->tm_year + 1900, tm->tm_hour, tm->tm_min);
-    
-    int total_facturas = generarInformeFacturacionBD(fecha_inicio, fecha_fin);
-    
-    if (total_facturas > 0) {
-        fprintf(archivo, "===================================================\n");
-        fprintf(archivo, "              INFORME DE FACTURACI�N\n");
-        fprintf(archivo, "                %s - %s\n", fecha_inicio, fecha_fin);
-        fprintf(archivo, "===================================================\n\n");
-        fprintf(archivo, "Fecha de generacion: %s\n\n", fecha_actual);
-        fprintf(archivo, "Total de facturas: %d\n", total_facturas);
-        fprintf(archivo, "===================================================\n");
-    } else {
-        fprintf(archivo, "===================================================\n");
-        fprintf(archivo, "              INFORME DE FACTURACI�N\n");
-        fprintf(archivo, "                %s - %s\n", fecha_inicio, fecha_fin);
-        fprintf(archivo, "===================================================\n\n");
-        fprintf(archivo, "Fecha de generacion: %s\n\n", fecha_actual);
-        fprintf(archivo, "No se encontraron facturas en el periodo especificado.\n");
-        fprintf(archivo, "===================================================\n");
-    }
-    
-    fclose(archivo);
-    
-    printf("\nInforme generado correctamente en el archivo '%s'.\n", nombre_archivo);
-    fflush(stdout);
+    free(numero_factura);
 }
 
 void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
@@ -321,8 +206,6 @@ void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
     printf("\n--- FACTURACION ---\n");
     printf("1. Generar nueva factura\n");
     printf("2. Buscar factura\n");
-    printf("3. Listar facturas por fecha\n");
-    printf("4. Generar informe de facturacion\n");
     printf("0. Volver al menu principal\n");
     printf("Seleccione una opcion: ");
     fflush(stdout);
@@ -336,16 +219,6 @@ void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
         break;
     case 2:
         buscarFactura(&usuario_actual);
-        break;
-    case 3:
-        printf("Listar facturas por fecha\n");
-        fflush(stdout);
-        listarFacturasPorFecha(&usuario_actual);
-        break;
-    case 4:
-        printf("Generar informe de facturacion\n");
-        fflush(stdout);
-        generarInformeFacturacion(&usuario_actual);
         break;
     case 0:
         mostrarMenuPrincipal();

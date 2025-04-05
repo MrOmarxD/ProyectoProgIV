@@ -490,25 +490,25 @@ void listarHabitaciones(){
 void buscarHabitacionBD(const char *numHabitacion){
 	char sql2[] = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero = ?";
 
-			sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
 
-			sqlite3_bind_text(stmt, 1, numHabitacion, strlen(numHabitacion), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, numHabitacion, strlen(numHabitacion), SQLITE_STATIC);
 
-			printf("\n");
-			do {
-				result = sqlite3_step(stmt);
-				if (result == SQLITE_ROW) {
-					printf("%s, %s, %d, %s, %d, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
-																sqlite3_column_text(stmt, 1),
-																sqlite3_column_int(stmt, 2),
-																sqlite3_column_text(stmt, 3),
-																sqlite3_column_int(stmt, 4),
-																sqlite3_column_text(stmt, 5));
-				}
-			} while (result == SQLITE_ROW);
-			printf("\n");
+	printf("\n");
+	do {
+		result = sqlite3_step(stmt);
+		if (result == SQLITE_ROW) {
+			printf("%s, %s, %d, %s, %d, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
+														sqlite3_column_text(stmt, 1),
+														sqlite3_column_int(stmt, 2),
+														sqlite3_column_text(stmt, 3),
+														sqlite3_column_int(stmt, 4),
+														sqlite3_column_text(stmt, 5));
+		}
+	} while (result == SQLITE_ROW);
+	printf("\n");
 
-			sqlite3_finalize(stmt);
+	sqlite3_finalize(stmt);
 }
 // FUNCIONALIDAD PARA FACTURAS ------------------------------------------------------------------------------
 
@@ -531,81 +531,40 @@ void crearFacturaBD(Factura* factura) {
         printf("Error insertando la factura: %s\n", sqlite3_errmsg(db));
         fflush(stdout);
     } else {
-        printf("Factura #%d registrada en la base de datos.\n", factura->numero_Factura);
+        printf("Factura #%s registrada en la base de datos.\n", factura->numero_Factura);
         fflush(stdout);
     }
     
     sqlite3_finalize(stmt);
 }
 
-int buscarFacturaBD(int id_factura, Factura* factura) {
-    char sql[] = "SELECT id_cliente, monto, metodo_pago, fecha, numero_factuta, estado FROM facturacion WHERE id = ?";
+int buscarFacturaBD(const char *numero_factura, Factura *factura) {
+    char sql[] = "SELECT id, id_reserva, id_cliente, monto, metodo_pago, fecha, numero_factura, estado FROM facturacion WHERE numero_factura = ?";
     sqlite3_stmt *stmt;
-    
-    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-    sqlite3_bind_int(stmt, 1, id_factura);
-    
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, numero_factura, strlen(numero_factura), SQLITE_STATIC);
+
     int result = sqlite3_step(stmt);
     if (result == SQLITE_ROW) {
-        //strcpy(factura->id_reserva, (const char*)sqlite3_column_text(stmt, 0));
-        strcpy(factura->dni_cliente, (const char*)sqlite3_column_text(stmt, 0));
-        factura->monto = (float)sqlite3_column_double(stmt, 1);
-        strcpy(factura->metodo_pago, (const char*)sqlite3_column_text(stmt, 2));
-        strcpy(factura->fecha, (const char*)sqlite3_column_text(stmt, 3));
-        strcpy(factura->numero_Factura, (const char*)sqlite3_column_text(stmt, 4));
-        strcpy(factura->estado, (const char*)sqlite3_column_text(stmt, 5));
-        
+        factura->id = sqlite3_column_int(stmt, 0);
+        strcpy(factura->id_reserva, (const char *)sqlite3_column_text(stmt, 2));
+        strcpy(factura->dni_cliente, (const char *)sqlite3_column_text(stmt, 2));
+        factura->monto = sqlite3_column_double(stmt, 3);
+        strcpy(factura->metodo_pago, (const char *)sqlite3_column_text(stmt, 4));
+        strcpy(factura->fecha, (const char *)sqlite3_column_text(stmt, 5));
+        strcpy(factura->numero_Factura, (const char *)sqlite3_column_text(stmt, 6));
+        strcpy(factura->estado, (const char *)sqlite3_column_text(stmt, 7));
+
         sqlite3_finalize(stmt);
         return 1;
     } else {
         sqlite3_finalize(stmt);
         return 0;
     }
-}
-
-int listarFacturasPorFechaBD(const char* fecha) {
-    char sql[] = "SELECT f.id, f.id_reserva, f.dni_cliente, f.monto, f.metodo_pago "
-                "FROM facturas f WHERE f.fecha = ?";
-    sqlite3_stmt *stmt;
-    int count = 0;
-    
-    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-    sqlite3_bind_text(stmt, 1, fecha, strlen(fecha), SQLITE_STATIC);
-    
-    printf("\nFacturas del %s:\n", fecha);
-    printf("---------------------------------------------------\n");
-    printf("  ID  | ID RESERVA |    DNI    |  MONTO  | MÉTODO\n");
-    printf("---------------------------------------------------\n");
-    
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
-        int id_reserva = sqlite3_column_int(stmt, 1);
-        const char* dni = (const char*)sqlite3_column_text(stmt, 2);
-        float monto = (float)sqlite3_column_double(stmt, 3);
-        const char* metodo = (const char*)sqlite3_column_text(stmt, 4);
-        
-        printf(" %4d |    %4d    | %9s | %6.2f€ | %s\n", 
-               id, id_reserva, dni, monto, metodo);
-        count++;
-    }
-    
-    sqlite3_finalize(stmt);
-    return count;
-}
-
-int generarInformeFacturacionBD(const char* fecha_inicio, const char* fecha_fin) {
-    char sql[] = "SELECT COUNT(*) FROM facturas WHERE fecha BETWEEN ? AND ?";
-    sqlite3_stmt *stmt;
-    int total_facturas = 0;
-    
-    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-    sqlite3_bind_text(stmt, 1, fecha_inicio, strlen(fecha_inicio), SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, fecha_fin, strlen(fecha_fin), SQLITE_STATIC);
-    
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        total_facturas = sqlite3_column_int(stmt, 0);
-    }
-    
-    sqlite3_finalize(stmt);
-    return total_facturas;
 }

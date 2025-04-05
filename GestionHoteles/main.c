@@ -20,8 +20,3 @@ int main() {
     cerrarBd();
     return 0;
 }
-
-
-
-
-
