@@ -164,7 +164,7 @@ void crearHabitacion(Habitacion *habitacion) {
 void modificarHabitacion(Habitacion *habitacion){
 	char numero[20];
 
-	printf("\n--- MODEFICAR USUARIO ---\n");
+	printf("\n--- MODEFICAR HABITACION ---\n");
 		printf("Ingrese el numero de la habitacion a modificar: ");
 	    fflush(stdout);
 
@@ -274,7 +274,7 @@ void modificarHabitacion(Habitacion *habitacion){
 void establecerEstadoHabitacion(Habitacion *habitacion){
 	char numero[20];
 
-		printf("\n--- MODEFICAR USUARIO ---\n");
+		printf("\n--- MODEFICAR ESTADO DE LA HABITACION ---\n");
 			printf("Ingrese el numero de la habitacion a modificar: ");
 		    fflush(stdout);
 

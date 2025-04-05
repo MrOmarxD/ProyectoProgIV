@@ -1,7 +1,9 @@
-#ifndef GESTORFACTURAS_H_
-#define GESTORFACTURAS_H_
-#include <stdbool.h>
+#ifndef GESTOR_FACTURAS_H
+#define GESTOR_FACTURAS_H
 
+#include "gestorClientes.h"
+
+// Estructura para factura
 typedef struct {
     int id;
     int id_reserva;
@@ -11,6 +13,11 @@ typedef struct {
     char fecha[11];
 } Factura;
 
+// Funciones para cada opción del menú de facturación
 void gestionFacturacion(int usuario_actual, const char* LOG_FILE);
+void generarNuevaFactura(int* usuario_actual);
+void buscarFactura(int* usuario_actual);
+void listarFacturasPorFecha(int* usuario_actual);
+void generarInformeFacturacion(int* usuario_actual);
 
-#endif /* MODULOS_GESTORFACTURAS_H_ */
+#endif /* GESTOR_FACTURAS_H */
