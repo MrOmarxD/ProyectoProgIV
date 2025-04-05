@@ -52,7 +52,7 @@ void generarNuevaFactura(int* usuario_actual) {
 	char idReservaStr[20];
 	fgets(idReservaStr, 20, stdin);
 	idReservaStr[strcspn(idReservaStr, "\n")] = '\0'; // Eliminar el salto de línea
-	sscanf(idReservaStr, "%d", &nueva_factura.id_reserva);
+	scanf(idReservaStr, "%d", &nueva_factura.id_reserva);
 	while (getchar() != '\n');
 
     int metodo_pago;

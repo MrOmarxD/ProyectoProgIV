@@ -2,14 +2,14 @@
            FACTURA #1982325104
 ===================================
 
-Numero de Factura: 65
+Numero de Factura: 77
 Estado de Factura: Pendiente
 ID de Reserva: 8191512
-DNI del Cliente: 12345678A
-Nombre: Pedro Martínez
+DNI del Cliente: 87654321C
+Nombre: Laura García
 Fecha: 05/04/2025
 Metodo de Pago: Efectivo
 
 -----------------------------------
-Monto Total: 12.00 €
+Monto Total: 13.00 €
 ===================================

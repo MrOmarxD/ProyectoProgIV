@@ -9,6 +9,7 @@
 #include "../modulos/gestorClientes.h"
 #include "../modulos/gestorHabitaciones.h"
 #include "../modulos/gestorFacturas.h"
+#include "../modulos/gestorReservas.h"
 
 void abrirBd();
 void cerrarBd();
@@ -43,5 +44,13 @@ void buscarHabitacionBD(const char *numHabitacion);
 // Funciones Facturas
 void crearFacturaBD(Factura *factura);
 int buscarFacturaBD(const char *numero_factura, Factura *factura);
+
+// Funciones Reservas
+void crearReservaBD(Reserva *r);
+void modificarReservaBD(Reserva *r);
+int recuperarReservaBD(const char *idUR, Reserva *r);
+void eliminarReservaBD();
+void buscarReservaBD(const char *reserva);
+void listarReservaBD();
 
 #endif /* GESTIONBD_H_ */

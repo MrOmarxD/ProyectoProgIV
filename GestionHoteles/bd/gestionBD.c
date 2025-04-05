@@ -568,3 +568,191 @@ int buscarFacturaBD(const char *numero_factura, Factura *factura) {
         return 0;
     }
 }
+
+
+// FUNCIONALIDAD PARA RESERVAS ---------------------------------------------------------------------------------------------------------------------------------------
+void crearReservaBD(Reserva *reserva){
+char sql1[] = "INSERT INTO reservas (id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
+    sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL);
+
+    sqlite3_bind_text(stmt, 1, reserva->dni_cliente, strlen(reserva->dni_cliente), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, reserva->id_habitacion);
+    sqlite3_bind_text(stmt, 3, reserva->fecha_entrada, strlen(reserva->fecha_entrada), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, reserva->fecha_salida, strlen(reserva->fecha_salida), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, reserva->estado, strlen(reserva->estado), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 6, reserva->monto);
+    sqlite3_bind_text(stmt, 7, reserva->observaciones, strlen(reserva->observaciones), SQLITE_STATIC);
+
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error insertando reserva: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+    } else {
+        printf("Reserva %d insertado\n", reserva->id);
+        fflush(stdout);
+    }
+
+    sqlite3_finalize(stmt);
+}
+void modificarReservaBD(Reserva *r){
+	    char sql[] = "UPDATE reservas SET id_cliente = ?, id_habitacion = ?, fecha_entrada = ?, fecha_salida = ?, estado = ?, monto = ?, observaciones = ? WHERE id = ?";
+	    sqlite3_stmt *stmt;
+
+	    	char dni_cliente[10];
+	        int id_habitacion = r->id_habitacion;
+	        char fecha_entrada[11];
+	        char fecha_salida[11];
+	        char estado[20];
+	        int monto = r->monto;
+	        char observaciones[100];
+
+		strcpy(dni_cliente, r->dni_cliente);
+		strcpy(observaciones, r->observaciones);
+		strcpy(fecha_entrada, r->fecha_entrada);
+		strcpy(fecha_salida, r->fecha_salida);
+		strcpy(estado, r->estado);
+
+		if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+		        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+		        fflush(stdout);
+		        return;
+		    }
+		sqlite3_bind_text(stmt, 1, dni_cliente, strlen(dni_cliente), SQLITE_STATIC);
+		sqlite3_bind_int(stmt, 2, id_habitacion);
+		sqlite3_bind_text(stmt, 3, fecha_entrada, strlen(fecha_entrada), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 4, fecha_salida, strlen(fecha_salida), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 5, estado, strlen(estado), SQLITE_STATIC);
+		sqlite3_bind_int(stmt, 6, monto);
+		sqlite3_bind_text(stmt, 7, observaciones, strlen(observaciones), SQLITE_STATIC);
+		sqlite3_bind_int(stmt, 8, r->id);
+
+		result = sqlite3_step(stmt);
+		if (result != SQLITE_DONE) {
+			printf("Error al modificar la reserva: %s\n", sqlite3_errmsg(db));
+			fflush(stdout);
+		} else {
+			printf("Reserva '%d' modificado correctamente\n", r->id);
+			fflush(stdout);
+		}
+
+		sqlite3_finalize(stmt);
+}
+
+int recuperarReservaBD(const char *idUR, Reserva *r) {
+    char sql[] = "SELECT id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas WHERE id_cliente = ?";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, idUR, strlen(idUR), SQLITE_STATIC);
+
+    int result = sqlite3_step(stmt);
+    if (result == SQLITE_ROW) {
+    	r->id = sqlite3_column_int(stmt, 0);
+        strcpy(r->dni_cliente, (const char *)sqlite3_column_text(stmt, 1));
+        r->id_habitacion = sqlite3_column_int(stmt, 2);
+        strcpy(r->fecha_entrada, (const char *)sqlite3_column_text(stmt, 3));
+        strcpy(r->fecha_salida, (const char *)sqlite3_column_text(stmt, 4));
+        strcpy(r->estado, (const char *)sqlite3_column_text(stmt, 5));
+        r->monto = sqlite3_column_int(stmt, 6);
+        strcpy(r->observaciones, (const char *)sqlite3_column_text(stmt, 7));
+        sqlite3_finalize(stmt);
+        return 1;
+    } else {
+        printf("Reserva no encontrado.\n");
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    }
+}
+void eliminarReservaBD() {
+    char idReserva[50];
+
+    printf("\n--- ELIMINAR RESERVA ---\n");
+    printf("Ingrese el id del usuario de la reserva a eliminar: ");
+    fflush(stdout);
+    scanf("%49s", idReserva);  // Limitamos la entrada a 49 caracteres + el terminador nulo
+
+    if (!comprobarReserva(idReserva)) {
+        printf("El usuario '%s' no existe en la base de datos.\n", idReserva);
+        fflush(stdout);
+        return;
+    }
+
+    char sql[] = "DELETE FROM reservas WHERE id_cliente = ?";
+
+    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+
+    sqlite3_bind_text(stmt, 1, idReserva, strlen(idReserva), SQLITE_STATIC);
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error al eliminar la reserva: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+    } else {
+        printf("Usuario '%s' eliminado correctamente\n", idReserva);
+        fflush(stdout);
+    }
+
+    sqlite3_finalize(stmt);
+}
+int comprobarReserva(const char *reserva){
+	char sql2[] = "select count(*) from reservas where id_cliente = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+		sqlite3_bind_text(stmt, 1, reserva, strlen(reserva), SQLITE_STATIC);
+
+		result = sqlite3_step(stmt);
+		    int count = 0;
+		    if (result == SQLITE_ROW) {
+		        count = sqlite3_column_int(stmt, 0);
+		    }
+
+		    sqlite3_finalize(stmt);
+		    return count > 0;
+}
+void buscarReservaBD(const char *reserva){
+	char sql2[] = "SELECT id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas WHERE id_cliente = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+		sqlite3_bind_text(stmt, 1, reserva, strlen(reserva), SQLITE_STATIC);
+
+		printf("\n");
+		do {
+			result = sqlite3_step(stmt);
+			if (result == SQLITE_ROW) {
+				printf("%d, %s, %d, %s, %s, %s, %d, %s\n", (char*) 	sqlite3_column_int(stmt, 0),
+															sqlite3_column_text(stmt, 1),
+															sqlite3_column_int(stmt, 2),
+															sqlite3_column_text(stmt, 3),
+															sqlite3_column_text(stmt, 4),
+															sqlite3_column_text(stmt, 5),
+															sqlite3_column_int(stmt, 6),
+															sqlite3_column_text(stmt, 7));
+			}
+		} while (result == SQLITE_ROW);
+		printf("\n");
+
+		sqlite3_finalize(stmt);
+}
+void listarReserva(){
+	char sql2[] = "select id_cliente, estado from reservas";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+		printf("\n");
+		do {
+			result = sqlite3_step(stmt);
+			if (result == SQLITE_ROW) {
+				printf("%s, %s\n", (char*) sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1));
+			}
+		} while (result == SQLITE_ROW);
+		printf("\n");
+
+		sqlite3_finalize(stmt);
+}
