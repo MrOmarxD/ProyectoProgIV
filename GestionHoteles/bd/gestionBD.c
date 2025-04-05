@@ -375,3 +375,31 @@ void buscarClientesBD(const char *dniCliente){
 
 		sqlite3_finalize(stmt);
 }
+
+
+// FUNCIONALIDAD PARA HABITACIONES ----------------------------------------------------------------------------------------------------------------------------------------
+
+void crearHabitacionBD(Habitacion *habitacion) {
+    char sql[] = "INSERT INTO habitaciones (numero, tipo, precio, estado, capacidad, descripcion) VALUES (?, ?, ?, ?, ?, ?)";
+    sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
+
+    sqlite3_bind_text(stmt, 1, habitacion->numero, strlen(habitacion->numero), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, habitacion->tipo, strlen(habitacion->tipo), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, habitacion->precio);
+    sqlite3_bind_text(stmt, 4, habitacion->estado, strlen(habitacion->estado), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 5, habitacion->capacidad);
+    sqlite3_bind_text(stmt, 6, habitacion->descripcion, strlen(habitacion->descripcion), SQLITE_STATIC);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error insertando la habitacion: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+    } else {
+        printf("Habitacion %s insertada\n", habitacion->numero);
+        fflush(stdout);
+    }
+
+    sqlite3_finalize(stmt);
+}
+
+
