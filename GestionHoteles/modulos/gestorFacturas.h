@@ -6,14 +6,15 @@
 // Estructura para factura
 typedef struct {
     int id;
-    int id_reserva;
+    char id_reserva[10];
     char dni_cliente[10];
     float monto;
     char metodo_pago[20];
     char fecha[11];
-} Factura;
+    char numero_Factura[20];
+    char estado[20];
+}Factura;
 
-// Funciones para cada opción del menú de facturación
 void gestionFacturacion(int usuario_actual, const char* LOG_FILE);
 void generarNuevaFactura(int* usuario_actual);
 void buscarFactura(int* usuario_actual);

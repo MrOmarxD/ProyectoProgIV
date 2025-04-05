@@ -1,23 +1,16 @@
 #include "gestorFacturas.h"
 #include "gestorRegistros.h"
 #include "gestorMenus.h"
-#include "gestionBD.h"
+#include "../bd/gestionBD.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
 
-// Funci�n para generar una nueva factura - Case 1
 void generarNuevaFactura(int* usuario_actual) {
     Factura nueva_factura;
     Cliente cliente;
-    
-    // Abrir la base de datos
-    abrirBd();
-    
-    // Generar ID de factura (siguiente al �ltimo en la BD)
-    nueva_factura.id = obtenerUltimoIDFacturaBD() + 1;
     
     // Obtener fecha actual
     time_t t = time(NULL);
@@ -27,15 +20,11 @@ void generarNuevaFactura(int* usuario_actual) {
     // Pedir datos de la factura
     printf("\n--- GENERAR NUEVA FACTURA ---\n");
     
-    printf("Ingrese ID de reserva: ");
-    fflush(stdout);
-    scanf("%d", &nueva_factura.id_reserva);
-    
     printf("Ingrese DNI del cliente: ");
-    fflush(stdout);
-    
-    while (getchar() != '\n');
-    
+	fflush(stdout);
+
+	while (getchar() != '\n');
+
     fgets(nueva_factura.dni_cliente, 10, stdin);
     nueva_factura.dni_cliente[strcspn(nueva_factura.dni_cliente, "\n")] = '\0';
     
@@ -43,34 +32,108 @@ void generarNuevaFactura(int* usuario_actual) {
     if (!recuperarClienteBD(nueva_factura.dni_cliente, &cliente)) {
         printf("Error: El cliente con DNI %s no existe en la base de datos.\n", nueva_factura.dni_cliente);
         fflush(stdout);
-        cerrarBd();
         return;
     }
-    
+
+    printf("Ingrese numero de Facturacion: ");
+	fflush(stdout);
+
+	while (getchar() != '\n');
+
+	fgets(nueva_factura.numero_Factura, 10, stdin);
+	    nueva_factura.numero_Factura[strcspn(nueva_factura.numero_Factura, "\n")] = '\0';
+
     printf("Ingrese monto: ");
     fflush(stdout);
     scanf("%f", &nueva_factura.monto);
     
-    printf("Ingrese metodo de pago: ");
-    fflush(stdout);
+    printf("Ingrese id Reserva: ");
+	fflush(stdout);
+	char idReservaStr[20];
+	fgets(idReservaStr, 20, stdin);
+	idReservaStr[strcspn(idReservaStr, "\n")] = '\0'; // Eliminar el salto de línea
+	sscanf(idReservaStr, "%d", &nueva_factura.id_reserva);
+	while (getchar() != '\n');
+
+    int metodo_pago;
+    do {
+        printf("Elija el metodo de pago\n");
+        printf("1. Efectivo\n");
+        printf("2. Transferencia\n");
+        printf("3. Tarjeta de credito\n");
+        printf("Seleccione un metodo de pago: ");
+        fflush(stdout);
+        scanf("%d", &metodo_pago);
+
+        // Limpiar el buffer de entrada
+        while (getchar() != '\n');
+
+        switch(metodo_pago) {
+            case 1:
+                printf("\nHa seleccionado: Efectivo\n\n");
+                fflush(stdout);
+                strcpy(nueva_factura.metodo_pago, "Efectivo");
+                break;
+            case 2:
+                printf("\nHa seleccionado: Transferencia\n\n");
+                fflush(stdout);
+                strcpy(nueva_factura.metodo_pago, "Transferencia");
+                break;
+            case 3:
+                printf("\nHa seleccionado: Tarjeta de credito\n\n");
+                fflush(stdout);
+                strcpy(nueva_factura.metodo_pago, "Tarjeta de credito");
+                break;
+            default:
+                printf("\nMetodo de pago no valido. Por favor, intente de nuevo.\n");
+                fflush(stdout);
+                metodo_pago = 0;
+                break;
+        }
+    } while(metodo_pago == 0);
     
-    while (getchar() != '\n');
-    
-    fgets(nueva_factura.metodo_pago, 20, stdin);
-    nueva_factura.metodo_pago[strcspn(nueva_factura.metodo_pago, "\n")] = '\0';
-    
-    // Guardar la factura en la base de datos
+    int estado_factura;
+
+    do {
+        printf("Elija el estado de la factura\n");
+        printf("1. Pendiente\n");
+        printf("2. Pagada\n");
+        printf("Seleccione un estado: ");
+        fflush(stdout);
+        scanf("%d", &estado_factura);
+
+        // Limpiar el buffer de entrada
+        while (getchar() != '\n');
+
+        switch(estado_factura) {
+            case 1:
+                printf("\nHa seleccionado: Pendiente\n\n");
+                fflush(stdout);
+                strcpy(nueva_factura.estado, "Pendiente");
+                break;
+            case 2:
+                printf("\nHa seleccionado: Pagada\n\n");
+                fflush(stdout);
+                strcpy(nueva_factura.estado, "Pagada");
+                break;
+            default:
+                printf("\nEstado no valido. Por favor, intente de nuevo.\n");
+                fflush(stdout);
+                estado_factura = 0;
+                break;
+        }
+    } while(estado_factura == 0);
+
     crearFacturaBD(&nueva_factura);
     
     // Crear archivo de factura
     char nombre_archivo[50];
-    sprintf(nombre_archivo, "factura_%d.txt", nueva_factura.id);
+    sprintf(nombre_archivo, "factura_%d.txt", nueva_factura.numero_Factura);
     
     FILE* archivo = fopen(nombre_archivo, "w");
     if (archivo == NULL) {
         printf("Error al crear el archivo de factura.\n");
         fflush(stdout);
-        cerrarBd();
         return;
     }
     
@@ -78,7 +141,8 @@ void generarNuevaFactura(int* usuario_actual) {
     fprintf(archivo, "===================================\n");
     fprintf(archivo, "           FACTURA #%d\n", nueva_factura.id);
     fprintf(archivo, "===================================\n\n");
-    fprintf(archivo, "ID de Factura: %d\n", nueva_factura.id);
+    fprintf(archivo, "Numero de Factura: %s\n", nueva_factura.numero_Factura);
+    fprintf(archivo, "Estado de Factura: %s\n", nueva_factura.estado);
     fprintf(archivo, "ID de Reserva: %d\n", nueva_factura.id_reserva);
     fprintf(archivo, "DNI del Cliente: %s\n", nueva_factura.dni_cliente);
     fprintf(archivo, "Nombre: %s %s\n", cliente.nombre, cliente.apellido);
@@ -92,12 +156,8 @@ void generarNuevaFactura(int* usuario_actual) {
     
     printf("\nFactura #%d generada correctamente en el archivo '%s'.\n", nueva_factura.id, nombre_archivo);
     fflush(stdout);
-    
-    // Cerrar la base de datos
-    cerrarBd();
 }
 
-// Funci�n para buscar factura - Case 2
 void buscarFactura(int* usuario_actual) {
     int id_factura;
     Factura factura_encontrada;
@@ -108,29 +168,24 @@ void buscarFactura(int* usuario_actual) {
     fflush(stdout);
     scanf("%d", &id_factura);
     
-    // Abrir la base de datos
-    abrirBd();
-    
     // Buscar la factura en la base de datos
-    printf("\nBuscando factura #%d...\n", id_factura);
+    printf("\nBuscando factura %d...\n", id_factura);
     fflush(stdout);
     
     if (buscarFacturaBD(id_factura, &factura_encontrada)) {
-        // Obtener informaci�n del cliente
         if (recuperarClienteBD(factura_encontrada.dni_cliente, &cliente)) {
-            // Mostrar los datos de la factura
             printf("\n=== FACTURA ENCONTRADA ===\n");
             printf("ID: %d\n", factura_encontrada.id);
-            printf("ID Reserva: %d\n", factura_encontrada.id_reserva);
             printf("DNI Cliente: %s\n", factura_encontrada.dni_cliente);
             printf("Nombre Cliente: %s %s\n", cliente.nombre, cliente.apellido);
             printf("Monto: %.2f €\n", factura_encontrada.monto);
             printf("Metodo de Pago: %s\n", factura_encontrada.metodo_pago);
             printf("Fecha: %s\n", factura_encontrada.fecha);
+            printf("Fecha: %s\n", factura_encontrada.numero_Factura);
+            printf("Fecha: %s\n", factura_encontrada.estado);
             printf("=========================\n");
             fflush(stdout);
             
-            // Opci�n para generar archivo
             char opcion;
             printf("\n¿Desea generar un archivo con esta factura? (s/n): ");
             fflush(stdout);
@@ -146,16 +201,13 @@ void buscarFactura(int* usuario_actual) {
                 if (archivo == NULL) {
                     printf("Error al crear el archivo de factura.\n");
                     fflush(stdout);
-                    cerrarBd();
                     return;
                 }
                 
-                // Escribir datos de la factura en el archivo
                 fprintf(archivo, "===================================\n");
                 fprintf(archivo, "           FACTURA #%d\n", factura_encontrada.id);
                 fprintf(archivo, "===================================\n\n");
                 fprintf(archivo, "ID de Factura: %d\n", factura_encontrada.id);
-                fprintf(archivo, "ID de Reserva: %d\n", factura_encontrada.id_reserva);
                 fprintf(archivo, "DNI del Cliente: %s\n", factura_encontrada.dni_cliente);
                 fprintf(archivo, "Nombre: %s %s\n", cliente.nombre, cliente.apellido);
                 fprintf(archivo, "Fecha: %s\n", factura_encontrada.fecha);
@@ -170,19 +222,15 @@ void buscarFactura(int* usuario_actual) {
                 fflush(stdout);
             }
         } else {
-            printf("Error: No se pudo encontrar informaci�n del cliente con DNI %s.\n", factura_encontrada.dni_cliente);
+            printf("Error: No se pudo encontrar informacion del cliente con DNI %s.\n", factura_encontrada.dni_cliente);
             fflush(stdout);
         }
     } else {
-        printf("No se encontr� ninguna factura con el ID %d.\n", id_factura);
+        printf("No se encontrado ninguna factura con el ID %d.\n", id_factura);
         fflush(stdout);
     }
-    
-    // Cerrar la base de datos
-    cerrarBd();
 }
 
-// Funci�n para listar facturas por fecha - Case 3
 void listarFacturasPorFecha(int* usuario_actual) {
     char fecha[11];
     
@@ -195,10 +243,6 @@ void listarFacturasPorFecha(int* usuario_actual) {
     fgets(fecha, 11, stdin);
     fecha[strcspn(fecha, "\n")] = '\0';
     
-    // Abrir la base de datos
-    abrirBd();
-    
-    // Buscar facturas en la base de datos para la fecha especificada
     int count = listarFacturasPorFechaBD(fecha);
     
     if (count > 0) {
@@ -209,12 +253,8 @@ void listarFacturasPorFecha(int* usuario_actual) {
         printf("No se encontraron facturas para el %s\n", fecha);
     }
     fflush(stdout);
-    
-    // Cerrar la base de datos
-    cerrarBd();
 }
 
-// Funci�n para generar informe de facturaci�n - Case 4
 void generarInformeFacturacion(int* usuario_actual) {
     char fecha_inicio[11], fecha_fin[11];
     
@@ -233,10 +273,6 @@ void generarInformeFacturacion(int* usuario_actual) {
     fgets(fecha_fin, 11, stdin);
     fecha_fin[strcspn(fecha_fin, "\n")] = '\0';
     
-    // Abrir la base de datos
-    abrirBd();
-    
-    // Crear archivo de informe
     char nombre_archivo[50];
     sprintf(nombre_archivo, "informe_%s_%s.txt", fecha_inicio, fecha_fin);
     
@@ -248,14 +284,12 @@ void generarInformeFacturacion(int* usuario_actual) {
         return;
     }
     
-    // Obtener fecha actual
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
     char fecha_actual[20];
     sprintf(fecha_actual, "%02d/%02d/%04d %02d:%02d", tm->tm_mday, tm->tm_mon + 1, 
             tm->tm_year + 1900, tm->tm_hour, tm->tm_min);
     
-    // Generar informe de facturaci�n
     int total_facturas = generarInformeFacturacionBD(fecha_inicio, fecha_fin);
     
     if (total_facturas > 0) {
@@ -272,7 +306,7 @@ void generarInformeFacturacion(int* usuario_actual) {
         fprintf(archivo, "                %s - %s\n", fecha_inicio, fecha_fin);
         fprintf(archivo, "===================================================\n\n");
         fprintf(archivo, "Fecha de generacion: %s\n\n", fecha_actual);
-        fprintf(archivo, "No se encontraron facturas en el per�odo especificado.\n");
+        fprintf(archivo, "No se encontraron facturas en el periodo especificado.\n");
         fprintf(archivo, "===================================================\n");
     }
     
@@ -280,12 +314,8 @@ void generarInformeFacturacion(int* usuario_actual) {
     
     printf("\nInforme generado correctamente en el archivo '%s'.\n", nombre_archivo);
     fflush(stdout);
-    
-    // Cerrar la base de datos
-    cerrarBd();
 }
 
-// Funci�n principal de gesti�n de facturaci�n
 void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
     int opcion;
     printf("\n--- FACTURACION ---\n");
@@ -305,8 +335,6 @@ void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
         generarNuevaFactura(&usuario_actual);
         break;
     case 2:
-        printf("Buscar factura\n");
-        fflush(stdout);
         buscarFactura(&usuario_actual);
         break;
     case 3:

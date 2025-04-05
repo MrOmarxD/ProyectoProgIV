@@ -8,6 +8,7 @@
 #include "../modulos/gestorUsuarios.h"
 #include "../modulos/gestorClientes.h"
 #include "../modulos/gestorHabitaciones.h"
+#include "../modulos/gestorFacturas.h"
 
 void abrirBd();
 void cerrarBd();
@@ -40,10 +41,9 @@ void listarHabitaciones();
 void buscarHabitacionBD(const char *numHabitacion);
 
 // Funciones Facturas
-void crearFacturaBD(Factura* factura);
-int obtenerUltimoIDFacturaBD();
-int buscarFacturaBD(int id_factura, Factura* factura);
-int listarFacturasPorFechaBD(const char* fecha);
-int generarInformeFacturacionBD(const char* fecha_inicio, const char* fecha_fin);
+void crearFacturaBD(Factura *factura);
+int buscarFacturaBD(int id_factura, Factura *factura);
+int listarFacturasPorFechaBD(const char *fecha);
+int generarInformeFacturacionBD(const char *fecha_inicio, const char *fecha_fin);
 
 #endif /* GESTIONBD_H_ */
