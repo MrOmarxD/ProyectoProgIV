@@ -39,4 +39,11 @@ void cambiarEstadoHabitacionBD();
 void listarHabitaciones();
 void buscarHabitacionBD(const char *numHabitacion);
 
+// Funciones Facturas
+void crearFacturaBD(Factura* factura);
+int obtenerUltimoIDFacturaBD();
+int buscarFacturaBD(int id_factura, Factura* factura);
+int listarFacturasPorFechaBD(const char* fecha);
+int generarInformeFacturacionBD(const char* fecha_inicio, const char* fecha_fin);
+
 #endif /* GESTIONBD_H_ */
