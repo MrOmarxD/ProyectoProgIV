@@ -11,7 +11,7 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
     printf("2. Modificar habitación\n");
     printf("3. Cambiar estado de habitación\n");
     printf("4. Listar habitaciones\n");
-    printf("5. Buscar habitacione\n");
+    printf("5. Buscar habitaciones\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
     fflush(stdout);
