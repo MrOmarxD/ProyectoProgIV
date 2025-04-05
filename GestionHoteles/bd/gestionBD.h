@@ -33,8 +33,10 @@ void buscarClientesBD(const char *dniCliente);
 
 // Funciones Habitaciones
 void crearHabitacionBD(Habitacion *habitacion);
-void modificarHabitacionBD();
+void modificarHabitacionBD(Habitacion *habitacion);
+int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion);
 void cambiarEstadoHabitacionBD();
 void listarHabitaciones();
+void buscarHabitacionBD(const char *numHabitacion);
 
 #endif /* GESTIONBD_H_ */

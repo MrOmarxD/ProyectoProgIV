@@ -253,6 +253,7 @@ void crearClienteBD(Cliente *client){
 		}
 
 		sqlite3_finalize(stmt);
+		mostrarMenuPrincipal();
 }
 
 int comprobarCliente(const char *cliente){
@@ -304,6 +305,7 @@ void modificarClienteBD(Cliente *client){
 		}
 
 		sqlite3_finalize(stmt);
+		mostrarMenuPrincipal();
 }
 
 int recuperarClienteBD(const char *dniCliente, Cliente *client) {
@@ -353,7 +355,7 @@ void listarClientes(){
 }
 
 void buscarClientesBD(const char *dniCliente){
-	char sql2[] = "SELECT dni, nombre, apellido, telefono, email FROM clientes WHERE dni = ?";
+	char sql2[] = "SELECT dni, nombre, apellido, telefono, email, fecha_registro FROM clientes WHERE dni = ?";
 
 		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
 
@@ -402,4 +404,109 @@ void crearHabitacionBD(Habitacion *habitacion) {
     sqlite3_finalize(stmt);
 }
 
+void modificarHabitacionBD(Habitacion *habitacion){
+	char sql[] = "UPDATE habitaciones SET tipo = ?, precio = ?, estado = ?, capacidad = ?, descripcion = ? WHERE numero = ?";
+		    sqlite3_stmt *stmt;
 
+		    char numero[10];
+		    char tipo[20];
+		    int precio = habitacion->precio;
+		    char estado[15]; // Disponible, Ocupada, Mantenimiento
+		    int capacidad = habitacion->capacidad;
+		    char descripcion[100];
+
+			strcpy(numero, habitacion->numero);
+			strcpy(tipo, habitacion->tipo);
+			strcpy(estado, habitacion->estado);
+			strcpy(descripcion, habitacion->descripcion);
+
+			sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
+			sqlite3_bind_text(stmt, 1, tipo, strlen(tipo), SQLITE_STATIC);
+			sqlite3_bind_int(stmt, 2, precio);
+			sqlite3_bind_text(stmt, 3, estado, strlen(estado), SQLITE_STATIC);
+			sqlite3_bind_int(stmt, 4, capacidad);
+			sqlite3_bind_text(stmt, 5, descripcion, strlen(descripcion), SQLITE_STATIC);
+			sqlite3_bind_text(stmt, 6, numero, strlen(numero), SQLITE_STATIC);
+
+			result = sqlite3_step(stmt);
+			if (result != SQLITE_DONE) {
+				printf("Error al modificar la habitacion: %s\n", sqlite3_errmsg(db));
+				fflush(stdout);
+			} else {
+				printf("Habitacion '%s' modificada correctamente\n", habitacion->numero);
+				fflush(stdout);
+			}
+
+			sqlite3_finalize(stmt);
+}
+
+int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion) {
+    char sql[] = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero = ?";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, numHabitacion, strlen(numHabitacion), SQLITE_STATIC);
+
+    int result = sqlite3_step(stmt);
+    if (result == SQLITE_ROW) {
+        strcpy(habitacion->numero, (const char *)sqlite3_column_text(stmt, 0));
+        strcpy(habitacion->tipo, (const char *)sqlite3_column_text(stmt, 1));
+        habitacion->precio = sqlite3_column_int(stmt, 2);
+        strcpy(habitacion->estado, (const char *)sqlite3_column_text(stmt, 3));
+        habitacion->capacidad = sqlite3_column_int(stmt, 4);
+        strcpy(habitacion->descripcion, (const char *)sqlite3_column_text(stmt, 5));
+        sqlite3_finalize(stmt);
+        return 1;
+    } else {
+        printf("Cliente no encontrado.\n");
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    }
+}
+
+void listarHabitaciones(){
+	char sql2[] = "select numero from habitaciones";
+
+			sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+			printf("\n");
+			do {
+				result = sqlite3_step(stmt);
+				if (result == SQLITE_ROW) {
+					printf("%s\n", (char*) sqlite3_column_text(stmt, 0));
+				}
+			} while (result == SQLITE_ROW);
+			printf("\n");
+
+			sqlite3_finalize(stmt);
+}
+
+void buscarHabitacionBD(const char *numHabitacion){
+	char sql2[] = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero = ?";
+
+			sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+			sqlite3_bind_text(stmt, 1, numHabitacion, strlen(numHabitacion), SQLITE_STATIC);
+
+			printf("\n");
+			do {
+				result = sqlite3_step(stmt);
+				if (result == SQLITE_ROW) {
+					printf("%s, %s, %d, %s, %d, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
+																sqlite3_column_text(stmt, 1),
+																sqlite3_column_int(stmt, 2),
+																sqlite3_column_text(stmt, 3),
+																sqlite3_column_int(stmt, 4),
+																sqlite3_column_text(stmt, 5));
+				}
+			} while (result == SQLITE_ROW);
+			printf("\n");
+
+			sqlite3_finalize(stmt);
+}

@@ -19,6 +19,8 @@ typedef struct {
 void gestionHabitaciones(int usuario_actual, const char* LOG_FILE);
 
 void crearHabitacion(Habitacion *habitacion);
+void modificarHabitacion(Habitacion *habitacion);
 void establecerEstadoHabitacion(Habitacion *habitacion);
+void buscarHabitacion(Habitacion *habitacion);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

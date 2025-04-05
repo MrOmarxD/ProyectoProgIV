@@ -11,6 +11,7 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
     printf("2. Modificar habitación\n");
     printf("3. Cambiar estado de habitación\n");
     printf("4. Listar habitaciones\n");
+    printf("5. Buscar habitacione\n");
     printf("0. Volver al menú principal\n");
     printf("Seleccione una opción: ");
     fflush(stdout);
@@ -22,7 +23,7 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 2:
-                	printf("Modificar habitación\n");
+                	modificarHabitacion(&h);
                 	fflush(stdout);
                     break;
                 case 3:
@@ -30,9 +31,13 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 4:
-                	printf("Listar habitaciones\n");
+                	listarHabitaciones();
                 	fflush(stdout);
                     break;
+                case 5:
+					buscarHabitacion(&h);
+					fflush(stdout);
+					break;
                 case 0:
                 	mostrarMenuPrincipal();
                 	break;
@@ -156,6 +161,116 @@ void crearHabitacion(Habitacion *habitacion) {
     crearHabitacionBD(habitacion);
 }
 
+void modificarHabitacion(Habitacion *habitacion){
+	char numero[20];
+
+	printf("\n--- MODEFICAR USUARIO ---\n");
+		printf("Ingrese el numero de la habitacion a modificar: ");
+	    fflush(stdout);
+
+	    while (getchar() != '\n');
+
+	    fgets(numero, 20, stdin);
+	    numero[strcspn(numero, "\n")] = '\0';
+
+	    if (!recuperarHabitacionBD(numero, habitacion)) {
+	        return;
+	    }
+
+	    printf("Habitacion encontrada. Dejar en blanco para no modificar.\n");
+
+	    int tipo;
+	    printf("Tipo actual: %s\n", habitacion->tipo);
+	    printf("Elija el nuevo tipo de la habitacion\n");
+	    printf("1. Individual\n");
+		printf("2. Doble\n");
+		printf("3. Suite\n");
+		printf("4. Familiar\n");
+		printf("Seleccione una opcion: ");
+		fflush(stdout);
+	    if (scanf("%d", &tipo) == 1) {
+	        while (getchar() != '\n'); // Limpiar el buffer de entrada
+	        switch(tipo) {
+	            case 1:
+	                strcpy(habitacion->tipo, "Individual");
+	                break;
+	            case 2:
+	                strcpy(habitacion->tipo, "Doble");
+	                break;
+	            case 3:
+	                strcpy(habitacion->tipo, "Suite");
+	                break;
+	            case 4:
+	                strcpy(habitacion->tipo, "Familiar");
+	                break;
+	            default:
+	                printf("No se modificará el tipo.\n");
+	                fflush(stdout);
+	                break;
+	        }
+	    } else {
+	        while (getchar() != '\n'); // Limpiar el buffer de entrada
+	    }
+
+	    printf("Ingrese nuevo precio en euros €: ");
+		fflush(stdout);
+		char precioStr[20];
+		fgets(precioStr, 20, stdin);
+		precioStr[strcspn(precioStr, "\n")] = '\0'; // Eliminar el salto de línea
+		sscanf(precioStr, "%d", &habitacion->precio);
+
+		int estado;
+			    printf("Estado actual: %s\n", habitacion->estado);
+			    printf("Elija el nuevo estado de la habitacion.\n");
+			    printf("1. Disponible\n");
+				printf("2. Ocupada\n");
+				printf("3. Mantenimiento\n");
+				printf("Seleccione una opcion: ");
+				fflush(stdout);
+			    if (scanf("%d", &estado) == 1) {
+			        while (getchar() != '\n'); // Limpiar el buffer de entrada
+			        switch(estado) {
+			            case 1:
+			                strcpy(habitacion->estado, "Disponible");
+			                break;
+			            case 2:
+			                strcpy(habitacion->estado, "Ocupada");
+			                break;
+			            case 3:
+			                strcpy(habitacion->estado, "Mantenimiento");
+			                break;
+			            default:
+			                printf("No se modificará el estado.\n");
+			                fflush(stdout);
+			                break;
+			        }
+			    } else {
+			        while (getchar() != '\n'); // Limpiar el buffer de entrada
+			    }
+
+		printf("Ingrese la nueva capacidad: ");
+		fflush(stdout);
+		char capacidadStr[20];
+		fgets(capacidadStr, 20, stdin);
+		capacidadStr[strcspn(capacidadStr, "\n")] = '\0'; // Eliminar el salto de línea
+		sscanf(capacidadStr, "%d", &habitacion->capacidad);
+
+	    printf("Ingrese nueva descripcion: ");
+	    fflush(stdout);
+	    char nuevaDescripcion[100];
+
+
+	    fgets(nuevaDescripcion, 20, stdin);
+	    nuevaDescripcion[strcspn(nuevaDescripcion, "\n")] = '\0';
+	    if (strlen(nuevaDescripcion) > 0) {
+	    	strcpy(habitacion->descripcion, nuevaDescripcion);
+	    }
+
+
+	    modificarHabitacionBD(habitacion);
+}
+
+
 void establecerEstadoHabitacion(Habitacion *habitacion){
 	int estado;
 	do {
@@ -193,4 +308,19 @@ void establecerEstadoHabitacion(Habitacion *habitacion){
 				break;
 		}
 	} while(estado == 0);
+}
+
+void buscarHabitacion(Habitacion *habitacion){
+	char numero[20];
+
+	printf("\n--- BUSCAR HABITACION ---\n");
+	printf("Ingrese el numero de la habitacion que quiera buscar: ");
+	fflush(stdout);
+
+	while (getchar() != '\n');
+
+	fgets(numero, 20, stdin);
+	numero[strcspn(numero, "\n")] = '\0';
+
+	buscarHabitacionBD(numero);
 }
