@@ -10,8 +10,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int mostrarMenuPrincipal(int usuario_actual, const char* LOG_FILE);
-int mostrarMenuPrincipalCliente(int usuario_actual, const char* LOG_FILE);
+
+
+
+int mostrarMenuPrincipal();
+void eleccionInicial();
+void configuracionSistema();
+int mostrarMenuPrincipalCliente();
 
 
 

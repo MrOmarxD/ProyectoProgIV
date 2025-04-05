@@ -33,7 +33,8 @@ void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 0:
-                	mostrarMenuPrincipal(usuario_actual, LOG_FILE);
+                	mostrarMenuPrincipal();
+                	break;
                 default:
                     printf("Opción no válida. Intente nuevamente.\n");
                     fflush(stdout);

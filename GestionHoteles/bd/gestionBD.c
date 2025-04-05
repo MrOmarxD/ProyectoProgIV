@@ -4,25 +4,25 @@ sqlite3 *db;
 sqlite3_stmt *stmt;
 int result;
 
-int abrirBd(){
+void abrirBd(){
 
 	result = sqlite3_open("hotelesBD.sqlite", &db);
     if (result != SQLITE_OK) {
         printf("Error al abrir la BBDD\n");
         fflush(stdout);
-        return result;
+        return;
     }
     printf("BBDD abierta\n");
     fflush(stdout);
 }
 
-int cerrarBd(){
+void cerrarBd(){
 	result = sqlite3_close(db);
     if (result != SQLITE_OK) {
         printf("Error al cerrar la BBDD\n");
         printf("%s\n", sqlite3_errmsg(db));
         fflush(stdout);
-        return result;
+        return;
     }
 
     printf("BBDD cerrada\n");
@@ -46,7 +46,6 @@ void listaUsuarios(){
 		printf("\n");
 
 		sqlite3_finalize(stmt);
-		main();
 }
 
 void eliminarUsuarioBD() {
@@ -60,6 +59,7 @@ void eliminarUsuarioBD() {
     if (!comprobarUsuario(nombreUsuario)) {
         printf("El usuario '%s' no existe en la base de datos.\n", nombreUsuario);
         fflush(stdout);
+        mostrarMenuPrincipal();
         return;
     }
 
@@ -78,7 +78,6 @@ void eliminarUsuarioBD() {
     }
 
     sqlite3_finalize(stmt);
-    main();
 }
 
 int comprobarUsuario(const char *usuario){
@@ -125,7 +124,6 @@ void crearUsuarioBD(Usuario *user){
 		}
 
 		sqlite3_finalize(stmt);
-		main();
 }
 
 void modificarUsuarioBD(Usuario *user){
@@ -158,7 +156,6 @@ void modificarUsuarioBD(Usuario *user){
 		}
 
 		sqlite3_finalize(stmt);
-	    main();
 }
 
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user) {
@@ -231,6 +228,125 @@ void crearClienteBD(Cliente *client){
 		}
 
 		sqlite3_finalize(stmt);
-		main();
 }
 
+int comprobarCliente(const char *cliente){
+	char sql2[] = "select count(*) from clientes where email = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+		sqlite3_bind_text(stmt, 1, cliente, strlen(cliente), SQLITE_STATIC);
+
+		result = sqlite3_step(stmt);
+		int count = 0;
+		if (result == SQLITE_ROW) {
+			count = sqlite3_column_int(stmt, 0);
+		}
+
+		sqlite3_finalize(stmt);
+		return count > 0;
+}
+
+void modificarClienteBD(Cliente *client){
+	    char sql[] = "UPDATE clientes SET nombre = ?, apellido = ?, telefono = ?, email = ? WHERE dni = ?";
+	    sqlite3_stmt *stmt;
+
+	    char dni[10];
+		char nombre[50];
+		char apellido[50];
+		char telefono[15];
+		char email[50];
+
+		strcpy(dni, client->dni);
+		strcpy(nombre, client->nombre);
+		strcpy(apellido, client->apellido);
+		strcpy(telefono, client->telefono);
+		strcpy(email, client->email);
+
+		sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
+		sqlite3_bind_text(stmt, 1, nombre, strlen(nombre), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 2, apellido, strlen(apellido), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 3, telefono, strlen(telefono), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 4, email, strlen(email), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 5, dni, strlen(dni), SQLITE_STATIC);
+
+		result = sqlite3_step(stmt);
+		if (result != SQLITE_DONE) {
+			printf("Error al modificar el cliente: %s\n", sqlite3_errmsg(db));
+			fflush(stdout);
+		} else {
+			printf("Cliente '%s' modificado correctamente\n", client->dni);
+			fflush(stdout);
+		}
+
+		sqlite3_finalize(stmt);
+}
+
+int recuperarClienteBD(const char *dniCliente, Cliente *client) {
+    char sql[] = "SELECT dni, nombre, apellido, telefono, email FROM clientes WHERE dni = ?";
+    sqlite3_stmt *stmt;
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, dniCliente, strlen(dniCliente), SQLITE_STATIC);
+
+    int result = sqlite3_step(stmt);
+    if (result == SQLITE_ROW) {
+        strcpy(client->dni, (const char *)sqlite3_column_text(stmt, 0));
+        strcpy(client->nombre, (const char *)sqlite3_column_text(stmt, 1));
+        strcpy(client->apellido, (const char *)sqlite3_column_text(stmt, 2));
+        strcpy(client->telefono, (const char *)sqlite3_column_text(stmt, 3));
+        strcpy(client->email, (const char *)sqlite3_column_text(stmt, 4));
+        sqlite3_finalize(stmt);
+        return 1;
+    } else {
+        printf("Cliente no encontrado.\n");
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    }
+}
+
+void listarClientes(){
+	char sql2[] = "select dni, nombre from clientes";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+		printf("\n");
+		do {
+			result = sqlite3_step(stmt);
+			if (result == SQLITE_ROW) {
+				printf("%s, %s\n", (char*) sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1));
+			}
+		} while (result == SQLITE_ROW);
+		printf("\n");
+
+		sqlite3_finalize(stmt);
+}
+
+void buscarClientesBD(const char *dniCliente){
+	char sql2[] = "SELECT dni, nombre, apellido, telefono, email FROM clientes WHERE dni = ?";
+
+		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+
+		sqlite3_bind_text(stmt, 1, dniCliente, strlen(dniCliente), SQLITE_STATIC);
+
+		printf("\n");
+		do {
+			result = sqlite3_step(stmt);
+			if (result == SQLITE_ROW) {
+				printf("%s, %s, %s, %s, %s, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
+															sqlite3_column_text(stmt, 1),
+															sqlite3_column_text(stmt, 2),
+															sqlite3_column_text(stmt, 3),
+															sqlite3_column_text(stmt, 4),
+															sqlite3_column_text(stmt, 5));
+			}
+		} while (result == SQLITE_ROW);
+		printf("\n");
+
+		sqlite3_finalize(stmt);
+}
