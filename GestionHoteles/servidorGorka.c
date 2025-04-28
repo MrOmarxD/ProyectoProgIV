@@ -10,6 +10,28 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+void procesarPeticion(char recvBuff, char sendBuff){
+	 if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+	                listarClientes();
+	                printf("Manda lista de clientes\n");
+	            }
+	            else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
+	                listarHabitacios();
+	                printf("Manda la lista de habitaciones\n");
+	            }
+	            else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
+	                crearReserva(recvBuff);
+	                printf("Procesando reserva\n");
+	            }
+	            else if (strcmp(recvBuff, "EXIT") == 0) {
+	                printf("El cliente ha solicitado desconectar\n");
+	                break;
+	            }
+	            else {
+	                printf("Comando desconocido\n");
+	                strcpy(sendBuff, "ERROR|Unknown command");
+	            }
+}
 int main(int argc, char *argv[]) {
 
 	WSADATA wsaData;
@@ -18,6 +40,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in server;
 	struct sockaddr_in client;
 	char sendBuff[512], recvBuff[512]; // lo que yo envio, lo que yo recibo
+	int bytes_recibidos;
 
 	printf("\nInitialising Winsock...\n"); // inicializa la libreria
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -79,16 +102,50 @@ int main(int argc, char *argv[]) {
 
 	int fin = 0;
 	do {
-		 abrirBd();
+	        // Abrir la base de datos al inicio del bucle
+	        abrirBd();
 
+	        // Limpiar los buffers
+	        memset(recvBuff, 0, 512);
+	        memset(sendBuff, 0, 512);
 
+	        // Recibir datos del cliente
+	        bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
 
-		 cerrarBd();
-	} while (fin == 0);
+	        if (bytes_recibidos > 0) {
+	            // Asegurar que el buffer termina en NULL
+	            recvBuff[bytes_recibidos] = '\0';
 
-	// CLOSING the sockets and cleaning Winsock...
-	closesocket(comm_socket);
-	WSACleanup();
+	            printf("Mensaje recibido: %s\n", recvBuff);
 
-	return 0;
-}
+	            // Procesar la petición
+	            procesarPeticion(recvBuff, sendBuff);
+
+	            // Enviar respuesta al cliente
+	            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+	            // Si el cliente envía "SALIR", terminamos el bucle
+	            if (strcmp(recvBuff, "SALIR") == 0) {
+	                fin = 1;
+	            }
+	        } else if (bytes_recibidos == 0) {
+	            // El cliente ha cerrado la conexión
+	            printf("Cliente desconectado\n");
+	            fin = 1;
+	        } else {
+	            // Error en la recepción
+	            printf("Error en recv: %d\n", WSAGetLastError());
+	            fin = 1;
+	        }
+
+	        // Cerrar la base de datos al final de cada iteración
+	        cerrarBd();
+	    } while (fin == 0);
+
+	    // CLOSING the sockets and cleaning Winsock...
+	    closesocket(comm_socket);
+	    WSACleanup();
+
+	    return 0;
+	}
+
