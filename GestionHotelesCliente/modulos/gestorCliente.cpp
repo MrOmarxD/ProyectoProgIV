@@ -23,7 +23,7 @@ void gestionClientes(int usuario_actual, const char* LOG_FILE) {
                 	fflush(stdout);
                     break;
                 case 3:
-                	buscarCliente(&usuario_actual);
+                	buscarCliente(s);
                 	fflush(stdout);
                     break;
                 case 4:
@@ -164,8 +164,8 @@ void modificarCliente(Cliente *client) {
     modificarClienteBD(client);
 }
 
-void buscarCliente(Cliente *client){
-	char dni[20];
+void buscarCliente(SOCKET s){
+	char dni[10];
 
 	printf("\n--- BUSCAR CLIENTE ---\n");
 	printf("Ingrese el dni de cliente que quiera buscar: ");
@@ -176,7 +176,48 @@ void buscarCliente(Cliente *client){
 	fgets(dni, 20, stdin);
 	dni[strcspn(dni, "\n")] = '\0';
 
-	buscarClientesBD(dni);
+	char recvBuff[512];
+	char sendBuff[512] = dni;
+
+	// Enviar comando al servidor
+	strcpy(sendBuff, "BUSCAR_CLIENTE");
+	send(s, sendBuff, strlen(sendBuff), 0);
+
+	strcpy(sendBuff, dni);
+	send(s, sendBuff, strlen(sendBuff), 0);
+
+	// Recibir respuesta del servidor
+	int bytes = recv(s, recvBuff, sizeof(recvBuff), 0);
+
+	if (bytes > 0) {
+	    recvBuff[bytes] = '\0';
+
+	    // Verificar si el mensaje comienza con "CLIENTE|"
+	    if (strncmp(recvBuff, "CLIENTE|", 8) == 0) {
+	        // Dividir el mensaje en partes
+	        char *token = strtok(recvBuff + 8, "|");
+	        printf("Información del Cliente:\n");
+	        printf("-------------------------\n");
+
+	        if (token != NULL) printf("DNI: %s\n", token);
+	        token = strtok(NULL, "|");
+	        if (token != NULL) printf("Nombre: %s\n", token);
+	        token = strtok(NULL, "|");
+	        if (token != NULL) printf("Apellido: %s\n", token);
+	        token = strtok(NULL, "|");
+	        if (token != NULL) printf("Teléfono: %s\n", token);
+	        token = strtok(NULL, "|");
+	        if (token != NULL) printf("Email: %s\n", token);
+
+	        printf("-------------------------\n");
+	    } else if (strncmp(recvBuff, "ERROR|", 6) == 0) {
+	        // Mostrar mensaje de error
+	        printf("Error: %s\n", recvBuff + 6);
+	    } else {
+	        // Mostrar cualquier otro mensaje recibido
+	        printf("Respuesta desconocida: %s\n", recvBuff);
+	    }
+	}
 }
 
 

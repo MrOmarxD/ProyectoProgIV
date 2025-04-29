@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
     do {
         c = menu();
 
+
         switch(c) {
             case '1':
                 mostrarClientes(s);

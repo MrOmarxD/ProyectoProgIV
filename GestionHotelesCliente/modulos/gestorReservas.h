@@ -2,6 +2,7 @@
 #define GESTORRESERVAS_H_
 
 #include "gestorRegistros.h"
+#include <winsock2.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -19,7 +20,7 @@ typedef struct {
 } Reserva;
 
 void gestionReservas(int usuario_actual, const char* LOG_FILE);
-void crearNuevaReserva(Reserva *reserva);
+void crearReserva(SOCKET s);
 void modificarReserva(Reserva *r);
 void buscarReservas(Reserva *r);
 #endif /* MODULOS_GESTORRESERVAS_H_ */

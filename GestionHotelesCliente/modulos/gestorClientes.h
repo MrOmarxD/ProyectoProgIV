@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <winsock2.h>
 
 typedef struct {
     char dni[10];
@@ -17,6 +18,6 @@ typedef struct {
 void gestionClientes(int usuario_actual, const char* LOG_FILE);
 void crearCliente(Cliente *client);
 void modificarCliente(Cliente *client);
-void buscarCliente(Cliente *client);
+void buscarCliente(SOCKET s);
 
 #endif /* GESTORCLIENTES_H */

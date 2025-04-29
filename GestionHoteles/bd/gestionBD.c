@@ -354,29 +354,41 @@ void listarClientes(){
 		sqlite3_finalize(stmt);
 }
 
-void buscarClientesBD(const char *dniCliente){
-	char sql2[] = "SELECT dni, nombre, apellido, telefono, email, fecha_registro FROM clientes WHERE dni = ?";
 
-		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+void buscarClientesBD(const char *dniCliente, SOCKET comm_socket) {
+    Cliente cliente; // Crear un objeto Cliente para almacenar los datos
+    memset(&cliente, 0, sizeof(Cliente)); // Inicializar el objeto a valores predeterminados
 
-		sqlite3_bind_text(stmt, 1, dniCliente, strlen(dniCliente), SQLITE_STATIC);
+    char sql2[] = "SELECT dni, nombre, apellido, telefono, email, fecha_registro FROM clientes WHERE dni = ?";
 
-		printf("\n");
-		do {
-			result = sqlite3_step(stmt);
-			if (result == SQLITE_ROW) {
-				printf("%s, %s, %s, %s, %s, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
-															sqlite3_column_text(stmt, 1),
-															sqlite3_column_text(stmt, 2),
-															sqlite3_column_text(stmt, 3),
-															sqlite3_column_text(stmt, 4),
-															sqlite3_column_text(stmt, 5));
-			}
-		} while (result == SQLITE_ROW);
-		printf("\n");
+    sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, dniCliente, strlen(dniCliente), SQLITE_STATIC);
 
-		sqlite3_finalize(stmt);
+    result = sqlite3_step(stmt);
+    if (result == SQLITE_ROW) {
+        // Asignar los valores obtenidos de la base de datos al objeto Cliente
+        strcpy(cliente.dni, (const char *)sqlite3_column_text(stmt, 0));
+        strcpy(cliente.nombre, (const char *)sqlite3_column_text(stmt, 1));
+        strcpy(cliente.apellido, (const char *)sqlite3_column_text(stmt, 2));
+        strcpy(cliente.telefono, (const char *)sqlite3_column_text(stmt, 3));
+        strcpy(cliente.email, (const char *)sqlite3_column_text(stmt, 4));
+        // Serializar el objeto Cliente en un buffer
+        char sendBuff[512];
+        snprintf(sendBuff, sizeof(sendBuff), "CLIENTE|%s|%s|%s|%s|%s",
+                 cliente.dni, cliente.nombre, cliente.apellido,
+                 cliente.telefono, cliente.email);
+
+        // Enviar el buffer al cliente
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    } else {
+        // Enviar un mensaje indicando que no se encontró el cliente
+        const char *notFoundMsg = "ERROR|Cliente no encontrado";
+        send(comm_socket, notFoundMsg, strlen(notFoundMsg), 0);
+    }
+
+    sqlite3_finalize(stmt);
 }
+
 
 
 // FUNCIONALIDAD PARA HABITACIONES ----------------------------------------------------------------------------------------------------------------------------------------

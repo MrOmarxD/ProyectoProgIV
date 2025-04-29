@@ -3,130 +3,104 @@
 #include <stdio.h>
 #include "gestorMenus.h"
 
-void gestionReservas(int usuario_actual, const char* LOG_FILE) {
-    int opcion;
-    Reserva r;
+//void gestionReservas(int usuario_actual, const char* LOG_FILE) {
+//    int opcion;
+//    Reserva r;
+//
+//    printf("\n--- GESTIÓN DE RESERVAS ---\n");
+//    printf("1. Crear nueva reserva\n");
+//    printf("2. Modificar reserva\n");
+//    printf("3. Borrar reserva\n");
+//    printf("4. Buscar reservas por cliente\n");
+//    printf("5. Listar reservas activas\n");
+//    printf("0. Volver al menú principal\n");
+//    printf("Seleccione una opción: ");
+//    fflush(stdout);
+//    scanf("%d", &opcion);
+//
+//    switch (opcion) {
+//                case 1:
+//                	crearNuevaReserva(&r);
+//                    break;
+//                case 2:
+//                	modificarReserva(&r);
+//                    break;
+//                case 3:
+//                	eliminarReservaBD();
+//                    break;
+//                case 4:
+//                	buscarReservas(&r);
+//                    break;
+//                case 5:
+//                	listarReserva();
+//                    break;
+//                case 0:
+//                	mostrarMenuPrincipal();
+//                	break;
+//                default:
+//                    printf("Opción no válida. Intente nuevamente.\n");
+//                    fflush(stdout);
+//            }
+//
+//    registrarActividad(usuario_actual, "Acceso a gestión de reservas", LOG_FILE);
+//
+//}
 
-    printf("\n--- GESTIÓN DE RESERVAS ---\n");
-    printf("1. Crear nueva reserva\n");
-    printf("2. Modificar reserva\n");
-    printf("3. Borrar reserva\n");
-    printf("4. Buscar reservas por cliente\n");
-    printf("5. Listar reservas activas\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
+void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    Reserva nueva_reserva;
+    memset(&nueva_reserva, 0, sizeof(Reserva));
 
-    switch (opcion) {
-                case 1:
-                	crearNuevaReserva(&r);
-                    break;
-                case 2:
-                	modificarReserva(&r);
-                    break;
-                case 3:
-                	eliminarReservaBD();
-                    break;
-                case 4:
-                	buscarReservas(&r);
-                    break;
-                case 5:
-                	listarReserva();
-                    break;
-                case 0:
-                	mostrarMenuPrincipal();
-                	break;
-                default:
-                    printf("Opción no válida. Intente nuevamente.\n");
-                    fflush(stdout);
-            }
+    // Solicitar DNI del cliente
+    strcpy(sendBuff, "INPUT|Ingrese DNI del cliente: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.dni_cliente, recvBuff, strlen(recvBuff) + 1);
 
-    registrarActividad(usuario_actual, "Acceso a gestión de reservas", LOG_FILE);
+    // Solicitar ID de habitación
+    strcpy(sendBuff, "INPUT|Ingrese ID de habitación: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    nueva_reserva.id_habitacion = atoi(recvBuff);
 
+    // Solicitar fecha de entrada
+    strcpy(sendBuff, "INPUT|Ingrese fecha de entrada (formato YYYY-MM-DD): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.fecha_entrada, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar fecha de salida
+    strcpy(sendBuff, "INPUT|Ingrese fecha de salida (formato YYYY-MM-DD): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.fecha_salida, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar estado de la reserva
+    strcpy(sendBuff, "INPUT|Ingrese estado de la reserva (confirmada/pendiente/cancelada): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.estado, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar monto
+    strcpy(sendBuff, "INPUT|Ingrese monto de la reserva: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    nueva_reserva.monto = atoi(recvBuff);
+
+    // Solicitar observaciones
+    strcpy(sendBuff, "INPUT|Ingrese observaciones (opcional): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.observaciones, recvBuff, strlen(recvBuff) + 1);
+
+    // Guardar la reserva en la base de datos
+    crearReservaBD(&nueva_reserva);
+
+    // Informar al cliente del resultado
+    sprintf(sendBuff, "INFO|Reserva ID %d creada exitosamente", nueva_reserva.id);
+
+    printf("Reserva creada con ID: %d\n", nueva_reserva.id);
 }
 
-void crearNuevaReserva(Reserva *reserva) {
-        printf("Ingrese id cliente: ");
-        fflush(stdout);
-
-        while (getchar() != '\n');
-
-        fgets(reserva->dni_cliente, 50, stdin);
-        reserva->dni_cliente[strcspn(reserva->dni_cliente, "\n")] = '\0';
-
-        printf("Ingrese id habitacion: ");
-        	fflush(stdout);
-        	char id_habita[20];
-        	fgets(id_habita, 20, stdin);
-        	id_habita[strcspn(id_habita, "\n")] = '\0'; // Eliminar el salto de línea
-        	sscanf(id_habita, "%d", &reserva->id_habitacion);
-
-        printf("Ingrese fecha (AAAA/MM/DD): ");
-        fflush(stdout);
-
-           fgets(reserva->fecha_entrada, 11, stdin);
-           reserva->fecha_entrada[strcspn(reserva->fecha_entrada, "\n")] = '\0';
-
-           printf("Fecha de fin (AAAA/MM/DD): ");
-           fflush(stdout);
-
-           while (getchar() != '\n');
-
-           fgets(reserva->fecha_salida, 11, stdin);
-           reserva->fecha_salida[strcspn(reserva->fecha_salida, "\n")] = '\0';
-
-
-
-        int estado;
-       	do {
-       		printf("Elija el estado de la habitacion\n");
-       		printf("1. Confirmada\n");
-       		printf("2. Pendiente\n");
-       		printf("Seleccione el estado: ");
-       		fflush(stdout);
-       		scanf("%d", &estado);
-
-       		// Limpiar el buffer de entrada
-       		while (getchar() != '\n');
-
-       		switch(estado) {
-       			case 1:
-       				printf("\nHa seleccionado: Confirmada\n\n");
-       				fflush(stdout);
-       				strcpy(reserva->estado, "Confirmada");
-       				break;
-       			case 2:
-       				printf("\nHa seleccionado: Pendiente\n\n");
-       				fflush(stdout);
-       				strcpy(reserva->estado, "Pendiente");
-       				break;
-
-       			default:
-       				printf("\nEstado no valido. Por favor, intente de nuevo.\n");
-       				fflush(stdout);
-       				estado = 0;
-       				break;
-       			}
-             } while(estado == 0);
-
-        	printf("Ingrese monto: ");
-              	fflush(stdout);
-              	char montoString[20];
-              	fgets(montoString, 20, stdin);
-              	montoString[strcspn(montoString, "\n")] = '\0'; // Eliminar el salto de línea
-              	sscanf(montoString, "%d", &reserva->monto);
-
-              	printf("Ingrese la observacion: \n");
-              			fflush(stdout);
-
-              			fgets(reserva->observaciones, 100, stdin);
-              			reserva->observaciones[strcspn(reserva->observaciones, "\n")] = '\0';
-
-
-
-        crearReservaBD(reserva);
-}
 void modificarReserva(Reserva *r){
 
 	char idUReserva[10];
