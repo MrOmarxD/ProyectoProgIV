@@ -10,28 +10,85 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+// Declara esta función antes de procesarPeticion
+void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    Reserva nueva_reserva;
+    memset(&nueva_reserva, 0, sizeof(Reserva));
 
-void procesarPeticion(char recvBuff, char sendBuff){
-	 if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-	                listarClientes();
-	                printf("Manda lista de clientes\n");
-	            }
-	            else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
-	            	listarHabitaciones();
-	                printf("Manda la lista de habitaciones\n");
-	            }
-	            else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
-	               // crearReserva(recvBuff);
-	                printf("Procesando reserva\n");
-	            }
-	            else if (strcmp(recvBuff, "EXIT") == 0) {
-	                printf("El cliente ha solicitado desconectar\n");
+    // Solicitar DNI del cliente
+    strcpy(sendBuff, "INPUT|Ingrese DNI del cliente: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.dni_cliente, recvBuff, strlen(recvBuff) + 1);
 
-	            }
-	            else {
-	                printf("Comando desconocido\n");
-	                strcpy(sendBuff, "ERROR|Unknown command");
-	            }
+    // Solicitar ID de habitación
+    strcpy(sendBuff, "INPUT|Ingrese ID de habitación: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    nueva_reserva.id_habitacion = atoi(recvBuff);
+
+    // Solicitar fecha de entrada
+    strcpy(sendBuff, "INPUT|Ingrese fecha de entrada (formato YYYY-MM-DD): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.fecha_entrada, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar fecha de salida
+    strcpy(sendBuff, "INPUT|Ingrese fecha de salida (formato YYYY-MM-DD): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.fecha_salida, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar estado de la reserva
+    strcpy(sendBuff, "INPUT|Ingrese estado de la reserva (confirmada/pendiente/cancelada): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.estado, recvBuff, strlen(recvBuff) + 1);
+
+    // Solicitar monto
+    strcpy(sendBuff, "INPUT|Ingrese monto de la reserva: ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    nueva_reserva.monto = atoi(recvBuff);
+
+    // Solicitar observaciones
+    strcpy(sendBuff, "INPUT|Ingrese observaciones (opcional): ");
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    recv(comm_socket, recvBuff, 512, 0);
+    strncpy(nueva_reserva.observaciones, recvBuff, strlen(recvBuff) + 1);
+
+    // Guardar la reserva en la base de datos
+    crearReservaBD(&nueva_reserva);
+
+    // Informar al cliente del resultado
+    sprintf(sendBuff, "INFO|Reserva ID %d creada exitosamente", nueva_reserva.id);
+
+    printf("Reserva creada con ID: %d\n", nueva_reserva.id);
+}
+
+// Modifica procesarPeticion para que reciba el socket
+void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+        listarClientes();
+        printf("Manda lista de clientes\n");
+    }
+    else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
+        listarHabitaciones();
+        printf("Manda la lista de habitaciones\n");
+    }
+    else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
+        crearReserva(comm_socket, recvBuff, sendBuff);
+        printf("Reserva procesada\n");
+    }
+    else if (strcmp(recvBuff, "EXIT") == 0) {
+        printf("El cliente ha solicitado desconectar\n");
+        strcpy(sendBuff, "INFO|Desconexión solicitada");
+    }
+    else {
+        printf("Comando desconocido\n");
+        strcpy(sendBuff, "ERROR|Unknown command");
+    }
+
 }
 int main(int argc, char *argv[]) {
 
@@ -120,7 +177,7 @@ int main(int argc, char *argv[]) {
 	            printf("Mensaje recibido: %s\n", recvBuff);
 
 	            // Procesar la petición
-	            procesarPeticion(recvBuff, sendBuff);
+	            procesarPeticion(comm_socket, recvBuff, sendBuff);
 
 	            // Enviar respuesta al cliente
 	            send(comm_socket, sendBuff, strlen(sendBuff), 0);
