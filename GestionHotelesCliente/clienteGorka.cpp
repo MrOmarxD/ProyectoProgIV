@@ -31,48 +31,23 @@ char menu() {
 }
 void mostrarClientes(SOCKET s) {
     char recvBuff[512];
-
-    printf("\n--- LISTADO DE CLIENTES ---\n");
-    printf("DNI          | Nombre                | Apellido              | Telefono         | Email\n");
-    printf("-----------------------------------------------------------------------------------------\n");
-
-
     char sendBuff[512];
     strcpy(sendBuff, "GET_CLIENTS");
     send(s, sendBuff, sizeof(sendBuff), 0);
 
-
-    recv(s, recvBuff, sizeof(recvBuff), 0);
-   /*
-
-
-    while (1) {
-        recv(s, recvBuff, sizeof(recvBuff), 0);
-        if (strcmp(recvBuff, "CLIENT_LIST_END") == 0) {
-            break;
-        }
-
-        char *dni = strtok(recvBuff, "|");
-        char *nombre = strtok(NULL, "|");
-        char *apellido = strtok(NULL, "|");
-        char *telefono = strtok(NULL, "|");
-        char *email = strtok(NULL, "|");
-
-        if (dni && nombre && apellido && telefono && email) {
-            printf("%-13s| %-22s| %-22s| %-17s| %s\n",
-                  dni, nombre, apellido, telefono, email);
-        } else {
-            printf("Error al procesar datos del cliente: formato incorrecto\n");
-        }
-    }
-
-    printf("-----------------------------------------------------------------------------------------\n");*/
-    // Como la funcion listar cliente no devuelve nada esto no funciona, esto es por si devuelve un char, tendremos
-    //que cambiar la funcion para que sea asi y en el server una vez termine de mandar todos los datos
-    // este tiene que mandar CLIENT_LIST_END para saber que ha terminado
 }
-void crearReserva(SOCKET s){}
-void perdirHabitacion(SOCKET s){}
+void crearReserva(SOCKET s){
+		char recvBuff[512];
+	    char sendBuff[512];
+	    strcpy(sendBuff, "GET_ROOMS");
+	    send(s, sendBuff, sizeof(sendBuff), 0);
+}
+void pedirHabitacion(SOCKET s){
+		char recvBuff[512];
+		char sendBuff[512];
+		strcpy(sendBuff, "GET_ROOMS");
+		send(s, sendBuff, sizeof(sendBuff), 0);
+}
 
 int main(int argc, char *argv[]) {
 

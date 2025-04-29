@@ -10,22 +10,23 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+
 void procesarPeticion(char recvBuff, char sendBuff){
 	 if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
 	                listarClientes();
 	                printf("Manda lista de clientes\n");
 	            }
 	            else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
-	                listarHabitacios();
+	            	listarHabitaciones();
 	                printf("Manda la lista de habitaciones\n");
 	            }
 	            else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
-	                crearReserva(recvBuff);
+	               // crearReserva(recvBuff);
 	                printf("Procesando reserva\n");
 	            }
 	            else if (strcmp(recvBuff, "EXIT") == 0) {
 	                printf("El cliente ha solicitado desconectar\n");
-	                break;
+
 	            }
 	            else {
 	                printf("Comando desconocido\n");
