@@ -1,7 +1,6 @@
 #include "gestorFacturas.h"
 #include "gestorRegistros.h"
 #include "gestorMenus.h"
-#include "../bd/gestionBD.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
