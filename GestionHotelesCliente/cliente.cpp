@@ -3,11 +3,11 @@
 #include <iostream>
 #include <string>
 
-#include "modulos/gestorUsuarios.h"
-#include "modulos/gestorHabitaciones.h"
-#include "modulos/gestorReservas.h"
-#include "modulos/gestorFacturas.h"
-#include "modulos/gestorRegistros.h"
+//#include "modulos/gestorUsuarios.h"
+//#include "modulos/gestorHabitaciones.h"
+//#include "modulos/gestorReservas.h"
+//#include "modulos/gestorFacturas.h"
+//#include "modulos/gestorRegistros.h"
 #include "modulos/gestorMenus.h"
 
 #define SERVER_IP "127.0.0.1"
@@ -148,36 +148,73 @@ int main(int argc, char *argv[]) {
            ntohs(server.sin_port));
 
     /*EMPIEZA EL PROGRAMA DEL CLIENTE*/
-    char c;
+    char opcion;
     do {
-        c = menu();
+		opcion = eleccionInicial();
 
+		memset(sendBuff, 0, sizeof(sendBuff));
+		memset(recvBuff, 0, sizeof(recvBuff));
 
-        switch(c) {
-            case '1':
-                mostrarClientes(s);
-                break;
+		sprintf(sendBuff, "%c", opcion);
+		send(s, sendBuff, strlen(sendBuff), 0);
 
-            case '2':
-                pedirHabitacion(s);
-                break;
+		if (opcion == '1') {
+			char usu[20], con[20];
+			int resul;
 
-            case '3':
-                crearReserva(s);
-                break;
+			cout << "Introduce tu nombre de usuario: ";
+			cin >> usu;
+			cout << "Introduce tu contraseña: ";
+			cin >> con;
 
-            case '4':
-                strcpy(sendBuff, "EXIT");
-                send(s, sendBuff, strlen(sendBuff), 0);  // Modificado: usar strlen en lugar de sizeof
-                printf("Desconectando del servidor...\n");
-                break;
+			// Clear input buffer
+			cin.ignore(1000, '\n');
 
-            default:
-                printf("Opcion no valida. Intente nuevamente.\n");
-                break;
-        }
+			// Send nombre de usuario
+			memset(sendBuff, 0, sizeof(sendBuff));
+			strcpy(sendBuff, usu);
+			send(s, sendBuff, strlen(sendBuff), 0);
 
-    } while(c != '4');
+			// Send password
+			memset(sendBuff, 0, sizeof(sendBuff));
+			strcpy(sendBuff, con);
+			send(s, sendBuff, strlen(sendBuff), 0);
+
+			// Receive confirmation
+			memset(recvBuff, 0, sizeof(recvBuff));
+			int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+			if (bytes > 0) {
+				recvBuff[bytes] = '\0';
+				cout << recvBuff << endl;
+
+				// Receive authentication result
+				memset(recvBuff, 0, sizeof(recvBuff));
+				bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+				if (bytes > 0) {
+					recvBuff[bytes] = '\0';
+					sscanf(recvBuff, "%d", &resul);
+
+					if (resul == 0) {
+						cout << "Sesión iniciada correctamente" << endl;
+						mostrarMenuPrincipal();
+					} else if (resul == 1) {
+						cout << "La contraseña no es correcta" << endl;
+					} else {
+						cout << "El nombre de usuario no es correcto" << endl;
+					}
+				}
+			}
+		} else if (opcion == '2') {
+			// Implement registration functionality
+			cout << "Funcionalidad de registro no implementada" << endl;
+		} else if (opcion == '0') {
+			cout << "Saliendo del programa..." << endl;
+		} else {
+			cout << "Opción no válida" << endl;
+		}
+
+	} while (opcion != '0');
+
 
     /*ACABA EL PROGRAMA DEL CLIENTE*/
 

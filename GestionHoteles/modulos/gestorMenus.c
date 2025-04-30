@@ -28,13 +28,13 @@ int mostrarMenuPrincipal() {
                     gestionUsuarios(usuario_actual, LOG_FILE);
                     break;
                 case 2:
-                    gestionClientes(usuario_actual, LOG_FILE);
+                    //gestionClientes(usuario_actual, LOG_FILE);
                     break;
                 case 3:
                     gestionHabitaciones(usuario_actual, LOG_FILE);
                     break;
                 case 4:
-                    gestionReservas(usuario_actual, LOG_FILE);
+                    //gestionReservas(usuario_actual, LOG_FILE);
                     break;
                 case 5:
                     gestionFacturacion(usuario_actual, LOG_FILE);

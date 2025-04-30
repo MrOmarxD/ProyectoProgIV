@@ -16,7 +16,7 @@ typedef struct {
 
 void gestionClientes(int usuario_actual, const char* LOG_FILE);
 void crearCliente(Cliente *client);
-void modificarCliente(Cliente *client);
+void modificarCliente(char *dni_recibido, int socket_cliente);
 void buscarCliente(Cliente *client);
 
 #endif /* GESTORCLIENTES_H */

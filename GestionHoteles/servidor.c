@@ -17,47 +17,100 @@
 #define SERVER_PORT 6000
 
 // Modifica procesarPeticion para que reciba el socket
+
+
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    printf("Procesando petición: '%s'\n", recvBuff);
+
+    // Clear the send buffer before populating it
+    memset(sendBuff, 0, 512);
+
     if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-        listarClientes();
+        // Populate the sendBuff with client list
+        strcpy(sendBuff, "Lista de clientes: Cliente1, Cliente2, Cliente3");
         printf("Manda lista de clientes\n");
-    }
-    else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
-        listarHabitaciones();
-        printf("Manda la lista de habitaciones\n");
-    }
-    else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
+    } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
         printf("Reserva procesada\n");
-    }
-    else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
-    		recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
-            buscarClientesBD(recvBuff, comm_socket);
-
-    }
-    else if (strcmp(recvBuff, "MODIFICAR_CLIENTE") == 0) {
+    } else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
+        // Populate the sendBuff with room list
+        strcpy(sendBuff, "Lista de habitaciones: Hab101, Hab102, Hab103");
+        printf("Manda la lista de habitaciones\n");
+    } else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
+        // Clear and receive new data in recvBuff
+        memset(recvBuff, 0, 512);
+        recv(comm_socket, recvBuff, 512, 0);
+        buscarClientesBD(recvBuff, comm_socket);
+    } else if (strcmp(recvBuff, "MODIFICAR_CLIENTE") == 0) {
         // Solicitar el DNI del cliente a modificar
-        char respuesta[] = "ENVIAR_DNI";
-        send(comm_socket, respuesta, strlen(respuesta), 0);
+        strcpy(sendBuff, "ENVIAR_DNI");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
         // Recibir el DNI
-        memset(recvBuff, 0, sizeof(recvBuff));
-        int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
+        memset(recvBuff, 0, 512);
+        int bytes = recv(comm_socket, recvBuff, 512, 0);
         if (bytes > 0) {
             recvBuff[bytes] = '\0'; // Asegurar terminación
             modificarCliente(recvBuff, comm_socket);
         }
-    }
-    else if (strcmp(recvBuff, "EXIT") == 0) {
-        printf("El cliente ha solicitado desconectar\n");
-        strcpy(sendBuff, "INFO|Desconexión solicitada");
-    }
-    else {
-        printf("Comando desconocido\n");
-        strcpy(sendBuff, "ERROR|Unknown command");
-    }
+    } else if (strcmp(recvBuff, "1") == 0) {
+        printf("Procesando opción 1 (login)...\n");
 
+        // Clear buffers for fresh receipt
+        char usu[20] = {0}, con[20] = {0};
+        int resul;
+
+        // Get username
+        memset(recvBuff, 0, 512);
+        int bytes_username = recv(comm_socket, recvBuff, 512, 0);
+        if (bytes_username <= 0) {
+            strcpy(sendBuff, "Error al recibir el nombre de usuario");
+            return;
+        }
+
+        strncpy(usu, recvBuff, sizeof(usu)-1);
+        usu[sizeof(usu)-1] = '\0';
+
+        // Get password
+        memset(recvBuff, 0, 512);
+        int bytes_password = recv(comm_socket, recvBuff, 512, 0);
+        if (bytes_password <= 0) {
+            strcpy(sendBuff, "Error al recibir la contraseña");
+            return;
+        }
+
+        strncpy(con, recvBuff, sizeof(con)-1);
+        con[sizeof(con)-1] = '\0';
+
+        // Debug output
+        printf("Usuario recibido: %s, Contraseña recibida: %s\n", usu, con);
+
+        // Send confirmation
+        sprintf(sendBuff, "Servidor: Recibido %s %s", usu, con);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+        // This part needs fixing - u is not initialized properly
+        Usuario *u = (Usuario*) malloc(sizeof(Usuario));
+        if (recuperarUsuarioBD(usu, u) != 0) {
+            if (strcmp(con, u->password) == 0) resul = 0;
+            else resul = 1;
+        } else {
+            resul = 2;
+        }
+        free(u);
+
+        // Clear buffer and send result
+        memset(sendBuff, 0, 512);
+        sprintf(sendBuff, "%d", resul);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Verificación de credenciales completada: %d\n", resul);
+    } else {
+        // Unknown command
+        sprintf(sendBuff, "Comando desconocido: %s", recvBuff);
+        printf("Comando desconocido recibido: %s\n", recvBuff);
+    }
 }
+
 int main(int argc, char *argv[]) {
 
 	WSADATA wsaData;
@@ -127,50 +180,47 @@ int main(int argc, char *argv[]) {
 
 
 	int fin = 0;
+	abrirBd();
 	do {
-	        // Abrir la base de datos al inicio del bucle
-	        abrirBd();
+		// Limpiar los buffers
+		memset(recvBuff, 0, 512);
+		memset(sendBuff, 0, 512);
 
-	        // Limpiar los buffers
-	        memset(recvBuff, 0, 512);
-	        memset(sendBuff, 0, 512);
+		// Recibir datos del cliente
+		bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
 
-	        // Recibir datos del cliente
-	        bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
+		if (bytes_recibidos > 0) {
+			// Asegurar que el buffer termina en NULL
+			recvBuff[bytes_recibidos] = '\0';
 
-	        if (bytes_recibidos > 0) {
-	            // Asegurar que el buffer termina en NULL
-	            recvBuff[bytes_recibidos] = '\0';
+			printf("Mensaje recibido: %s\n", recvBuff);
 
-	            printf("Mensaje recibido: %s\n", recvBuff);
+			// Procesar la petición
+			procesarPeticion(comm_socket, recvBuff, sendBuff);
 
-	            // Procesar la petición
-	            procesarPeticion(comm_socket, recvBuff, sendBuff);
+			// Enviar respuesta al cliente
+			send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-	            // Enviar respuesta al cliente
-	            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+			// Si el cliente envía "SALIR", terminamos el bucle
+			if (strcmp(recvBuff, "SALIR") == 0) {
+				fin = 1;
+			}
+		} else if (bytes_recibidos == 0) {
+			// El cliente ha cerrado la conexión
+			printf("Cliente desconectado\n");
+			fin = 1;
+		} else {
+			// Error en la recepción
+			printf("Error en recv: %d\n", WSAGetLastError());
+			fin = 1;
+		}
 
-	            // Si el cliente envía "SALIR", terminamos el bucle
-	            if (strcmp(recvBuff, "SALIR") == 0) {
-	                fin = 1;
-	            }
-	        } else if (bytes_recibidos == 0) {
-	            // El cliente ha cerrado la conexión
-	            printf("Cliente desconectado\n");
-	            fin = 1;
-	        } else {
-	            // Error en la recepción
-	            printf("Error en recv: %d\n", WSAGetLastError());
-	            fin = 1;
-	        }
+	} while (fin == 0);
+		cerrarBd();
 
-	        // Cerrar la base de datos al final de cada iteración
-	        cerrarBd();
-	    } while (fin == 0);
-
-	    // CLOSING the sockets and cleaning Winsock...
-	    closesocket(comm_socket);
-	    WSACleanup();
+		// CLOSING the sockets and cleaning Winsock...
+		closesocket(comm_socket);
+		WSACleanup();
 
 	    return 0;
 	}

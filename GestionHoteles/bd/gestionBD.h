@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <winsock2.h>
 #include "../modulos/gestorUsuarios.h"
 #include "../modulos/gestorClientes.h"
 #include "../modulos/gestorHabitaciones.h"
