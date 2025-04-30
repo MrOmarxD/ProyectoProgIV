@@ -16,9 +16,6 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
-// Modifica procesarPeticion para que reciba el socket
-
-
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     printf("Procesando petición: '%s'\n", recvBuff);
 
