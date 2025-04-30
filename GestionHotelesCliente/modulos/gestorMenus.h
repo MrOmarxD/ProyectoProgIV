@@ -2,8 +2,9 @@
 #define GESTORMENUS_H
 
 #include <iostream>
+#include <winsock2.h>
 //#include "gestorUsuarios.h"
-//#include "gestorClientes.h"
+#include "gestorCliente.h"
 //#include "gestorHabitaciones.h"
 //#include "gestorReservas.h"
 //#include "gestorFacturas.h"
@@ -16,7 +17,7 @@
 int mostrarMenuPrincipal();
 char eleccionInicial();
 void configuracionSistema();
-int mostrarMenuPrincipalCliente();
+int mostrarMenuPrincipalCliente(SOCKET s);
 
 
 

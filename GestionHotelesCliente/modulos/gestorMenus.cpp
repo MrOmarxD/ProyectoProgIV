@@ -20,8 +20,8 @@ int mostrarMenuPrincipal() {
 	cout<<"7. Configuración del Sistema\n";
 	cout<<"0. Salir\n";
 	cout<<"=============================================================\n";
-	cout<<"Seleccione una opción: ";
-    scanf("%d", &opcion);
+	cout<<"Seleccione una opción: " << endl;
+	cin >> opcion;
 
             switch (opcion) {
                 case 1:
@@ -73,42 +73,69 @@ char eleccionInicial(){
 /* Implementación básica de las funciones de gestión */
 void configuracionSistema() {
     int opcion;
-    printf("\n--- CONFIGURACIÓN DEL SISTEMA ---\n");
-    printf("1. Cambiar rutas de archivos\n");
-    printf("2. Configurar parámetros de conexión\n");
-    printf("3. Hacer copia de seguridad\n");
-    printf("4. Restaurar desde copia de seguridad\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    scanf("%d", &opcion);
+    cout<<"\n--- CONFIGURACIÓN DEL SISTEMA ---\n";
+    cout<<"1. Cambiar rutas de archivos\n";
+    cout<<"2. Configurar parámetros de conexión\n";
+    cout<<"3. Hacer copia de seguridad\n";
+    cout<<"4. Restaurar desde copia de seguridad\n";
+    cout<<"0. Volver al menú principal\n";
+    cout<<"Seleccione una opción: " << endl;
+    cin>>opcion;
 
     switch (opcion) {
-                case 1:
-                	printf("Cambiar rutas de archivos\n");
-                    break;
-                case 2:
-                	printf("Configurar parámetros de conexión\n");
-                    break;
-                case 3:
-                	printf("Hacer copia de seguridad\n");
-                    break;
-                case 4:
-                	printf("Restaurar desde copia de seguridad\n");
-                    break;
-                case 0:
-                	mostrarMenuPrincipal();
-                	break;
-                default:
-                    printf("Opción no válida. Intente nuevamente.\n");
-            }
+		case 1:
+			cout<<"Cambiar rutas de archivos\n";
+			break;
+		case 2:
+			cout<<"Configurar parámetros de conexión\n";
+			break;
+		case 3:
+			cout<<"Hacer copia de seguridad\n";
+			break;
+		case 4:
+			cout<<"Restaurar desde copia de seguridad\n";
+			break;
+		case 0:
+			mostrarMenuPrincipal();
+			break;
+		default:
+			cout<<"Opción no válida. Intente nuevamente.\n";
+	}
 
 //    registrarActividad(usuario_actual, "Acceso a configuración del sistema", LOG_FILE);
 
     /* Aquí iría la implementación de cada opción */
-    printf("Funcionalidad en desarrollo...\n");
+    cout<<"Funcionalidad en desarrollo...\n";
 }
 
-int mostrarMenuPrincipalCliente(){
-	printf("En Proceso...");
-	return 0;
+int mostrarMenuPrincipalCliente(SOCKET s){
+	int opcion;
+	cout<<"\n==========================================================\n";
+	cout<<" SISTEMA DE GESTION DE HOTELES - CLIENTE REMOTO\n";
+	cout<<"==========================================================\n";
+	cout<<"1. Ver listado de clientes\n";
+	cout<<"2. Ver listado de habitaciones\n";
+	cout<<"3. Crear nueva reserva\n";
+	cout<<"4. Salir\n\n";
+	cout<<"Seleccione una opcion: " << endl;
+	cin>> opcion;
+
+	switch (opcion) {
+		case 1:
+			mostrarClientes(s);
+			break;
+		case 2:
+			cout<<"Ver listado de habitaciones\n";
+			break;
+		case 3:
+			cout<<"Crear nueva reserva\n";
+			break;
+		case 4:
+			cout<<"Salir\n";
+			break;
+		default:
+			cout<<"Opción no válida. Intente nuevamente.\n";
+	}
+
+	return opcion;
 }
