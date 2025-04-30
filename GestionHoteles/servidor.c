@@ -31,8 +31,22 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         printf("Reserva procesada\n");
     }
     else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
-            buscarClientesBD(recv(comm_socket, recvBuff, 512, 0), comm_socket);
+    		recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
+            buscarClientesBD(recvBuff, comm_socket);
 
+    }
+    else if (strcmp(recvBuff, "MODIFICAR_CLIENTE") == 0) {
+        // Solicitar el DNI del cliente a modificar
+        char respuesta[] = "ENVIAR_DNI";
+        send(comm_socket, respuesta, strlen(respuesta), 0);
+
+        // Recibir el DNI
+        memset(recvBuff, 0, sizeof(recvBuff));
+        int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+            modificarCliente(recvBuff, comm_socket);
+        }
     }
     else if (strcmp(recvBuff, "EXIT") == 0) {
         printf("El cliente ha solicitado desconectar\n");

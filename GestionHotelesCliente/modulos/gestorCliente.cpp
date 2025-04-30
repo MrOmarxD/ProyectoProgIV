@@ -90,25 +90,53 @@ void crearCliente(Cliente *client) {
     crearClienteBD(client);
 }
 
-void modificarCliente(Cliente *client) {
-    char dni[20];
+void modificarCliente(int socket_servidor) {
+    char buffer[1024];
+    int bytes_recibidos;
 
-	printf("\n--- MODEFICAR CLIENTE ---\n");
-	printf("Ingrese el dni de cliente a modificar: ");
+    // 1. Enviar solicitud de modificación
+    char comando[] = "MODIFICAR_CLIENTE";
+    send(socket_servidor, comando, strlen(comando), 0);
+
+    // 2. Recibir solicitud de DNI y solicitarlo al usuario
+    char dni[20];
+    printf("\n--- MODIFICAR CLIENTE ---\n");
+    printf("Ingrese el dni de cliente a modificar: ");
     fflush(stdout);
 
+    // Limpiar buffer de entrada
     while (getchar() != '\n');
 
     fgets(dni, 20, stdin);
     dni[strcspn(dni, "\n")] = '\0';
 
-    if (!recuperarClienteBD(dni, client)) {
+    // 3. Enviar DNI al servidor
+    send(socket_servidor, dni, strlen(dni), 0);
+
+    // 4. Recibir respuesta del servidor
+    memset(buffer, 0, sizeof(buffer));
+    bytes_recibidos = recv(socket_servidor, buffer, sizeof(buffer), 0);
+    if (bytes_recibidos <= 0) {
+        printf("Error de comunicación con el servidor\n");
+        return;
+    }
+    buffer[bytes_recibidos] = '\0';
+
+    // 5. Verificar respuesta
+    if (strcmp(buffer, "CLIENTE_NO_ENCONTRADO") == 0) {
+        printf("Cliente con DNI %s no encontrado\n", dni);
         return;
     }
 
+    // 6. Procesar datos del cliente encontrado
+    Cliente client;
+    sscanf(buffer, "CLIENTE_ENCONTRADO:%[^:]:%[^:]:%[^:]:%[^:]:%[^:]",
+           client.dni, client.nombre, client.apellido, client.telefono, client.email);
+
+    // 7. Mostrar info actual y solicitar modificaciones
     printf("Usuario encontrado. Dejar en blanco para no modificar.\n");
 
-    printf("Nombre actual: %s\n", client->nombre);
+    printf("Nombre actual: %s\n", client.nombre);
     printf("Ingrese nuevo nombre: ");
     fflush(stdout);
     char nuevoNombre[50];
@@ -116,52 +144,58 @@ void modificarCliente(Cliente *client) {
     fgets(nuevoNombre, 50, stdin);
     nuevoNombre[strcspn(nuevoNombre, "\n")] = '\0';
     if (strlen(nuevoNombre) > 0) {
-        strcpy(client->nombre, nuevoNombre);
+        strcpy(client.nombre, nuevoNombre);
     }
 
-    printf("Apellido actual: %s\n", client->apellido);
-	printf("Ingrese nuevo apellido: ");
-	fflush(stdout);
-	char nuevoApellido[50];
+    printf("Apellido actual: %s\n", client.apellido);
+    printf("Ingrese nuevo apellido: ");
+    fflush(stdout);
+    char nuevoApellido[50];
 
-	fgets(nuevoApellido, 50, stdin);
-	nuevoApellido[strcspn(nuevoApellido, "\n")] = '\0';
-	if (strlen(nuevoApellido) > 0) {
-		strcpy(client->apellido, nuevoApellido);
-	}
+    fgets(nuevoApellido, 50, stdin);
+    nuevoApellido[strcspn(nuevoApellido, "\n")] = '\0';
+    if (strlen(nuevoApellido) > 0) {
+        strcpy(client.apellido, nuevoApellido);
+    }
 
-    printf("Telefono actual: %s\n", client->telefono);
-	printf("Ingrese nuevo telefono: ");
-	fflush(stdout);
-	char nuevoTelefono[50];
+    printf("Telefono actual: %s\n", client.telefono);
+    printf("Ingrese nuevo telefono: ");
+    fflush(stdout);
+    char nuevoTelefono[15];
 
-	fgets(nuevoTelefono, 50, stdin);
-	nuevoTelefono[strcspn(nuevoTelefono, "\n")] = '\0';
-	if (strlen(nuevoTelefono) > 0) {
-		strcpy(client->telefono, nuevoTelefono);
-	}
+    fgets(nuevoTelefono, 15, stdin);
+    nuevoTelefono[strcspn(nuevoTelefono, "\n")] = '\0';
+    if (strlen(nuevoTelefono) > 0) {
+        strcpy(client.telefono, nuevoTelefono);
+    }
 
-    printf("Email actual: %s\n", client->email);
-    do {
-		printf("Ingrese nuevo email: ");
-		fflush(stdout);
-		char nuevoEmail[50];
+    printf("Email actual: %s\n", client.email);
+    printf("Ingrese nuevo email: ");
+    fflush(stdout);
+    char nuevoEmail[50];
 
-		fgets(nuevoEmail, 50, stdin);
-		nuevoEmail[strcspn(nuevoEmail, "\n")] = '\0';
-		if (strlen(nuevoEmail) > 0) {
-			strcpy(client->email, nuevoEmail);
-		}
-		if (comprobarCliente(client->email)) {
-			printf("El email ya existe. Por favor, elija otro.\n\n");
-			fflush(stdout);
-		} else {
-			break;
-		}
-	} while (1);
+    fgets(nuevoEmail, 50, stdin);
+    nuevoEmail[strcspn(nuevoEmail, "\n")] = '\0';
+    if (strlen(nuevoEmail) > 0) {
+        strcpy(client.email, nuevoEmail);
+    }
 
+    // 8. Enviar datos modificados al servidor
+    sprintf(buffer, "DATOS_MODIFICADOS:%s:%s:%s:%s:%s",
+            client.dni, client.nombre, client.apellido, client.telefono, client.email);
+    send(socket_servidor, buffer, strlen(buffer), 0);
 
-    modificarClienteBD(client);
+    // 9. Recibir confirmación del servidor
+    memset(buffer, 0, sizeof(buffer));
+    bytes_recibidos = recv(socket_servidor, buffer, sizeof(buffer), 0);
+    if (bytes_recibidos > 0) {
+        buffer[bytes_recibidos] = '\0';
+        if (strcmp(buffer, "MODIFICACION_EXITOSA") == 0) {
+            printf("Cliente modificado correctamente\n");
+        } else {
+            printf("Error al modificar el cliente\n");
+        }
+    }
 }
 
 void buscarCliente(SOCKET s){
