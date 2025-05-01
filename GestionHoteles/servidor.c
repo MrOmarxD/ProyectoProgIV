@@ -17,15 +17,13 @@
 #define SERVER_PORT 6000
 
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    printf("Procesando petición: '%s'\n", recvBuff);
-
     // Clear the send buffer before populating it
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
         // Populate the sendBuff with client list
         strcpy(sendBuff, "Lista de clientes: Cliente1, Cliente2, Cliente3");
-        printf("Manda lista de clientes\n");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
         printf("Reserva procesada\n");

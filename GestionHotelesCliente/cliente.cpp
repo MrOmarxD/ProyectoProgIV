@@ -14,25 +14,6 @@
 #define SERVER_PORT 6000
 using namespace std;
 
-char menu() {
-    printf("\n==========================================================\n");
-    printf(" SISTEMA DE GESTION DE HOTELES - CLIENTE REMOTO\n");
-    printf("==========================================================\n");
-    printf("1. Ver listado de clientes\n");
-    printf("2. Ver listado de habitaciones\n");
-    printf("3. Crear nueva reserva\n");
-    printf("4. Salir\n\n");
-    printf("Seleccione una opcion: ");
-
-    char opcion = getchar();
-    char c;
-    while ((c = getchar()) != '\n' && c != EOF);
-
-    return opcion;
-}
-
-
-
 int main(int argc, char *argv[]) {
     WSADATA wsaData;
     SOCKET s;

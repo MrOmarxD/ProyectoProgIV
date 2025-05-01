@@ -1,5 +1,8 @@
 #include "gestorCliente.h"
 
+
+using namespace std;
+
 void mostrarClientes(SOCKET s) {
     char recvBuff[512];
     char sendBuff[512];
@@ -11,8 +14,8 @@ void mostrarClientes(SOCKET s) {
     // Recibir respuesta del servidor
     int bytes = recv(s, recvBuff, sizeof(recvBuff), 0);
     if (bytes > 0) {
-        recvBuff[bytes] = '\0';
-        printf("%s\n", recvBuff);
+		recvBuff[bytes] = '\0';
+		cout << recvBuff << endl;
     }
 }
 
@@ -33,7 +36,6 @@ void pedirHabitacion(SOCKET s) {
 }
 
 void crearReserva(SOCKET s) {
-	using namespace std;
     char recvBuff[512];
     char sendBuff[512];
     string input;
