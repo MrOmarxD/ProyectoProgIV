@@ -113,8 +113,50 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		} else if (opcion == '2') {
-			// Implement registration functionality
-			cout << "Funcionalidad de registro no implementada" << endl;
+			char nombre[50], rol[20], usuario[20], password[20], turno[20];
+			int salario;
+
+			// Limpiar el buffer de entrada antes de usar getline
+			cin.ignore(1000, '\n');
+
+			cout << "=== REGISTRO DE NUEVO USUARIO ===" << endl;
+			cout << "Introduce el nombre completo: ";
+			cin.getline(nombre, 50);
+
+			cout << "Introduce el rol (admin/empleado): ";
+			cin.getline(rol, 20);
+
+			cout << "Introduce el nombre de usuario: ";
+			cin.getline(usuario, 20);
+
+			cout << "Introduce la contraseña: ";
+			cin.getline(password, 20);
+
+			cout << "Introduce el turno (mañana/tarde/noche): ";
+			cin.getline(turno, 20);
+
+			cout << "Introduce el salario: ";
+			cin >> salario;
+
+			// Limpiar buffer después de usar cin >>
+			cin.ignore(1000, '\n');
+
+			// Enviar señal de registro
+			strcpy(sendBuff, "2");
+			send(s, sendBuff, strlen(sendBuff), 0);
+
+			// Crear cadena con los datos separados por '|'
+			memset(sendBuff, 0, sizeof(sendBuff));
+			sprintf(sendBuff, "%s|%s|%s|%s|%s|%d", nombre, rol, usuario, password, turno, salario);
+			send(s, sendBuff, strlen(sendBuff), 0);
+
+			// Recibir respuesta del servidor
+			memset(recvBuff, 0, sizeof(recvBuff));
+			int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+			if (bytes > 0) {
+				recvBuff[bytes] = '\0';
+				cout << recvBuff << endl;
+			}
 		} else if (opcion == '0') {
 			cout << "Saliendo del programa..." << endl;
 		} else {

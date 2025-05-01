@@ -49,6 +49,57 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
             recvBuff[bytes] = '\0'; // Asegurar terminación
             modificarCliente(recvBuff, comm_socket);
         }
+    } else if (strcmp(recvBuff, "2") == 0) {
+        // Procesar registro de nuevo usuario
+        memset(recvBuff, 0, 512);
+        int bytes = recv(comm_socket, recvBuff, 512, 0);
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+
+            // Extraer datos del usuario
+            Usuario *nuevoUsuario = (Usuario*) malloc(sizeof(Usuario));
+            memset(nuevoUsuario, 0, sizeof(Usuario));
+
+            // Parsear los datos separados por '|'
+            char *token;
+            char *rest = recvBuff;
+
+            // Nombre
+            token = strtok_s(rest, "|", &rest);
+            strcpy(nuevoUsuario->nombre, token);
+
+            // Rol
+            token = strtok_s(rest, "|", &rest);
+            strcpy(nuevoUsuario->rol, token);
+
+            // Usuario
+            token = strtok_s(rest, "|", &rest);
+            strcpy(nuevoUsuario->usuario, token);
+
+            // Password
+            token = strtok_s(rest, "|", &rest);
+            strcpy(nuevoUsuario->password, token);
+
+            // Turno
+            token = strtok_s(rest, "|", &rest);
+            strcpy(nuevoUsuario->turno, token);
+
+            // Salario
+            token = strtok_s(rest, "|", &rest);
+            nuevoUsuario->salario = atoi(token);
+
+            // Verificar si el usuario ya existe
+            if (comprobarUsuario(nuevoUsuario->usuario)) {
+                strcpy(sendBuff, "ERROR: El nombre de usuario ya existe");
+            } else {
+                // Crear usuario en la BD
+                crearUsuarioBD(nuevoUsuario);
+                strcpy(sendBuff, "Usuario registrado correctamente");
+            }
+
+            free(nuevoUsuario);
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        }
     } else if (strcmp(recvBuff, "1") == 0) {
         char usu[20] = {0}, con[20] = {0};
         int resul;
