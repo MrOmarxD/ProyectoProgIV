@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "gestorMenus.h"
+
 #ifndef MODULOS_GESTORCLIENTE_H_
 #define MODULOS_GESTORCLIENTE_H_
 

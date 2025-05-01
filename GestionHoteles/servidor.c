@@ -21,9 +21,17 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-        // Populate the sendBuff with client list
+        // Imprimir mensaje de depuración
+        printf("Comando GET_CLIENTS recibido correctamente\n");
+
+        // Preparar respuesta - mantenemos el formato original que funcionaba
         strcpy(sendBuff, "Lista de clientes: Cliente1, Cliente2, Cliente3");
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+        // Enviar respuesta con longitud correcta
+        int bytesSent = send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+        // Verificar si se envió correctamente
+        printf("Bytes enviados: %d, Mensaje: %s\n", bytesSent, sendBuff);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
         printf("Reserva procesada\n");
@@ -31,6 +39,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         // Populate the sendBuff with room list
         strcpy(sendBuff, "Lista de habitaciones: Hab101, Hab102, Hab103");
         printf("Manda la lista de habitaciones\n");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
         // Clear and receive new data in recvBuff
         memset(recvBuff, 0, 512);
@@ -175,42 +184,42 @@ int main(int argc, char *argv[]) {
 
 
 	int fin = 0;
-	abrirBd();
-	do {
-		// Limpiar los buffers
-		memset(recvBuff, 0, 512);
-		memset(sendBuff, 0, 512);
+		abrirBd();
+		do {
+			// Limpiar los buffers
+			memset(recvBuff, 0, 512);
+			memset(sendBuff, 0, 512);
 
-		// Recibir datos del cliente
-		bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
+			// Recibir datos del cliente
+			bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
 
-		if (bytes_recibidos > 0) {
-			// Asegurar que el buffer termina en NULL
-			recvBuff[bytes_recibidos] = '\0';
+			if (bytes_recibidos > 0) {
+				// Asegurar que el buffer termina en NULL
+				recvBuff[bytes_recibidos] = '\0';
 
-			printf("Mensaje recibido: %s\n", recvBuff);
+				printf("Mensaje recibido: %s\n", recvBuff);
 
-			// Procesar la petición
-			procesarPeticion(comm_socket, recvBuff, sendBuff);
+				// Procesar la petición
+				procesarPeticion(comm_socket, recvBuff, sendBuff);
 
-			// Enviar respuesta al cliente
-			send(comm_socket, sendBuff, strlen(sendBuff), 0);
+				// Nota: El envío se maneja dentro de procesarPeticion para comandos específicos
+				// No se necesita un send adicional aquí para comandos que ya manejan su propio envío
 
-			// Si el cliente envía "SALIR", terminamos el bucle
-			if (strcmp(recvBuff, "SALIR") == 0) {
+				// Si el cliente envía "SALIR", terminamos el bucle
+				if (strcmp(recvBuff, "SALIR") == 0) {
+					fin = 1;
+				}
+			} else if (bytes_recibidos == 0) {
+				// El cliente ha cerrado la conexión
+				printf("Cliente desconectado\n");
+				fin = 1;
+			} else {
+				// Error en la recepción
+				printf("Error en recv: %d\n", WSAGetLastError());
 				fin = 1;
 			}
-		} else if (bytes_recibidos == 0) {
-			// El cliente ha cerrado la conexión
-			printf("Cliente desconectado\n");
-			fin = 1;
-		} else {
-			// Error en la recepción
-			printf("Error en recv: %d\n", WSAGetLastError());
-			fin = 1;
-		}
 
-	} while (fin == 0);
+		} while (fin == 0);
 		cerrarBd();
 
 		// CLOSING the sockets and cleaning Winsock...
@@ -219,4 +228,3 @@ int main(int argc, char *argv[]) {
 
 	    return 0;
 	}
-

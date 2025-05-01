@@ -7,15 +7,26 @@ void mostrarClientes(SOCKET s) {
     char recvBuff[512];
     char sendBuff[512];
 
+    // Limpiar buffers
+    memset(recvBuff, 0, sizeof(recvBuff));
+    memset(sendBuff, 0, sizeof(sendBuff));
+
     // Enviar comando al servidor
     strcpy(sendBuff, "GET_CLIENTS");
     send(s, sendBuff, strlen(sendBuff), 0);
+    cout << "Enviando comando GET_CLIENTS al servidor..." << endl;
 
-    // Recibir respuesta del servidor
-    int bytes = recv(s, recvBuff, sizeof(recvBuff), 0);
+    // Esperar respuesta del servidor
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
     if (bytes > 0) {
-		recvBuff[bytes] = '\0';
-		cout << recvBuff << endl;
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        cout << recvBuff << endl;
+        mostrarMenuPrincipalCliente(s);
+    } else if (bytes == 0) {
+        cout << "El servidor ha cerrado la conexión" << endl;
+    } else {
+        cout << "Error al recibir datos: " << WSAGetLastError() << endl;
     }
 }
 
