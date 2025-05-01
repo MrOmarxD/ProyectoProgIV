@@ -23,8 +23,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
         // Populate the sendBuff with client list
         strcpy(sendBuff, "Lista de clientes: Cliente1, Cliente2, Cliente3");
-        send(comm_socket, sendBuff, strlen(sendBuff) + 1, 0);  // +1 para incluir el carácter nulo
-
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
         printf("Reserva procesada\n");

@@ -4,23 +4,18 @@
 using namespace std;
 
 void mostrarClientes(SOCKET s) {
-    char recvBuff[512];  // Array de caracteres, no array de punteros
-    char sendBuff[512];  // Array de caracteres, no array de punteros
+    char recvBuff[512];
+    char sendBuff[512];
 
     // Enviar comando al servidor
     strcpy(sendBuff, "GET_CLIENTS");
-    send(s, sendBuff, strlen(sendBuff) + 1, 0);  // +1 para incluir el carácter nulo
-
-    // Limpiar el buffer de recepción
-    memset(recvBuff, 0, sizeof(recvBuff));
+    send(s, sendBuff, strlen(sendBuff), 0);
 
     // Recibir respuesta del servidor
-    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+    int bytes = recv(s, recvBuff, sizeof(recvBuff), 0);
     if (bytes > 0) {
-        recvBuff[bytes] = '\0';  // Asegurar terminación del string
-        cout << "Respuesta recibida: " << recvBuff << endl;
-    } else {
-        cout << "Error al recibir datos o conexión cerrada" << endl;
+		recvBuff[bytes] = '\0';
+		cout << recvBuff << endl;
     }
 }
 
