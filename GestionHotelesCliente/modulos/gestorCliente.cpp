@@ -14,7 +14,6 @@ void mostrarClientes(SOCKET s) {
     // Enviar comando al servidor
     strcpy(sendBuff, "GET_CLIENTS");
     send(s, sendBuff, strlen(sendBuff), 0);
-    cout << "Enviando comando GET_CLIENTS al servidor..." << endl;
 
     // Esperar respuesta del servidor
     int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
@@ -30,19 +29,29 @@ void mostrarClientes(SOCKET s) {
     }
 }
 
-void pedirHabitacion(SOCKET s) {
+void mostrarHabitaciones(SOCKET s) {
     char recvBuff[512];
     char sendBuff[512];
+
+    // Limpiar buffers
+    memset(recvBuff, 0, sizeof(recvBuff));
+    memset(sendBuff, 0, sizeof(sendBuff));
 
     // Enviar comando al servidor
     strcpy(sendBuff, "GET_ROOMS");
     send(s, sendBuff, strlen(sendBuff), 0);
 
-    // Recibir respuesta del servidor
-    int bytes = recv(s, recvBuff, sizeof(recvBuff), 0);
+    // Esperar respuesta del servidor
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
     if (bytes > 0) {
-        recvBuff[bytes] = '\0';
-        printf("%s\n", recvBuff);
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        cout << recvBuff << endl;
+        mostrarMenuPrincipalCliente(s);
+    } else if (bytes == 0) {
+        cout << "El servidor ha cerrado la conexión" << endl;
+    } else {
+        cout << "Error al recibir datos: " << WSAGetLastError() << endl;
     }
 }
 

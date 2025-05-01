@@ -17,29 +17,21 @@
 #define SERVER_PORT 6000
 
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    // Clear the send buffer before populating it
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-        // Imprimir mensaje de depuración
-        printf("Comando GET_CLIENTS recibido correctamente\n");
-
-        // Preparar respuesta - mantenemos el formato original que funcionaba
-        strcpy(sendBuff, "Lista de clientes: Cliente1, Cliente2, Cliente3");
-
-        // Enviar respuesta con longitud correcta
-        int bytesSent = send(comm_socket, sendBuff, strlen(sendBuff), 0);
-
-        // Verificar si se envió correctamente
-        printf("Bytes enviados: %d, Mensaje: %s\n", bytesSent, sendBuff);
+        char* listaDeUsuarios = listaUsuarios();
+        strncpy(sendBuff, listaDeUsuarios, 511);
+        sendBuff[511] = '\0'; // Aseguramos que termine con nulo
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
         printf("Reserva procesada\n");
     } else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
-        // Populate the sendBuff with room list
-        strcpy(sendBuff, "Lista de habitaciones: Hab101, Hab102, Hab103");
-        printf("Manda la lista de habitaciones\n");
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    	char* listaDeHabitaciones = listarHabitaciones();
+		strncpy(sendBuff, listaDeHabitaciones, 511);
+		sendBuff[511] = '\0'; // Aseguramos que termine con nulo
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
         // Clear and receive new data in recvBuff
         memset(recvBuff, 0, 512);
@@ -58,9 +50,6 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
             modificarCliente(recvBuff, comm_socket);
         }
     } else if (strcmp(recvBuff, "1") == 0) {
-        printf("Procesando opción 1 (login)...\n");
-
-        // Clear buffers for fresh receipt
         char usu[20] = {0}, con[20] = {0};
         int resul;
 
@@ -85,9 +74,6 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 
         strncpy(con, recvBuff, sizeof(con)-1);
         con[sizeof(con)-1] = '\0';
-
-        // Debug output
-        printf("Usuario recibido: %s, Contraseña recibida: %s\n", usu, con);
 
         // Send confirmation
         sprintf(sendBuff, "Servidor: Recibido %s %s", usu, con);

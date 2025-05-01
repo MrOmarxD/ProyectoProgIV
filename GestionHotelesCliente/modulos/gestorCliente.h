@@ -20,7 +20,7 @@ typedef struct {
 }Cliente;
 
 void mostrarClientes(SOCKET s);
-void pedirHabitacion(SOCKET s);
+void mostrarHabitaciones(SOCKET s);
 void crearReserva(SOCKET s);
 
 #endif /* MODULOS_GESTORCLIENTE_H_ */

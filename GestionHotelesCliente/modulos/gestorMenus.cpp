@@ -125,7 +125,7 @@ int mostrarMenuPrincipalCliente(SOCKET s){
 			mostrarClientes(s);
 			break;
 		case 2:
-			cout<<"Ver listado de habitaciones\n";
+			mostrarHabitaciones(s);
 			break;
 		case 3:
 			cout<<"Crear nueva reserva\n";

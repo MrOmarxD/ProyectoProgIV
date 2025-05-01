@@ -20,7 +20,7 @@ void cerrarBd();
 int comprobarUsuario(const char *usuario);
 void crearUsuarioBD(Usuario *user);
 void modificarUsuarioBD(Usuario *user);
-void listaUsuarios();
+char* listaUsuarios();
 void eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
@@ -39,7 +39,7 @@ void crearHabitacionBD(Habitacion *habitacion);
 void modificarHabitacionBD(Habitacion *habitacion);
 int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion);
 void cambiarEstadoHabitacionBD();
-void listarHabitaciones();
+char* listarHabitaciones();
 void buscarHabitacionBD(const char *numHabitacion);
 
 // Funciones Facturas

@@ -31,21 +31,26 @@ void cerrarBd(){
 
 // FUNCIONALIDAD PARA USUARIO ---------------------------------------------------------------------------------------------------------------------------------------
 
-void listaUsuarios(){
-	char sql2[] = "select nombre from usuarios";
+char* listaUsuarios() {
+    static char resultBuffer[4096]; // Buffer estático para almacenar resultados
+    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
 
-		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+    char sql2[] = "select nombre from usuarios";
+    sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
 
-		printf("\n");
-		do {
-			result = sqlite3_step(stmt);
-			if (result == SQLITE_ROW) {
-				printf("%s\n", (char*) sqlite3_column_text(stmt, 0));
-			}
-		} while (result == SQLITE_ROW);
-		printf("\n");
+    strcat(resultBuffer, "Lista de usuarios:\n");
 
-		sqlite3_finalize(stmt);
+    do {
+        result = sqlite3_step(stmt);
+        if (result == SQLITE_ROW) {
+            char temp[256];
+            sprintf(temp, "%s\n", (char*)sqlite3_column_text(stmt, 0));
+            strcat(resultBuffer, temp);
+        }
+    } while (result == SQLITE_ROW);
+
+    sqlite3_finalize(stmt);
+    return resultBuffer;
 }
 
 void eliminarUsuarioBD() {
@@ -482,21 +487,26 @@ int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion) {
     }
 }
 
-void listarHabitaciones(){
+char* listarHabitaciones(){
+	static char resultBuffer[4096]; // Buffer estático para almacenar resultados
+	resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+
 	char sql2[] = "select numero from habitaciones";
+	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
 
-			sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+	strcat(resultBuffer, "Lista de Habitaciones:\n");
 
-			printf("\n");
-			do {
-				result = sqlite3_step(stmt);
-				if (result == SQLITE_ROW) {
-					printf("%s\n", (char*) sqlite3_column_text(stmt, 0));
-				}
-			} while (result == SQLITE_ROW);
-			printf("\n");
+	do {
+		result = sqlite3_step(stmt);
+		if (result == SQLITE_ROW) {
+			char temp[256];
+			sprintf(temp, "Habitacion - %s\n", (char*)sqlite3_column_text(stmt, 0));
+			strcat(resultBuffer, temp);
+		}
+	} while (result == SQLITE_ROW);
 
-			sqlite3_finalize(stmt);
+	sqlite3_finalize(stmt);
+	return resultBuffer;
 }
 
 void buscarHabitacionBD(const char *numHabitacion){
