@@ -10,15 +10,21 @@
 //#include "gestorFacturas.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "config.h"
 
-
-
+// Variable global para la configuración
+extern ConfigData g_config;  // Declarar como extern para ser visible en todo el programa
+extern char CONFIG_FILE[];   // Ruta al archivo de configuración
 
 int mostrarMenuPrincipal();
 char eleccionInicial();
 void configuracionSistema();
 int mostrarMenuPrincipalCliente(SOCKET s);
 
-
+// Añadir funciones para la configuración del sistema
+void cambiarRutasArchivos();
+void configurarConexion();
+void hacerCopiaSeguridad();
+void restaurarCopiaSeguridad();
 
 #endif /* GESTORMENUS_H */

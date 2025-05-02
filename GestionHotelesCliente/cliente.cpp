@@ -2,6 +2,8 @@
 #include <winsock2.h>
 #include <iostream>
 #include <string>
+#include <unistd.h>
+#include <stdlib.h>
 
 //#include "modulos/gestorUsuarios.h"
 //#include "modulos/gestorHabitaciones.h"
@@ -10,8 +12,6 @@
 //#include "modulos/gestorRegistros.h"
 #include "modulos/gestorMenus.h"
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 6000
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -19,6 +19,12 @@ int main(int argc, char *argv[]) {
     SOCKET s;
     struct sockaddr_in server;
     char sendBuff[512], recvBuff[512];
+
+    // Cargar la configuración desde el archivo
+    if (!loadConfig(CONFIG_FILE, &g_config)) {
+        cout << "No se pudo cargar la configuración. Se utilizarán valores por defecto." << endl;
+        setDefaultConfig(&g_config);
+    }
 
     printf("\nInitialising Winsock...\n");
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -37,9 +43,12 @@ int main(int argc, char *argv[]) {
 
     printf("Socket created.\n");
 
-    server.sin_addr.s_addr = inet_addr(SERVER_IP);
+    // Usar IP y puerto desde la configuración
+    server.sin_addr.s_addr = inet_addr(g_config.server_ip);
     server.sin_family = AF_INET;
-    server.sin_port = htons(SERVER_PORT);
+    server.sin_port = htons(g_config.server_port);
+
+    printf("Conectando a %s:%d...\n", g_config.server_ip, g_config.server_port);
 
     //CONNECT to remote server
     if (connect(s, (struct sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
@@ -50,7 +59,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Connection stablished with: %s (%d)\n", inet_ntoa(server.sin_addr),
-           ntohs(server.sin_port));
+    ntohs(server.sin_port));
+
 
     /*EMPIEZA EL PROGRAMA DEL CLIENTE*/
     char opcion;
@@ -66,6 +76,7 @@ int main(int argc, char *argv[]) {
 		if (opcion == '1') {
 			char usu[20], con[20];
 			int resul;
+            Usuario *usuarioActual = (Usuario*) malloc(sizeof(Usuario));
 
 			cout << "Introduce tu nombre de usuario: ";
 			cin >> usu;
@@ -101,10 +112,44 @@ int main(int argc, char *argv[]) {
 
 					if (resul == 0) {
 						cout << "Sesión iniciada correctamente" << endl;
-						if (strstr(usu, "admin"))
-							mostrarMenuPrincipal();
-						else
-							mostrarMenuPrincipalCliente(s);
+
+                        // Recibir datos del usuario desde el servidor
+                        memset(recvBuff, 0, sizeof(recvBuff));
+                        bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+                        if (bytes > 0) {
+                            recvBuff[bytes] = '\0';
+
+                            // Parsear los datos del usuario
+                            char *token;
+                            char *rest = recvBuff;
+
+                            token = strtok(rest, "|");
+                            if (token != NULL) strcpy(usuarioActual->nombre, token);
+
+                            token = strtok(NULL, "|");
+                            if (token != NULL) strcpy(usuarioActual->rol, token);
+
+                            token = strtok(NULL, "|");
+                            if (token != NULL) strcpy(usuarioActual->usuario, token);
+
+                            token = strtok(NULL, "|");
+                            if (token != NULL) strcpy(usuarioActual->password, token);
+
+                            token = strtok(NULL, "|");
+                            if (token != NULL) strcpy(usuarioActual->turno, token);
+
+                            token = strtok(NULL, "|");
+                            if (token != NULL) usuarioActual->salario = atoi(token);
+
+                            cout << "Bienvenido, " << usuarioActual->nombre << " (" << usuarioActual->rol << ")" << endl;
+
+                            // Comprobar el rol en lugar del nombre de usuario
+                            if (strcmp(usuarioActual->rol, "Administrador") == 0) {
+                                mostrarMenuPrincipal();
+                            } else {
+                                mostrarMenuPrincipalCliente(s);
+                            }
+                        }
 					} else if (resul == 1) {
 						cout << "La contraseña no es correcta" << endl;
 					} else {
@@ -112,6 +157,9 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+
+            // Liberar memoria
+            free(usuarioActual);
 		} else if (opcion == '2') {
 			char nombre[50], rol[20], usuario[20], password[20], turno[20];
 			int salario;

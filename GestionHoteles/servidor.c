@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <winsock2.h>
 
 #include "bd/gestionBD.h"
@@ -209,17 +208,37 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         memset(u, 0, sizeof(Usuario)); // Initialize with zeros
 
         if (recuperarUsuarioBD(usu, u) != 0) {
-            if (strcmp(con, u->password) == 0) resul = 0;
-            else resul = 1;
+            if (strcmp(con, u->password) == 0) {
+                resul = 0;
+
+                // Preparar para enviar los datos del usuario al cliente después del resultado
+                memset(sendBuff, 0, 512);
+                sprintf(sendBuff, "%d", resul);
+                send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+                // Enviar los datos del usuario como una cadena delimitada por '|'
+                memset(sendBuff, 0, 512);
+                sprintf(sendBuff, "%s|%s|%s|%s|%s|%d",
+                    u->nombre, u->rol, u->usuario, u->password, u->turno, u->salario);
+                send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+                printf("Datos de usuario enviados tras autenticación exitosa\n");
+            } else {
+                resul = 1;
+                // Solo enviar el resultado (error de contraseña)
+                memset(sendBuff, 0, 512);
+                sprintf(sendBuff, "%d", resul);
+                send(comm_socket, sendBuff, strlen(sendBuff), 0);
+            }
         } else {
             resul = 2;
+            // Solo enviar el resultado (usuario no encontrado)
+            memset(sendBuff, 0, 512);
+            sprintf(sendBuff, "%d", resul);
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
         }
-        free(u);
 
-        // Clear buffer and send result
-        memset(sendBuff, 0, 512);
-        sprintf(sendBuff, "%d", resul);
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        free(u);
         printf("Verificación de credenciales completada: %d\n", resul);
     } else if (strcmp(recvBuff, "SALIR") == 0) {
         // Cliente solicita terminar la conexión
