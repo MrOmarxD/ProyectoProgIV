@@ -221,8 +221,6 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
                 sprintf(sendBuff, "%s|%s|%s|%s|%s|%d",
                     u->nombre, u->rol, u->usuario, u->password, u->turno, u->salario);
                 send(comm_socket, sendBuff, strlen(sendBuff), 0);
-
-                printf("Datos de usuario enviados tras autenticación exitosa\n");
             } else {
                 resul = 1;
                 // Solo enviar el resultado (error de contraseña)

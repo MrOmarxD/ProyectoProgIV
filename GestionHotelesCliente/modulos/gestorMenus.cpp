@@ -248,7 +248,7 @@ int mostrarMenuPrincipalCliente(SOCKET s){
 	cout<<"1. Ver listado de clientes\n";
 	cout<<"2. Ver listado de habitaciones\n";
 	cout<<"3. Crear nueva reserva\n";
-	cout<<"4. Salir\n\n";
+	cout<<"0. Salir\n\n";
 	cout<<"Seleccione una opcion: " << endl;
 	cin>> opcion;
 
@@ -262,7 +262,7 @@ int mostrarMenuPrincipalCliente(SOCKET s){
 		case 3:
 			crearReserva(s);
 			break;
-		case 4:
+		case 0:
 			cout<<"Salir\n";
 			break;
 		default:
