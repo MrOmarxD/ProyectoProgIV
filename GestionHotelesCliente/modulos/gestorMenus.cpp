@@ -128,7 +128,7 @@ int mostrarMenuPrincipalCliente(SOCKET s){
 			mostrarHabitaciones(s);
 			break;
 		case 3:
-			cout<<"Crear nueva reserva\n";
+			crearReserva(s);
 			break;
 		case 4:
 			cout<<"Salir\n";

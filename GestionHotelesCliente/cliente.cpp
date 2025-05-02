@@ -123,8 +123,43 @@ int main(int argc, char *argv[]) {
 			cout << "Introduce el nombre completo: ";
 			cin.getline(nombre, 50);
 
-			cout << "Introduce el rol (admin/empleado): ";
-			cin.getline(rol, 20);
+		    int opcion;
+		    do {
+		        cout<<"Elija el rol del nuevo Usuario\n";
+		        cout<<"1. Administrador\n";
+		        cout<<"2. Recepcionista\n";
+		        cout<<"3. Limpieza\n";
+		        cout<<"4. Mantenimiento\n";
+		        cout<<"Seleccione una opcion: ";
+
+				cin>>opcion;
+
+		        switch(opcion) {
+		            case 1:
+		                cout<<"\nHa seleccionado: Administrador\n\n";
+		                strcpy(rol, "Administrador");
+		                break;
+		            case 2:
+		                cout<<"\nHa seleccionado: Recepcionista\n\n";
+		                strcpy(rol, "Recepcionista");
+		                break;
+		            case 3:
+		                cout<<"\nHa seleccionado: Limpieza\n\n";
+		                strcpy(rol, "Limpieza");
+		                break;
+		            case 4:
+		                cout<<"\nHa seleccionado: Mantenimiento\n\n";
+		                strcpy(rol, "Mantenimiento");
+		                break;
+		            default:
+		                cout<<"\nOpcion no valida. Por favor, intente de nuevo.\n";
+		                opcion = 0;
+		                break;
+		        }
+		    } while(opcion == 0);
+
+		    // Limpiar el buffer de entrada antes de usar getline
+			cin.ignore(1000, '\n');
 
 			cout << "Introduce el nombre de usuario: ";
 			cin.getline(usuario, 20);
@@ -132,8 +167,35 @@ int main(int argc, char *argv[]) {
 			cout << "Introduce la contraseña: ";
 			cin.getline(password, 20);
 
-			cout << "Introduce el turno (mañana/tarde/noche): ";
-			cin.getline(turno, 20);
+		    opcion = 0;
+		    do {
+		        cout<<"Elija el turno del nuevo Usuario\n";
+		        cout<<"1. Mañana\n";
+		        cout<<"2. Tarde\n";
+		        cout<<"3. Noche\n";
+		        cout<<"Seleccione una opcion: ";
+
+				cin>>opcion;
+
+		        switch(opcion) {
+		            case 1:
+		                cout<<"\nHa seleccionado: Mañana\n\n";
+		                strcpy(turno, "Mañana");
+		                break;
+		            case 2:
+		                cout<<"\nHa seleccionado: Tarde\n\n";
+		                strcpy(turno, "Tarde");
+		                break;
+		            case 3:
+		                cout<<"\nHa seleccionado: Noche\n\n";
+		                strcpy(turno, "Noche");
+		                break;
+		            default:
+		                cout<<"\nOpcion no valida. Por favor, intente de nuevo.\n";
+		                opcion = 0;
+		                break;
+		        }
+		    } while(opcion == 0);
 
 			cout << "Introduce el salario: ";
 			cin >> salario;
@@ -141,11 +203,7 @@ int main(int argc, char *argv[]) {
 			// Limpiar buffer después de usar cin >>
 			cin.ignore(1000, '\n');
 
-			// Enviar señal de registro
-			strcpy(sendBuff, "2");
-			send(s, sendBuff, strlen(sendBuff), 0);
-
-			// Crear cadena con los datos separados por '|'
+			// Enviar los datos del registro al servidor
 			memset(sendBuff, 0, sizeof(sendBuff));
 			sprintf(sendBuff, "%s|%s|%s|%s|%s|%d", nombre, rol, usuario, password, turno, salario);
 			send(s, sendBuff, strlen(sendBuff), 0);
@@ -156,15 +214,22 @@ int main(int argc, char *argv[]) {
 			if (bytes > 0) {
 				recvBuff[bytes] = '\0';
 				cout << recvBuff << endl;
+
+				// Añadir una pausa para que el usuario pueda leer el mensaje
+				cout << "Presiona Enter para continuar...";
+				cin.get();
 			}
 		} else if (opcion == '0') {
+			// Enviar señal de salida al servidor
+			memset(sendBuff, 0, sizeof(sendBuff));
+			strcpy(sendBuff, "SALIR");
+			send(s, sendBuff, strlen(sendBuff), 0);
 			cout << "Saliendo del programa..." << endl;
 		} else {
 			cout << "Opción no válida" << endl;
 		}
 
 	} while (opcion != '0');
-
 
     /*ACABA EL PROGRAMA DEL CLIENTE*/
 

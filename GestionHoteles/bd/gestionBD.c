@@ -101,9 +101,21 @@ int comprobarUsuario(const char *usuario){
 }
 
 
-void crearUsuarioBD(Usuario *user) {
+int crearUsuarioBD(Usuario *user) {
     char sql1[] = "INSERT INTO usuarios (id, nombre, rol, nombre_usuario, contraseña, turno, salario) VALUES (NULL, ?, ?, ?, ?, ?, ?)";
-    sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL);
+
+    // Verificar primero si el usuario ya existe
+    if (comprobarUsuario(user->usuario)) {
+        printf("Error: El usuario %s ya existe en la base de datos\n", user->usuario);
+        fflush(stdout);
+        return 0;
+    }
+
+    if (sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
 
     sqlite3_bind_text(stmt, 1, user->nombre, strlen(user->nombre), SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, user->rol, strlen(user->rol), SQLITE_STATIC);
@@ -112,16 +124,24 @@ void crearUsuarioBD(Usuario *user) {
     sqlite3_bind_text(stmt, 5, user->turno, strlen(user->turno), SQLITE_STATIC);
     sqlite3_bind_int(stmt, 6, user->salario);
 
+    // Iniciar una transacción
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+
     result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
         printf("Error insertando el usuario: %s\n", sqlite3_errmsg(db));
+        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL); // Hacer rollback en caso de error
         fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
     } else {
-        printf("Usuario %s insertado\n", user->nombre);
+        printf("Usuario %s insertado con éxito\n", user->nombre);
+        // Ejecutar COMMIT para asegurar que los cambios se guarden
+        sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
         fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 1;
     }
-
-    sqlite3_finalize(stmt);
 }
 
 void modificarUsuarioBD(Usuario *user){
@@ -593,9 +613,14 @@ int buscarFacturaBD(const char *numero_factura, Factura *factura) {
 
 
 // FUNCIONALIDAD PARA RESERVAS ---------------------------------------------------------------------------------------------------------------------------------------
-void crearReservaBD(Reserva *reserva){
-char sql1[] = "INSERT INTO reservas (id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
-    sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL);
+int crearReservaBD(Reserva *reserva){
+	char sql1[] = "INSERT INTO reservas (id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
+
+	if (sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL) != SQLITE_OK) {
+		   printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+		   fflush(stdout);
+		   return 0;
+	}
 
     sqlite3_bind_text(stmt, 1, reserva->dni_cliente, strlen(reserva->dni_cliente), SQLITE_STATIC);
     sqlite3_bind_int(stmt, 2, reserva->id_habitacion);
@@ -605,17 +630,24 @@ char sql1[] = "INSERT INTO reservas (id, id_cliente, id_habitacion, fecha_entrad
     sqlite3_bind_int(stmt, 6, reserva->monto);
     sqlite3_bind_text(stmt, 7, reserva->observaciones, strlen(reserva->observaciones), SQLITE_STATIC);
 
+    // Iniciar una transacción
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
 
     result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
-        printf("Error insertando reserva: %s\n", sqlite3_errmsg(db));
+        printf("Error insertando la reserva: %s\n", sqlite3_errmsg(db));
+        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL); // Hacer rollback en caso de error
         fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
     } else {
-        printf("Reserva %d insertado\n", reserva->id);
+        printf("Resereva del cliente: %s insertada con éxito\n", reserva->dni_cliente);
+        // Ejecutar COMMIT para asegurar que los cambios se guarden
+        sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
         fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 1;
     }
-
-    sqlite3_finalize(stmt);
 }
 void modificarReservaBD(Reserva *r){
 	    char sql[] = "UPDATE reservas SET id_cliente = ?, id_habitacion = ?, fecha_entrada = ?, fecha_salida = ?, estado = ?, monto = ?, observaciones = ? WHERE id = ?";

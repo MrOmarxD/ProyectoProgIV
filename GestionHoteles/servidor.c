@@ -25,8 +25,68 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         sendBuff[511] = '\0'; // Aseguramos que termine con nulo
         send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
-        crearReserva(comm_socket, recvBuff, sendBuff);
-        printf("Reserva procesada\n");
+    	// Procesar registro de nuevo usuario
+		memset(recvBuff, 0, 512);
+		int bytes = recv(comm_socket, recvBuff, 512, 0);
+		if (bytes > 0) {
+			recvBuff[bytes] = '\0'; // Asegurar terminación
+			printf("Datos de la reserva recibidos: %s\n", recvBuff);
+
+			// Extraer datos de la reserva
+			Reserva *nuevaReserva = (Reserva*) malloc(sizeof(Reserva));
+			memset(nuevaReserva, 0, sizeof(Reserva));
+
+			// Parsear los datos separados por '|'
+			char *token;
+			char *rest = recvBuff;
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) strcpy(nuevaReserva->dni_cliente, token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) strcpy(nuevaReserva->fecha_entrada, token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) strcpy(nuevaReserva->fecha_salida, token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) strcpy(nuevaReserva->estado, token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) strcpy(nuevaReserva->observaciones, token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) nuevaReserva->id_habitacion = atoi(token);
+
+			token = strtok_s(rest, "|", &rest);
+			if (token != NULL) nuevaReserva->monto = atoi(token);
+
+			printf("Datos extraídos - dni_cliente: %s, fecha_entrada: %s, fecha_salida: %s, estado: %s, observaciones: %s, id_habitacion: %d, monto: %d\n",
+				  nuevaReserva->dni_cliente, nuevaReserva->fecha_entrada, nuevaReserva->fecha_salida,
+				  nuevaReserva->estado, nuevaReserva->observaciones, nuevaReserva->id_habitacion, nuevaReserva->monto);
+
+			// Verificar si el cliente existe
+			Cliente *cli = (Cliente*) malloc(sizeof(Cliente));
+			if (recuperarClienteBD(nuevaReserva->dni_cliente, cli) == 0) {
+				strcpy(sendBuff, "ERROR: El dni_cliente no existe");
+				printf("DNI %s no existe en la BD\n", nuevaReserva->dni_cliente);
+			} else {
+				// Crear reserva en la BD
+				if (crearReservaBD(nuevaReserva) != 1) {
+					strcpy(sendBuff, "Reserva no registrada correctamente");
+					printf("Reserva del cliente: %s no a quedado registrada en la BD\n", nuevaReserva->dni_cliente);
+				} else {
+					strcpy(sendBuff, "Reserva registrada correctamente");
+					printf("Reserva del cliente: %s registrada en la BD\n", nuevaReserva->dni_cliente);
+
+				}
+			}
+
+			free(nuevaReserva);
+			free(cli);
+			send(comm_socket, sendBuff, strlen(sendBuff), 0);
+		}
+
     } else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
     	char* listaDeHabitaciones = listarHabitaciones();
 		strncpy(sendBuff, listaDeHabitaciones, 511);
@@ -55,6 +115,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         int bytes = recv(comm_socket, recvBuff, 512, 0);
         if (bytes > 0) {
             recvBuff[bytes] = '\0'; // Asegurar terminación
+            printf("Datos de usuario recibidos: %s\n", recvBuff);
 
             // Extraer datos del usuario
             Usuario *nuevoUsuario = (Usuario*) malloc(sizeof(Usuario));
@@ -66,35 +127,46 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 
             // Nombre
             token = strtok_s(rest, "|", &rest);
-            strcpy(nuevoUsuario->nombre, token);
+            if (token != NULL) strcpy(nuevoUsuario->nombre, token);
 
             // Rol
             token = strtok_s(rest, "|", &rest);
-            strcpy(nuevoUsuario->rol, token);
+            if (token != NULL) strcpy(nuevoUsuario->rol, token);
 
             // Usuario
             token = strtok_s(rest, "|", &rest);
-            strcpy(nuevoUsuario->usuario, token);
+            if (token != NULL) strcpy(nuevoUsuario->usuario, token);
 
             // Password
             token = strtok_s(rest, "|", &rest);
-            strcpy(nuevoUsuario->password, token);
+            if (token != NULL) strcpy(nuevoUsuario->password, token);
 
             // Turno
             token = strtok_s(rest, "|", &rest);
-            strcpy(nuevoUsuario->turno, token);
+            if (token != NULL) strcpy(nuevoUsuario->turno, token);
 
             // Salario
             token = strtok_s(rest, "|", &rest);
-            nuevoUsuario->salario = atoi(token);
+            if (token != NULL) nuevoUsuario->salario = atoi(token);
+
+            printf("Datos extraídos - Nombre: %s, Rol: %s, Usuario: %s, Password: %s, Turno: %s, Salario: %d\n",
+                  nuevoUsuario->nombre, nuevoUsuario->rol, nuevoUsuario->usuario,
+                  nuevoUsuario->password, nuevoUsuario->turno, nuevoUsuario->salario);
 
             // Verificar si el usuario ya existe
             if (comprobarUsuario(nuevoUsuario->usuario)) {
                 strcpy(sendBuff, "ERROR: El nombre de usuario ya existe");
+                printf("Usuario %s ya existe en la BD\n", nuevoUsuario->usuario);
             } else {
                 // Crear usuario en la BD
-                crearUsuarioBD(nuevoUsuario);
-                strcpy(sendBuff, "Usuario registrado correctamente");
+                if (crearUsuarioBD(nuevoUsuario) != 1) {
+                    strcpy(sendBuff, "Usuario no registrado correctamente");
+                    printf("Usuario %s no a quedado registrado en la BD\n", nuevoUsuario->usuario);
+                } else {
+                    strcpy(sendBuff, "Usuario registrado correctamente");
+                    printf("Usuario %s registrado en la BD\n", nuevoUsuario->usuario);
+
+				}
             }
 
             free(nuevoUsuario);
@@ -109,6 +181,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         int bytes_username = recv(comm_socket, recvBuff, 512, 0);
         if (bytes_username <= 0) {
             strcpy(sendBuff, "Error al recibir el nombre de usuario");
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
             return;
         }
 
@@ -120,6 +193,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         int bytes_password = recv(comm_socket, recvBuff, 512, 0);
         if (bytes_password <= 0) {
             strcpy(sendBuff, "Error al recibir la contraseña");
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
             return;
         }
 
@@ -130,8 +204,10 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         sprintf(sendBuff, "Servidor: Recibido %s %s", usu, con);
         send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-        // This part needs fixing - u is not initialized properly
+        // Properly initialize and use the Usuario structure
         Usuario *u = (Usuario*) malloc(sizeof(Usuario));
+        memset(u, 0, sizeof(Usuario)); // Initialize with zeros
+
         if (recuperarUsuarioBD(usu, u) != 0) {
             if (strcmp(con, u->password) == 0) resul = 0;
             else resul = 1;
@@ -145,9 +221,15 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         sprintf(sendBuff, "%d", resul);
         send(comm_socket, sendBuff, strlen(sendBuff), 0);
         printf("Verificación de credenciales completada: %d\n", resul);
+    } else if (strcmp(recvBuff, "SALIR") == 0) {
+        // Cliente solicita terminar la conexión
+        strcpy(sendBuff, "Cerrando conexión");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Cliente solicitó terminar la conexión\n");
     } else {
         // Unknown command
         sprintf(sendBuff, "Comando desconocido: %s", recvBuff);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
         printf("Comando desconocido recibido: %s\n", recvBuff);
     }
 }
@@ -219,49 +301,52 @@ int main(int argc, char *argv[]) {
 	// Closing the listening sockets (is not going to be used anymore)
 	closesocket(conn_socket);
 
-
 	int fin = 0;
-		abrirBd();
-		do {
-			// Limpiar los buffers
-			memset(recvBuff, 0, 512);
-			memset(sendBuff, 0, 512);
+	abrirBd();
+	printf("Base de datos abierta correctamente\n");
 
-			// Recibir datos del cliente
-			bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
+	do {
+		// Limpiar los buffers
+		memset(recvBuff, 0, 512);
+		memset(sendBuff, 0, 512);
 
-			if (bytes_recibidos > 0) {
-				// Asegurar que el buffer termina en NULL
-				recvBuff[bytes_recibidos] = '\0';
+		// Recibir datos del cliente
+		bytes_recibidos = recv(comm_socket, recvBuff, 512, 0);
 
-				printf("Mensaje recibido: %s\n", recvBuff);
+		if (bytes_recibidos > 0) {
+			// Asegurar que el buffer termina en NULL
+			recvBuff[bytes_recibidos] = '\0';
 
-				// Procesar la petición
-				procesarPeticion(comm_socket, recvBuff, sendBuff);
+			printf("Mensaje recibido: %s\n", recvBuff);
 
-				// Nota: El envío se maneja dentro de procesarPeticion para comandos específicos
-				// No se necesita un send adicional aquí para comandos que ya manejan su propio envío
+			// Procesar la petición
+			procesarPeticion(comm_socket, recvBuff, sendBuff);
 
-				// Si el cliente envía "SALIR", terminamos el bucle
-				if (strcmp(recvBuff, "SALIR") == 0) {
-					fin = 1;
-				}
-			} else if (bytes_recibidos == 0) {
-				// El cliente ha cerrado la conexión
-				printf("Cliente desconectado\n");
+			// Si el cliente envía "SALIR", terminamos el bucle
+			if (strcmp(recvBuff, "SALIR") == 0) {
 				fin = 1;
-			} else {
-				// Error en la recepción
-				printf("Error en recv: %d\n", WSAGetLastError());
-				fin = 1;
+				printf("Recibida señal de salida del cliente\n");
 			}
+		} else if (bytes_recibidos == 0) {
+			// El cliente ha cerrado la conexión
+			printf("Cliente desconectado\n");
+			fin = 1;
+		} else {
+			// Error en la recepción
+			printf("Error en recv: %d\n", WSAGetLastError());
+			fin = 1;
+		}
 
-		} while (fin == 0);
-		cerrarBd();
+	} while (fin == 0);
 
-		// CLOSING the sockets and cleaning Winsock...
-		closesocket(comm_socket);
-		WSACleanup();
+	printf("Cerrando la base de datos...\n");
+	cerrarBd();
+	printf("Base de datos cerrada correctamente\n");
 
-	    return 0;
-	}
+	// CLOSING the sockets and cleaning Winsock...
+	closesocket(comm_socket);
+	WSACleanup();
+	printf("Servidor finalizado.\n");
+
+    return 0;
+}

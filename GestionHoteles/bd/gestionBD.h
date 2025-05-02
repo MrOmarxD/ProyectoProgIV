@@ -18,7 +18,7 @@ void cerrarBd();
 
 // Funciones Usuarios
 int comprobarUsuario(const char *usuario);
-void crearUsuarioBD(Usuario *user);
+int crearUsuarioBD(Usuario *user);
 void modificarUsuarioBD(Usuario *user);
 char* listaUsuarios();
 void eliminarUsuarioBD();
@@ -47,7 +47,7 @@ void crearFacturaBD(Factura *factura);
 int buscarFacturaBD(const char *numero_factura, Factura *factura);
 
 // Funciones Reservas
-void crearReservaBD(Reserva *r);
+int crearReservaBD(Reserva *r);
 void modificarReservaBD(Reserva *r);
 int recuperarReservaBD(const char *idUR, Reserva *r);
 void eliminarReservaBD();
