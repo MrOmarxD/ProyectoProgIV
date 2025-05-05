@@ -1,50 +1,6 @@
 #include "gestorReservas.h"
 #include "gestorRegistros.h"
 #include <stdio.h>
-#include "gestorMenus.h"
-
-//void gestionReservas(int usuario_actual, const char* LOG_FILE) {
-//    int opcion;
-//    Reserva r;
-//
-//    printf("\n--- GESTIÓN DE RESERVAS ---\n");
-//    printf("1. Crear nueva reserva\n");
-//    printf("2. Modificar reserva\n");
-//    printf("3. Borrar reserva\n");
-//    printf("4. Buscar reservas por cliente\n");
-//    printf("5. Listar reservas activas\n");
-//    printf("0. Volver al menú principal\n");
-//    printf("Seleccione una opción: ");
-//    fflush(stdout);
-//    scanf("%d", &opcion);
-//
-//    switch (opcion) {
-//                case 1:
-//                	crearNuevaReserva(&r);
-//                    break;
-//                case 2:
-//                	modificarReserva(&r);
-//                    break;
-//                case 3:
-//                	eliminarReservaBD();
-//                    break;
-//                case 4:
-//                	buscarReservas(&r);
-//                    break;
-//                case 5:
-//                	listarReserva();
-//                    break;
-//                case 0:
-//                	mostrarMenuPrincipal();
-//                	break;
-//                default:
-//                    printf("Opción no válida. Intente nuevamente.\n");
-//                    fflush(stdout);
-//            }
-//
-//    registrarActividad(usuario_actual, "Acceso a gestión de reservas", LOG_FILE);
-//
-//}
 
 void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     Reserva nueva_reserva;

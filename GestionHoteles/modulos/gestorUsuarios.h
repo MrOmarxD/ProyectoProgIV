@@ -15,7 +15,6 @@ typedef struct {
     char password[20];
 }Usuario;
 
-void gestionUsuarios(int usuario_actual, const char* LOG_FILE);
 void crearUsuario(Usuario *user);
 void modificarUsuario(Usuario *user);
 void buscarUsuario(Usuario *usuario);

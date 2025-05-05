@@ -278,7 +278,6 @@ void crearClienteBD(Cliente *client){
 		}
 
 		sqlite3_finalize(stmt);
-		mostrarMenuPrincipal();
 }
 
 int comprobarCliente(const char *cliente){
@@ -330,7 +329,6 @@ void modificarClienteBD(Cliente *client){
 		}
 
 		sqlite3_finalize(stmt);
-		mostrarMenuPrincipal();
 }
 
 int recuperarClienteBD(const char *dniCliente, Cliente *client) {

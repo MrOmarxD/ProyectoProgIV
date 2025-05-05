@@ -1,6 +1,6 @@
 #include "gestorFacturas.h"
 #include "gestorRegistros.h"
-#include "gestorMenus.h"
+
 #include "../bd/gestionBD.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -199,34 +199,4 @@ void buscarFactura(int* usuario_actual) {
         fflush(stdout);
     }
     free(numero_factura);
-}
-
-void gestionFacturacion(int usuario_actual, const char* LOG_FILE) {
-    int opcion;
-    printf("\n--- FACTURACION ---\n");
-    printf("1. Generar nueva factura\n");
-    printf("2. Buscar factura\n");
-    printf("0. Volver al menu principal\n");
-    printf("Seleccione una opcion: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    switch (opcion) {
-    case 1:
-        printf("Generar nueva factura\n");
-        fflush(stdout);
-        generarNuevaFactura(&usuario_actual);
-        break;
-    case 2:
-        buscarFactura(&usuario_actual);
-        break;
-    case 0:
-        mostrarMenuPrincipal();
-        break;
-    default:
-        printf("Opcion no valida. Intente nuevamente.\n");
-        fflush(stdout);
-    }
-
-    registrarActividad(usuario_actual, "Acceso a facturacion", LOG_FILE);
 }

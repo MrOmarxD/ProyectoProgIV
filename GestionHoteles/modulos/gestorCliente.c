@@ -1,46 +1,5 @@
 #include "gestorClientes.h"
 
-
-//void gestionClientes(int usuario_actual, const char* LOG_FILE) {
-//    int opcion;
-//    printf("\n--- GESTIÓN DE CLIENTES ---\n");
-//    printf("1. Registrar nuevo cliente\n");
-//    printf("2. Modificar datos de cliente\n");
-//    printf("3. Buscar cliente\n");
-//    printf("4. Listar todos los clientes\n");
-//    printf("0. Volver al menú principal\n");
-//    printf("Seleccione una opción: ");
-//    fflush(stdout);
-//    scanf("%d", &opcion);
-//
-//    switch (opcion) {
-//                case 1:
-//                	crearCliente(&usuario_actual);
-//                	fflush(stdout);
-//                    break;
-//                case 2:
-//                	modificarCliente(&usuario_actual);
-//                	fflush(stdout);
-//                    break;
-//                case 3:
-//                	buscarCliente(&usuario_actual);
-//                	fflush(stdout);
-//                    break;
-//                case 4:
-//                	listarClientes();
-//                	fflush(stdout);
-//                    break;
-//                case 0:
-//                	mostrarMenuPrincipal();
-//                	break;
-//                default:
-//                    printf("Opción no válida. Intente nuevamente.\n");
-//                    fflush(stdout);
-//            }
-//
-//    registrarActividad(usuario_actual, "Acceso a gestión de clientes", LOG_FILE);
-//}
-
 void crearCliente(Cliente *client) {
     printf("Ingrese DNI: ");
     fflush(stdout);

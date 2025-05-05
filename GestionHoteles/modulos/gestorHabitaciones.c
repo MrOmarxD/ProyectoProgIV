@@ -1,53 +1,6 @@
 #include "gestorHabitaciones.h"
 #include "gestorRegistros.h"
 #include <stdio.h>
-#include "gestorMenus.h"
-
-void gestionHabitaciones(int usuario_actual, const char* LOG_FILE) {
-	Habitacion h;
-    int opcion;
-    printf("\n--- GESTIÓN DE HABITACIONES ---\n");
-    printf("1. Añadir nueva habitación\n");
-    printf("2. Modificar habitación\n");
-    printf("3. Cambiar estado de habitación\n");
-    printf("4. Listar habitaciones\n");
-    printf("5. Buscar habitaciones\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    switch (opcion) {
-                case 1:
-                	crearHabitacion(&h);
-                	fflush(stdout);
-                    break;
-                case 2:
-                	modificarHabitacion(&h);
-                	fflush(stdout);
-                    break;
-                case 3:
-                	establecerEstadoHabitacion(&h);
-                	fflush(stdout);
-                    break;
-                case 4:
-                	listarHabitaciones();
-                	fflush(stdout);
-                    break;
-                case 5:
-					buscarHabitacion(&h);
-					fflush(stdout);
-					break;
-                case 0:
-                	mostrarMenuPrincipal();
-                	break;
-                default:
-                    printf("Opción no válida. Intente nuevamente.\n");
-                    fflush(stdout);
-            }
-
-    registrarActividad(usuario_actual, "Acceso a gestión de habitaciones", LOG_FILE);
-}
 
 void crearHabitacion(Habitacion *habitacion) {
 	printf("Ingrese el número de la habitación: \n");

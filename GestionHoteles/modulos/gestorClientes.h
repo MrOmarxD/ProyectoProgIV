@@ -14,7 +14,6 @@ typedef struct {
     char email[50];
 }Cliente;
 
-void gestionClientes(int usuario_actual, const char* LOG_FILE);
 void crearCliente(Cliente *client);
 void modificarCliente(char *dni_recibido, int socket_cliente);
 void buscarCliente(Cliente *client);

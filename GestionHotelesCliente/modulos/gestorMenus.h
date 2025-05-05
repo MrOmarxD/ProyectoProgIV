@@ -3,11 +3,11 @@
 
 #include <iostream>
 #include <winsock2.h>
-//#include "gestorUsuarios.h"
+#include "gestorUsuarios.h"
 #include "gestorCliente.h"
-//#include "gestorHabitaciones.h"
-//#include "gestorReservas.h"
-//#include "gestorFacturas.h"
+#include "gestorHabitaciones.h"
+#include "gestorReservas.h"
+#include "gestorFacturas.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include "config.h"
@@ -16,13 +16,13 @@
 extern ConfigData g_config;  // Declarar como extern para ser visible en todo el programa
 extern char CONFIG_FILE[];   // Ruta al archivo de configuración
 
-int mostrarMenuPrincipal();
+int mostrarMenuPrincipal(SOCKET s);
 char eleccionInicial();
-void configuracionSistema();
+void configuracionSistema(SOCKET s);
 int mostrarMenuPrincipalCliente(SOCKET s);
 
 // Añadir funciones para la configuración del sistema
-void cambiarRutasArchivos();
+void cambiarRutasArchivos(SOCKET s);
 void configurarConexion();
 void hacerCopiaSeguridad();
 void restaurarCopiaSeguridad();

@@ -1,7 +1,8 @@
 #ifndef GESTOR_FACTURAS_H
 #define GESTOR_FACTURAS_H
 
-#include "gestorClientes.h"
+#include <winsock2.h>
+
 typedef struct {
     int id;
     char id_reserva[10];
@@ -13,7 +14,6 @@ typedef struct {
     char estado[20];
 }Factura;
 
-void generarNuevaFactura(int* usuario_actual);
-void buscarFactura(int* usuario_actual);
+void gestionFacturacion(SOCKET s);
 
 #endif /* GESTOR_FACTURAS_H */

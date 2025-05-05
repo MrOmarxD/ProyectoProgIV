@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 
                             // Comprobar el rol en lugar del nombre de usuario
                             if (strcmp(usuarioActual->rol, "Administrador") == 0) {
-                                mostrarMenuPrincipal();
+                                mostrarMenuPrincipal(s);
                             } else {
                                 mostrarMenuPrincipalCliente(s);
                             }

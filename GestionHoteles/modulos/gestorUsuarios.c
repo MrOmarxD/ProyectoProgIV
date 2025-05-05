@@ -1,53 +1,5 @@
 #include "gestorUsuarios.h"
 
-void gestionUsuarios(int usuario_actual, const char* LOG_FILE) {
-	Usuario usuario;
-    int opcion;
-    printf("\n--- GESTIÓN DE USUARIOS ---\n");
-    printf("1. Crear nuevo usuario\n");
-    printf("2. Modificar usuario existente\n");
-    printf("3. Eliminar usuario\n");
-    printf("4. Listar usuarios\n");
-    printf("5. Buscar usuario\n");
-    printf("0. Volver al menú principal\n");
-    printf("Seleccione una opción: ");
-    fflush(stdout);
-    scanf("%d", &opcion);
-
-    switch (opcion) {
-                case 1:
-                	printf("\n---CREAR NUEVO USUARIO---\n");
-                	crearUsuario(&usuario);
-                	fflush(stdout);
-                    break;
-                case 2:
-                	modificarUsuario(&usuario);
-                	fflush(stdout);
-                    break;
-                case 3:
-                	eliminarUsuarioBD();
-                	fflush(stdout);
-                    break;
-                case 4:
-                	listaUsuarios();
-                	fflush(stdout);
-                    break;
-                case 5:
-                	buscarUsuario(&usuario);
-					fflush(stdout);
-					break;
-                case 0:
-                	mostrarMenuPrincipal();
-                	break;
-                default:
-                    printf("Opción no válida. Intente nuevamente.\n");
-                    fflush(stdout);
-            }
-
-
-    registrarActividad(usuario_actual, "Acceso a gestión de usuarios", LOG_FILE);
-}
-
 void crearUsuario(Usuario *user) {
     printf("Ingrese nombre completo: \n");
     fflush(stdout);

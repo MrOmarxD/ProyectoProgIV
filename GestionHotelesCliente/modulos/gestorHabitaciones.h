@@ -1,7 +1,8 @@
 #ifndef GESTORHABITACIONES_H_
 #define GESTORHABITACIONES_H_
 
-#include "gestorRegistros.h"
+//#include "gestorRegistros.h"
+#include <winsock2.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,9 +17,6 @@ typedef struct {
     char descripcion[100];
 } Habitacion;
 
-void crearHabitacion(Habitacion *habitacion);
-void modificarHabitacion(Habitacion *habitacion);
-void establecerEstadoHabitacion(Habitacion *habitacion);
-void buscarHabitacion(Habitacion *habitacion);
+void gestionHabitaciones(SOCKET s);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

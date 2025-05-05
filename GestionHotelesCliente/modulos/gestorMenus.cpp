@@ -6,7 +6,7 @@ char CONFIG_FILE[100] = "config.dat";  // Ruta al archivo de configuración
 ConfigData g_config;  // Configuración global
 int usuario_actual = 0; // ID del usuario que ha iniciado sesión
 
-int mostrarMenuPrincipal() {
+int mostrarMenuPrincipal(SOCKET s) {
 	int opcion;
 	cout<<"\n=============================================================\n";
 	cout<<"               MENÚ PRINCIPAL\n";
@@ -25,25 +25,25 @@ int mostrarMenuPrincipal() {
 
             switch (opcion) {
                 case 1:
-//                    gestionUsuarios(usuario_actual, g_config.log_file);
+                	gestionUsuarios(s);
                     break;
                 case 2:
 //                    gestionClientes(usuario_actual, g_config.log_file);
                     break;
                 case 3:
-//                    gestionHabitaciones(usuario_actual, g_config.log_file);
+                    gestionHabitaciones(s);
                     break;
                 case 4:
-//                    gestionReservas(usuario_actual, g_config.log_file);
+                    gestionReservas(s);
                     break;
                 case 5:
-//                    gestionFacturacion(usuario_actual, g_config.log_file);
+                    gestionFacturacion(s);
                     break;
                 case 6:
 //                    verRegistrosActividad(usuario_actual, g_config.log_file);
                     break;
                 case 7:
-                    configuracionSistema();
+                    configuracionSistema(s);
                     break;
                 case 0:
                 	cout<<"Cerrando sesión y saliendo del sistema...\n";
@@ -71,7 +71,7 @@ char eleccionInicial(){
 }
 
 /* Implementación actualizada de las funciones de gestión */
-void configuracionSistema() {
+void configuracionSistema(SOCKET s) {
     int opcion;
     cout<<"\n--- CONFIGURACIÓN DEL SISTEMA ---\n";
     cout<<"1. Cambiar rutas de archivos\n";
@@ -85,7 +85,7 @@ void configuracionSistema() {
 
     switch (opcion) {
 		case 1:
-			cambiarRutasArchivos();
+			cambiarRutasArchivos(s);
 			break;
 		case 2:
 			configurarConexion();
@@ -100,7 +100,7 @@ void configuracionSistema() {
 			printConfig(&g_config);
 			break;
 		case 0:
-			mostrarMenuPrincipal();
+			mostrarMenuPrincipal(s);
 			break;
 		default:
 			cout<<"Opción no válida. Intente nuevamente.\n";
@@ -109,7 +109,7 @@ void configuracionSistema() {
 //    registrarActividad(usuario_actual, "Acceso a configuración del sistema", g_config.log_file);
 }
 
-void cambiarRutasArchivos() {
+void cambiarRutasArchivos(SOCKET s) {
     int opcion;
     char nueva_ruta[100];
 
@@ -165,7 +165,7 @@ void cambiarRutasArchivos() {
             strcpy(g_config.backup_dir, nueva_ruta);
             break;
         case 0:
-            configuracionSistema();
+            configuracionSistema(s);
             return;
         default:
             cout << "Opción no válida." << endl;
