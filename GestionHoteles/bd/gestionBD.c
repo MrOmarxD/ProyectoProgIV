@@ -100,6 +100,47 @@ int comprobarUsuario(const char *usuario){
 		    sqlite3_finalize(stmt);
 		    return count > 0;
 }
+int crearClienteBD(Cliente *cliente) {
+    char sql[] = "INSERT INTO clientes (dni, nombre, apellido, telefono, email) VALUES (?, ?, ?, ?, ?)";
+
+    // Verificar primero si el cliente ya existe
+    if (comprobarCliente(cliente->dni)) {
+        printf("Error: El cliente con DNI %s ya existe en la base de datos\n", cliente->dni);
+        fflush(stdout);
+        return 0;
+    }
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, cliente->dni, strlen(cliente->dni), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, cliente->nombre, strlen(cliente->nombre), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, cliente->apellido, strlen(cliente->apellido), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, cliente->telefono, strlen(cliente->telefono), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, cliente->email, strlen(cliente->email), SQLITE_STATIC);
+
+    // Iniciar una transacción
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error insertando el cliente: %s\n", sqlite3_errmsg(db));
+        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL); // Hacer rollback en caso de error
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    } else {
+        printf("Cliente %s %s insertado con éxito\n", cliente->nombre, cliente->apellido);
+        // Ejecutar COMMIT para asegurar que los cambios se guarden
+        sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 1;
+    }
+}
 
 
 int crearUsuarioBD(Usuario *user) {

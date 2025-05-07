@@ -25,7 +25,7 @@ void gestionUsuarios(SOCKET s) {
                 	eliminarUsuario(s);
                     break;
                 case 4:
-                	//listaUsuarios();
+                	listaUsuarios(s);
                     break;
                 case 5:
                 	//buscarUsuario(&usuario);
@@ -207,3 +207,29 @@ void eliminarUsuario(SOCKET s){
         cin.get();
     }
 }
+    void listaUsuarios(SOCKET s) {
+        char recvBuff[512];
+        char sendBuff[512];
+
+        // Limpiar buffers
+        memset(recvBuff, 0, sizeof(recvBuff));
+        memset(sendBuff, 0, sizeof(sendBuff));
+
+        // Enviar comando al servidor
+        strcpy(sendBuff, "GET_USERS");
+        send(s, sendBuff, strlen(sendBuff), 0);
+
+        // Esperar respuesta del servidor
+        int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+            cout << recvBuff << endl;
+            //mostrarMenuPrincipalUsuario(s);
+        } else if (bytes == 0) {
+            cout << "El servidor ha cerrado la conexión" << endl;
+        } else {
+            cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+        }
+    }
+

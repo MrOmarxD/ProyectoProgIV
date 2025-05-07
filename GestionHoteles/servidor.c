@@ -17,7 +17,13 @@
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
-    if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+  //  if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+    //        char* listaDeUsuarios = listaUsuarios();
+      //      strncpy(sendBuff, listaDeUsuarios, 511);
+        //    sendBuff[511] = '\0'; // Aseguramos que termine con nulo
+          //  send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+    if (strcmp(recvBuff, "GET_USERS") == 0) {
         char* listaDeUsuarios = listaUsuarios();
         strncpy(sendBuff, listaDeUsuarios, 511);
         sendBuff[511] = '\0'; // Aseguramos que termine con nulo
