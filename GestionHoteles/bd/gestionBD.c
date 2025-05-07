@@ -280,47 +280,6 @@ void buscarUsuarioBD(const char *nombreUsuario){
 
 // FUNCIONALIDAD PARA CLIENTE ----------------------------------------------------------------------------------------------------------------------------------------
 
-void crearClienteBD(Cliente *client){
-	char sql1[] = "insert into clientes (dni, nombre, apellido, telefono, email, fecha_registro) values (?, ?, ?, ?, ?, ?)";
-		char dni[10];
-	    char nombre[50];
-	    char apellido[50];
-	    char telefono[15];
-	    char email[50];
-
-		strcpy(dni, client->dni);
-		strcpy(nombre, client->nombre);
-		strcpy(apellido, client->apellido);
-		strcpy(telefono, client->telefono);
-		strcpy(email, client->email);
-
-		// Obtener la fecha actual
-		time_t t = time(NULL);
-		struct tm tm = *localtime(&t);
-
-		// Formatear la fecha como texto
-		char fecha[20];
-		snprintf(fecha, sizeof(fecha), "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-
-		sqlite3_prepare_v2(db, sql1, strlen(sql1) + 1, &stmt, NULL) ;
-		sqlite3_bind_text(stmt, 1, dni, strlen(dni), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 2, nombre, strlen(nombre), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 3, apellido, strlen(apellido), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 4, telefono, strlen(telefono), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 5, email, strlen(email), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 6, fecha, strlen(fecha), SQLITE_STATIC);
-
-		result = sqlite3_step(stmt);
-		if (result != SQLITE_DONE) {
-			printf("Error insertando el cliente\n");
-			fflush(stdout);
-		}else{
-			printf("Cliente %s insertado\n", dni);
-			fflush(stdout);
-		}
-
-		sqlite3_finalize(stmt);
-}
 
 int comprobarCliente(const char *cliente){
 	char sql2[] = "select count(*) from clientes where email = ?";
