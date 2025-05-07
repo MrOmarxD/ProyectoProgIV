@@ -17,6 +17,7 @@
 void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
+<<<<<<< HEAD
   //  if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
     //        char* listaDeUsuarios = listaUsuarios();
       //      strncpy(sendBuff, listaDeUsuarios, 511);
@@ -26,6 +27,11 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     if (strcmp(recvBuff, "GET_USERS") == 0) {
         char* listaDeUsuarios = listaUsuarios();
         strncpy(sendBuff, listaDeUsuarios, 511);
+=======
+    if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+        char* listaDeClientes = listarClientes();
+        strncpy(sendBuff, listaDeClientes, 511);
+>>>>>>> 8b228149fbf0e88cdfc5491915151b377cfc07ce
         sendBuff[511] = '\0'; // Aseguramos que termine con nulo
         send(comm_socket, sendBuff, strlen(sendBuff), 0);
     } else if (strcmp(recvBuff, "DELETE_USER") == 0) {
