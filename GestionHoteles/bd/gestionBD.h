@@ -21,7 +21,7 @@ int comprobarUsuario(const char *usuario);
 int crearUsuarioBD(Usuario *user);
 void modificarUsuarioBD(Usuario *user);
 char* listaUsuarios();
-void eliminarUsuarioBD();
+int eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
 void buscarUsuarioBD(const char *nombreUsuario);

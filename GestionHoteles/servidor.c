@@ -22,7 +22,31 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         strncpy(sendBuff, listaDeUsuarios, 511);
         sendBuff[511] = '\0'; // Aseguramos que termine con nulo
         send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
+    } else if (strcmp(recvBuff, "DELETE_USER") == 0) {
+        // Recibir el nombre de usuario a eliminar
+        memset(recvBuff, 0, 512);
+        int bytes = recv(comm_socket, recvBuff, 512, 0);
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+            // Verificar si el usuario existe
+            if (!comprobarUsuario(recvBuff)) {
+                strcpy(sendBuff, "ERROR: El usuario no existe en la base de datos");
+                printf("Usuario %s no existe en la BD\n", recvBuff);
+            } else {
+                // Eliminar usuario de la BD
+                if (eliminarUsuarioBD(recvBuff) != 1) {
+                    strcpy(sendBuff, "Usuario no eliminado correctamente");
+                    printf("Error al eliminar el usuario %s de la BD\n", recvBuff);
+                } else {
+                    strcpy(sendBuff, "Usuario eliminado correctamente");
+                    printf("Usuario %s eliminado de la BD\n", recvBuff);
+                }
+            }
+
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        }
+    }
+    else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
     	// Procesar registro de nuevo usuario
 		memset(recvBuff, 0, 512);
 		int bytes = recv(comm_socket, recvBuff, 512, 0);

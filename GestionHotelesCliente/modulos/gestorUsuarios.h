@@ -11,5 +11,7 @@
 #include "config.h"
 
 void gestionUsuarios(SOCKET s);
+void crearUsuario(SOCKET s);
+void eliminarUsuario(SOCKET s);
 
 #endif /* GESTORUSUARIOS_H */

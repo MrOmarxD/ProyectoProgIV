@@ -53,35 +53,36 @@ char* listaUsuarios() {
     return resultBuffer;
 }
 
-void eliminarUsuarioBD() {
-    char nombreUsuario[50];
+int eliminarUsuarioBD(char* nombreUsuario) {
+    sqlite3_stmt *stmt;
+    int result;
 
-    printf("\n--- ELIMINAR USUARIO ---\n");
-    printf("Ingrese el nombre de usuario a eliminar: ");
-    fflush(stdout);
-    scanf("%49s", nombreUsuario);  // Limitamos la entrada a 49 caracteres + el terminador nulo
+    // Query SQL para eliminar el usuario
+    char sql[100] = "DELETE FROM usuarios WHERE nombre_usuario = ?";
 
-    if (!comprobarUsuario(nombreUsuario)) {
-        printf("El usuario '%s' no existe en la base de datos.\n", nombreUsuario);
-        fflush(stdout);
-        return;
+    // Preparar la declaración SQL
+    if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        return 0;
     }
 
-    char sql[] = "DELETE FROM usuarios WHERE nombre_usuario = ?";
-
-    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-
+    // Vincular el parámetro (nombre de usuario)
     sqlite3_bind_text(stmt, 1, nombreUsuario, strlen(nombreUsuario), SQLITE_STATIC);
+
+    // Ejecutar la consulta
     result = sqlite3_step(stmt);
+
+    // Finalizar la declaración
+    sqlite3_finalize(stmt);
+
+    // Verificar el resultado
     if (result != SQLITE_DONE) {
         printf("Error al eliminar el usuario: %s\n", sqlite3_errmsg(db));
-        fflush(stdout);
-    } else {
-        printf("Usuario '%s' eliminado correctamente\n", nombreUsuario);
-        fflush(stdout);
+        return 0;
     }
 
-    sqlite3_finalize(stmt);
+    // Si llegamos aquí, el usuario se eliminó correctamente
+    return 1;
 }
 
 int comprobarUsuario(const char *usuario){
