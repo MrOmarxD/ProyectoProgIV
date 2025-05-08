@@ -208,29 +208,38 @@ void eliminarUsuario(SOCKET s){
     }
 }
 void listaUsuarios(SOCKET s) {
-	char recvBuff[512];
-	char sendBuff[512];
+    char recvBuff[512];
+    char sendBuff[512];
 
-	// Limpiar buffers
-	memset(recvBuff, 0, sizeof(recvBuff));
-	memset(sendBuff, 0, sizeof(sendBuff));
+    // Limpiar buffers
+    memset(recvBuff, 0, sizeof(recvBuff));
+    memset(sendBuff, 0, sizeof(sendBuff));
 
-	// Enviar comando al servidor
-	strcpy(sendBuff, "GET_USERS");
-	send(s, sendBuff, strlen(sendBuff), 0);
+    // Enviar comando al servidor
+    strcpy(sendBuff, "GET_USERS");
+    int sendResult = send(s, sendBuff, strlen(sendBuff), 0);
 
-	// Esperar respuesta del servidor
-	int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+    if (sendResult == SOCKET_ERROR) {
+        cout << "Error al enviar solicitud al servidor: " << WSAGetLastError() << endl;
+        return;
+    }
 
-	if (bytes > 0) {
-		recvBuff[bytes] = '\0'; // Asegurar terminación
-		cout << recvBuff << endl;
-		//mostrarMenuPrincipalUsuario(s);
-	} else if (bytes == 0) {
-		cout << "El servidor ha cerrado la conexión" << endl;
-	} else {
-		cout << "Error al recibir datos: " << WSAGetLastError() << endl;
-	}
+    // Esperar respuesta del servidor
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        cout << recvBuff << endl;
+
+        // Añadir una pausa para que el usuario pueda leer el mensaje
+        cout << "Presiona Enter para continuar...";
+        cin.ignore(1000, '\n');
+        cin.get();
+    } else if (bytes == 0) {
+        cout << "El servidor ha cerrado la conexión" << endl;
+    } else {
+        cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+    }
 }
 
 void modificarUsuario(SOCKET s) {

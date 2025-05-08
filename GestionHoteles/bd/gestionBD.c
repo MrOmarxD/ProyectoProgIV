@@ -34,20 +34,36 @@ void cerrarBd(){
 char* listaUsuarios() {
     static char resultBuffer[4096]; // Buffer estático para almacenar resultados
     resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+    sqlite3_stmt *stmt;
+    int result;
 
-    char sql2[] = "select nombre from usuarios";
-    sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
+    const char *sql = "SELECT nombre_usuario, nombre, rol, turno FROM usuarios";
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        return resultBuffer;
+    }
 
     strcat(resultBuffer, "Lista de usuarios:\n");
+    strcat(resultBuffer, "Usuario Nombre Rol Turno\n");
+    strcat(resultBuffer, "----------------------------------------\n");
 
-    do {
-        result = sqlite3_step(stmt);
-        if (result == SQLITE_ROW) {
-            char temp[256];
-            sprintf(temp, "%s\n", (char*)sqlite3_column_text(stmt, 0));
-            strcat(resultBuffer, temp);
-        }
-    } while (result == SQLITE_ROW);
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+        char temp[512];
+        sprintf(temp, "%s, %s, %s, %s\n",
+            (const char*)sqlite3_column_text(stmt, 0),  // usuario
+            (const char*)sqlite3_column_text(stmt, 1),  // nombre
+            (const char*)sqlite3_column_text(stmt, 2),  // rol
+            (const char*)sqlite3_column_text(stmt, 3)); // turno
+
+        strcat(resultBuffer, temp);
+    }
+
+    if (result != SQLITE_DONE) {
+        char temp[256];
+        sprintf(temp, "Error al ejecutar la consulta: %s\n", sqlite3_errmsg(db));
+        strcat(resultBuffer, temp);
+    }
 
     sqlite3_finalize(stmt);
     return resultBuffer;

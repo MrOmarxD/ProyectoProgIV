@@ -18,10 +18,19 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_USERS") == 0) {
-        char* listaDeUsuarios = listaUsuarios();
-        strncpy(sendBuff, listaDeUsuarios, 511);
+            // Obtener la lista de usuarios desde la BD
+            char* listaDeUsuarios = listaUsuarios();
 
-    } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
+            // Asegurarse de que no exceda el tamaño del buffer
+            strncpy(sendBuff, listaDeUsuarios, 511);
+            sendBuff[511] = '\0'; // Garantizar terminación con NULL
+
+            // Enviar la respuesta al cliente
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+            printf("Enviada lista de usuarios al cliente\n");
+
+        } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
         // Solicitar el nombre de usuario a modificar
         memset(recvBuff, 0, 512);
         int bytes = recv(comm_socket, recvBuff, 512, 0);
