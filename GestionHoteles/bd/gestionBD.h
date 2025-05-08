@@ -24,7 +24,7 @@ char* listaUsuarios();
 int eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
-void buscarUsuarioBD(const char *nombreUsuario);
+char* buscarUsuarioBD(const char *nombreUsuario);
 
 // Funciones Clientes
 int crearClienteBD(Cliente *client);

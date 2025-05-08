@@ -18,19 +18,38 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_USERS") == 0) {
-            // Obtener la lista de usuarios desde la BD
-            char* listaDeUsuarios = listaUsuarios();
+		// Obtener la lista de usuarios desde la BD
+		char* listaDeUsuarios = listaUsuarios();
 
-            // Asegurarse de que no exceda el tamaño del buffer
-            strncpy(sendBuff, listaDeUsuarios, 511);
-            sendBuff[511] = '\0'; // Garantizar terminación con NULL
+		// Asegurarse de que no exceda el tamaño del buffer
+		strncpy(sendBuff, listaDeUsuarios, 511);
+		sendBuff[511] = '\0'; // Garantizar terminación con NULL
 
-            // Enviar la respuesta al cliente
-            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+		// Enviar la respuesta al cliente
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-            printf("Enviada lista de usuarios al cliente\n");
+		printf("Enviada lista de usuarios al cliente\n");
 
-        } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
+	} else if (strcmp(recvBuff, "BUSCAR_USUARIO") == 0) {
+		// Recibir el criterio de búsqueda
+		memset(recvBuff, 0, 512);
+		int bytes = recv(comm_socket, recvBuff, 512, 0);
+		if (bytes > 0) {
+			recvBuff[bytes] = '\0'; // Asegurar terminación
+			printf("Búsqueda de usuario por criterio: %s\n", recvBuff);
+
+			// Realizar la búsqueda en la base de datos
+			char* resultadoBusqueda = buscarUsuarioBD(recvBuff);
+
+			// Enviar resultados al cliente
+			memset(sendBuff, 0, 512);
+			strncpy(sendBuff, resultadoBusqueda, 511);
+			sendBuff[511] = '\0'; // Asegurar terminación
+
+			send(comm_socket, sendBuff, strlen(sendBuff), 0);
+			printf("Resultados de búsqueda enviados al cliente\n");
+		}
+	} else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
         // Solicitar el nombre de usuario a modificar
         memset(recvBuff, 0, 512);
         int bytes = recv(comm_socket, recvBuff, 512, 0);

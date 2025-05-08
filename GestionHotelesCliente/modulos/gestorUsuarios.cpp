@@ -28,7 +28,7 @@ void gestionUsuarios(SOCKET s) {
                 	listaUsuarios(s);
                     break;
                 case 5:
-                	//buscarUsuario(&usuario);
+                	buscarUsuario(s);
 					break;
                 case 0:
                 	mostrarMenuPrincipal(s);
@@ -453,4 +453,50 @@ void modificarUsuario(SOCKET s) {
             cin.get();
         }
     }
+}
+
+void buscarUsuario(SOCKET s) {
+    char recvBuff[512];
+    char sendBuff[512];
+    string criterio;
+
+    // Limpiar buffers
+    memset(recvBuff, 0, sizeof(recvBuff));
+    memset(sendBuff, 0, sizeof(sendBuff));
+
+    cout << "\n=== BÚSQUEDA DE USUARIOS ===\n";
+    cout << "Introduce el nombre de usuario a buscar: ";
+    cin.ignore(1000, '\n'); // Limpiar buffer de entrada
+    getline(cin, criterio);
+
+    // Enviar comando al servidor
+    strcpy(sendBuff, "BUSCAR_USUARIO");
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    // Pequeña pausa para asegurar que el servidor procese el comando
+    Sleep(100);
+
+    // Enviar criterio de búsqueda
+    memset(sendBuff, 0, sizeof(sendBuff));
+    strcpy(sendBuff, criterio.c_str());
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    // Recibir resultados del servidor
+    memset(recvBuff, 0, sizeof(recvBuff));
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        cout << "\nResultados de la búsqueda:\n";
+        cout << "------------------------\n";
+        cout << recvBuff << endl;
+    } else if (bytes == 0) {
+        cout << "El servidor ha cerrado la conexión" << endl;
+    } else {
+        cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+    }
+
+    // Añadir una pausa para que el usuario pueda leer el mensaje
+    cout << "\nPresiona Enter para continuar...";
+    cin.get();
 }

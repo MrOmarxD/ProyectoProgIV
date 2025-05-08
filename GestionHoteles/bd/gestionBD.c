@@ -273,28 +273,61 @@ int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user) {
     }
 }
 
-void buscarUsuarioBD(const char *nombreUsuario){
-	char sql2[] = "SELECT nombre, rol, nombre_usuario, contraseña, turno, salario FROM usuarios WHERE nombre_usuario = ?";
+char* buscarUsuarioBD(const char *nombreUsuario) {
+    static char resultBuffer[1024]; // Buffer estático para almacenar resultados
+    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+    sqlite3_stmt *stmt;
+    int result;
 
-		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+    const char *sql = "SELECT nombre, rol, nombre_usuario, contraseña, turno, salario FROM usuarios WHERE nombre_usuario LIKE ?";
 
-		sqlite3_bind_text(stmt, 1, nombreUsuario, strlen(nombreUsuario), SQLITE_STATIC);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        return resultBuffer;
+    }
 
-		printf("\n");
-		do {
-			result = sqlite3_step(stmt);
-			if (result == SQLITE_ROW) {
-				printf("%s, %s, %s, %s, %s, %d\n", (char*) 	sqlite3_column_text(stmt, 0),
-															sqlite3_column_text(stmt, 1),
-															sqlite3_column_text(stmt, 2),
-															sqlite3_column_text(stmt, 3),
-															sqlite3_column_text(stmt, 4),
-															sqlite3_column_int(stmt, 5));
-			}
-		} while (result == SQLITE_ROW);
-		printf("\n");
+    // Agregar comodines para búsqueda parcial
+    char searchPattern[100];
+    sprintf(searchPattern, "%s", nombreUsuario); // %nombreUsuario%
 
-		sqlite3_finalize(stmt);
+    if (sqlite3_bind_text(stmt, 1, searchPattern, strlen(searchPattern), SQLITE_STATIC) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al enlazar parámetros: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return resultBuffer;
+    }
+
+    strcat(resultBuffer, "Resultados de la búsqueda:\n");
+    strcat(resultBuffer, "Nombre Rol Usuario Contraseña Turno Salario\n");
+    strcat(resultBuffer, "-----------------------------------------------------------\n");
+
+    bool foundResult = false;
+
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+        foundResult = true;
+        char temp[512];
+        sprintf(temp, "%s, %s, %s, %s, %s, %d\n",
+            (const char*)sqlite3_column_text(stmt, 0),  // nombre
+            (const char*)sqlite3_column_text(stmt, 1),  // rol
+            (const char*)sqlite3_column_text(stmt, 2),  // usuario
+            (const char*)sqlite3_column_text(stmt, 3),  // password
+            (const char*)sqlite3_column_text(stmt, 4),  // turno
+            sqlite3_column_int(stmt, 5));               // salario
+
+        strcat(resultBuffer, temp);
+    }
+
+    if (!foundResult) {
+        strcat(resultBuffer, "No se encontraron usuarios que coincidan con el criterio de búsqueda.\n");
+    }
+
+    if (result != SQLITE_DONE && result != SQLITE_ROW) {
+        char temp[256];
+        sprintf(temp, "Error al ejecutar la consulta: %s\n", sqlite3_errmsg(db));
+        strcat(resultBuffer, temp);
+    }
+
+    sqlite3_finalize(stmt);
+    return resultBuffer;
 }
 
 // FUNCIONALIDAD PARA CLIENTE ----------------------------------------------------------------------------------------------------------------------------------------
