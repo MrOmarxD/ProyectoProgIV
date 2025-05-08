@@ -21,6 +21,78 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         char* listaDeUsuarios = listaUsuarios();
         strncpy(sendBuff, listaDeUsuarios, 511);
 
+    } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
+        // Solicitar el nombre de usuario a modificar
+        memset(recvBuff, 0, 512);
+        int bytes = recv(comm_socket, recvBuff, 512, 0);
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+            char nombreUsuario[20];
+            strncpy(nombreUsuario, recvBuff, sizeof(nombreUsuario)-1);
+            nombreUsuario[sizeof(nombreUsuario)-1] = '\0';
+
+            // Verificar si el usuario existe
+            Usuario *u = (Usuario*) malloc(sizeof(Usuario));
+            memset(u, 0, sizeof(Usuario));
+
+            if (recuperarUsuarioBD(nombreUsuario, u) == 0) {
+                strcpy(sendBuff, "ERROR: El usuario no existe en la base de datos");
+                printf("Usuario %s no existe en la BD\n", nombreUsuario);
+                free(u);
+            } else {
+                // Enviar los datos actuales del usuario al cliente
+                memset(sendBuff, 0, 512);
+                sprintf(sendBuff, "%s|%s|%s|%s|%s|%d",
+                    u->nombre, u->rol, u->usuario, u->password, u->turno, u->salario);
+                send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+                // Recibir los datos actualizados del usuario
+                memset(recvBuff, 0, 512);
+                bytes = recv(comm_socket, recvBuff, 512, 0);
+                if (bytes > 0) {
+                    recvBuff[bytes] = '\0'; // Asegurar terminación
+                    printf("Datos actualizados del usuario recibidos: %s\n", recvBuff);
+
+                    // Parsear los datos separados por '|'
+                    char *token;
+                    char *rest = recvBuff;
+
+                    // Nombre
+                    token = strtok_s(rest, "|", &rest);
+                    if (token != NULL) strcpy(u->nombre, token);
+
+                    // Rol
+                    token = strtok_s(rest, "|", &rest);
+                    if (token != NULL) strcpy(u->rol, token);
+
+                    // Usuario (no cambia, es la clave primaria)
+
+                    // Password
+                    token = strtok_s(rest, "|", &rest);
+                    if (token != NULL) strcpy(u->password, token);
+
+                    // Turno
+                    token = strtok_s(rest, "|", &rest);
+                    if (token != NULL) strcpy(u->turno, token);
+
+                    // Salario
+                    token = strtok_s(rest, "|", &rest);
+                    if (token != NULL) u->salario = atoi(token);
+
+                    // Actualizar el usuario en la BD
+                    if (modificarUsuarioBD(u) != 1) {
+                        strcpy(sendBuff, "Usuario no modificado correctamente");
+                        printf("Error al modificar el usuario %s en la BD\n", u->usuario);
+                    } else {
+                        strcpy(sendBuff, "Usuario modificado correctamente");
+                        printf("Usuario %s modificado en la BD\n", u->usuario);
+                    }
+                }
+                free(u);
+            }
+
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        }
     } else if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
         char* listaDeClientes = listarClientes();
         strncpy(sendBuff, listaDeClientes, 511);

@@ -19,7 +19,7 @@ void cerrarBd();
 // Funciones Usuarios
 int comprobarUsuario(const char *usuario);
 int crearUsuarioBD(Usuario *user);
-void modificarUsuarioBD(Usuario *user);
+int modificarUsuarioBD(Usuario *user);
 char* listaUsuarios();
 int eliminarUsuarioBD();
 int comprobarUsuario(const char *usuario);

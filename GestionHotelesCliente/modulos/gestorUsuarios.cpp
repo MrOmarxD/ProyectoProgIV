@@ -19,7 +19,7 @@ void gestionUsuarios(SOCKET s) {
                 	crearUsuario(s);
                     break;
                 case 2:
-                	//modificarUsuario(&usuario);
+                	modificarUsuario(s);
                     break;
                 case 3:
                 	eliminarUsuario(s);
@@ -207,29 +207,241 @@ void eliminarUsuario(SOCKET s){
         cin.get();
     }
 }
-    void listaUsuarios(SOCKET s) {
-        char recvBuff[512];
-        char sendBuff[512];
+void listaUsuarios(SOCKET s) {
+	char recvBuff[512];
+	char sendBuff[512];
 
-        // Limpiar buffers
-        memset(recvBuff, 0, sizeof(recvBuff));
+	// Limpiar buffers
+	memset(recvBuff, 0, sizeof(recvBuff));
+	memset(sendBuff, 0, sizeof(sendBuff));
+
+	// Enviar comando al servidor
+	strcpy(sendBuff, "GET_USERS");
+	send(s, sendBuff, strlen(sendBuff), 0);
+
+	// Esperar respuesta del servidor
+	int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
+	if (bytes > 0) {
+		recvBuff[bytes] = '\0'; // Asegurar terminación
+		cout << recvBuff << endl;
+		//mostrarMenuPrincipalUsuario(s);
+	} else if (bytes == 0) {
+		cout << "El servidor ha cerrado la conexión" << endl;
+	} else {
+		cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+	}
+}
+
+void modificarUsuario(SOCKET s) {
+    char recvBuff[512];
+    char sendBuff[512];
+
+    // Enviar comando al servidor
+    strcpy(sendBuff, "MODIFICAR_USUARIO");
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    char nombreUsuario[20];
+    // Limpiar el buffer de entrada antes de usar getline
+    cin.ignore(1000, '\n');
+
+    cout << "\n=== MODIFICAR USUARIO ===\n";
+    cout << "Introduce el nombre de usuario que desea modificar: ";
+    cin.getline(nombreUsuario, 20);
+
+    // Enviar el nombre de usuario al servidor
+    memset(sendBuff, 0, sizeof(sendBuff));
+    strcpy(sendBuff, nombreUsuario);
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    // Recibir respuesta del servidor
+    memset(recvBuff, 0, sizeof(recvBuff));
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0';
+
+        // Verificar si hubo error (el usuario no existe)
+        if (strncmp(recvBuff, "ERROR:", 6) == 0) {
+            cout << recvBuff << endl;
+            cout << "Presiona Enter para continuar...";
+            cin.get();
+            return;
+        }
+
+        // Parsear los datos recibidos del usuario
+        char nombre[50], rol[20], usuario[20], password[20], turno[20];
+        int salario;
+
+        // Separar la cadena por '|'
+        char *token;
+        char *rest = recvBuff;
+
+        // Nombre
+        token = strtok(rest, "|");
+        if (token != NULL) strcpy(nombre, token);
+
+        // Rol
+        token = strtok(NULL, "|");
+        if (token != NULL) strcpy(rol, token);
+
+        // Usuario
+        token = strtok(NULL, "|");
+        if (token != NULL) strcpy(usuario, token);
+
+        // Password
+        token = strtok(NULL, "|");
+        if (token != NULL) strcpy(password, token);
+
+        // Turno
+        token = strtok(NULL, "|");
+        if (token != NULL) strcpy(turno, token);
+
+        // Salario
+        token = strtok(NULL, "|");
+        if (token != NULL) salario = atoi(token);
+
+        cout << "\nDatos actuales del usuario:\n";
+        cout << "Nombre: " << nombre << endl;
+        cout << "Rol: " << rol << endl;
+        cout << "Usuario: " << usuario << " (no se puede modificar)\n";
+        cout << "Contraseña: " << password << endl;
+        cout << "Turno: " << turno << endl;
+        cout << "Salario: " << salario << endl;
+
+        cout << "\nIntroduce los nuevos datos (deja en blanco para mantener el valor actual):\n";
+
+        char nuevoDato[50];
+
+        cout << "Nuevo nombre [" << nombre << "]: ";
+        cin.getline(nuevoDato, 50);
+        if (strlen(nuevoDato) > 0) {
+            strcpy(nombre, nuevoDato);
+        }
+
+        int opcion;
+        cout << "¿Desea cambiar el rol? (1: Sí, 0: No): ";
+        cin >> opcion;
+
+        if (opcion == 1) {
+            do {
+                cout << "Elija el nuevo rol del Usuario\n";
+                cout << "1. Administrador\n";
+                cout << "2. Recepcionista\n";
+                cout << "3. Limpieza\n";
+                cout << "4. Mantenimiento\n";
+                cout << "Seleccione una opcion: ";
+
+                cin >> opcion;
+
+                switch(opcion) {
+                    case 1:
+                        cout << "\nHa seleccionado: Administrador\n\n";
+                        strcpy(rol, "Administrador");
+                        break;
+                    case 2:
+                        cout << "\nHa seleccionado: Recepcionista\n\n";
+                        strcpy(rol, "Recepcionista");
+                        break;
+                    case 3:
+                        cout << "\nHa seleccionado: Limpieza\n\n";
+                        strcpy(rol, "Limpieza");
+                        break;
+                    case 4:
+                        cout << "\nHa seleccionado: Mantenimiento\n\n";
+                        strcpy(rol, "Mantenimiento");
+                        break;
+                    default:
+                        cout << "\nOpcion no valida. Por favor, intente de nuevo.\n";
+                        opcion = 0;
+                        break;
+                }
+            } while(opcion == 0);
+        }
+
+        // Limpiar el buffer de entrada antes de usar getline
+        cin.ignore(1000, '\n');
+
+        cout << "Nueva contraseña [" << password << "]: ";
+        cin.getline(nuevoDato, 20);
+        if (strlen(nuevoDato) > 0) {
+            strcpy(password, nuevoDato);
+        }
+
+        cout << "¿Desea cambiar el turno? (1: Sí, 0: No): ";
+        cin >> opcion;
+
+        if (opcion == 1) {
+            do {
+                cout << "Elija el nuevo turno del Usuario\n";
+                cout << "1. Mañana\n";
+                cout << "2. Tarde\n";
+                cout << "3. Noche\n";
+                cout << "Seleccione una opcion: ";
+
+                cin >> opcion;
+
+                switch(opcion) {
+                    case 1:
+                        cout << "\nHa seleccionado: Mañana\n\n";
+                        strcpy(turno, "Mañana");
+                        break;
+                    case 2:
+                        cout << "\nHa seleccionado: Tarde\n\n";
+                        strcpy(turno, "Tarde");
+                        break;
+                    case 3:
+                        cout << "\nHa seleccionado: Noche\n\n";
+                        strcpy(turno, "Noche");
+                        break;
+                    default:
+                        cout << "\nOpcion no valida. Por favor, intente de nuevo.\n";
+                        opcion = 0;
+                        break;
+                }
+            } while(opcion == 0);
+        }
+
+        cout << "Nuevo salario [" << salario << "]: ";
+        cin >> nuevoDato;
+        if (strlen(nuevoDato) > 0) {
+            salario = atoi(nuevoDato);
+        }
+
+        // Limpiar buffer después de usar cin >>
+        cin.ignore(1000, '\n');
+
+        // Confirmar la modificación
+        char confirmacion;
+        cout << "\n¿Está seguro de que desea modificar el usuario '" << usuario << "'? (S/N): ";
+        cin >> confirmacion;
+
+        if (toupper(confirmacion) != 'S') {
+            cout << "Operación cancelada." << endl;
+            cout << "Presiona Enter para continuar...";
+            cin.ignore(1000, '\n'); // Limpiar buffer
+            cin.get();
+            return;
+        }
+
+        // Limpiar buffer después de usar cin >>
+        cin.ignore(1000, '\n');
+
+        // Enviar los datos actualizados al servidor
         memset(sendBuff, 0, sizeof(sendBuff));
-
-        // Enviar comando al servidor
-        strcpy(sendBuff, "GET_USERS");
+        sprintf(sendBuff, "%s|%s|%s|%s|%d", nombre, rol, password, turno, salario);
         send(s, sendBuff, strlen(sendBuff), 0);
 
-        // Esperar respuesta del servidor
-        int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
-
+        // Recibir respuesta final del servidor
+        memset(recvBuff, 0, sizeof(recvBuff));
+        bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
         if (bytes > 0) {
-            recvBuff[bytes] = '\0'; // Asegurar terminación
+            recvBuff[bytes] = '\0';
             cout << recvBuff << endl;
-            //mostrarMenuPrincipalUsuario(s);
-        } else if (bytes == 0) {
-            cout << "El servidor ha cerrado la conexión" << endl;
-        } else {
-            cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+
+            // Añadir una pausa para que el usuario pueda leer el mensaje
+            cout << "Presiona Enter para continuar...";
+            cin.get();
         }
     }
-
+}

@@ -14,5 +14,6 @@ void gestionUsuarios(SOCKET s);
 void crearUsuario(SOCKET s);
 void eliminarUsuario(SOCKET s);
 void listaUsuarios(SOCKET s);
+void modificarUsuario(SOCKET s);
 
 #endif /* GESTORUSUARIOS_H */

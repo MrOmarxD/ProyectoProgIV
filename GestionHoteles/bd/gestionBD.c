@@ -186,41 +186,44 @@ int crearUsuarioBD(Usuario *user) {
     }
 }
 
-void modificarUsuarioBD(Usuario *user){
-	    char sql[] = "UPDATE usuarios SET nombre = ?, rol = ?, contraseña = ?, turno = ?, salario = ? WHERE nombre_usuario = ?";
-	    sqlite3_stmt *stmt;
+int modificarUsuarioBD(Usuario *user) {
+    char sql[] = "UPDATE usuarios SET nombre = ?, rol = ?, contraseña = ?, turno = ?, salario = ? WHERE nombre_usuario = ?";
+    sqlite3_stmt *stmt;
+    int result;
 
-	    char nombre[50];
-		char rol[20];
-		char usuario[20];
-		char password[20];
-		char turno[20];
-		int salario = user->salario;
+    char nombre[50];
+    char rol[20];
+    char usuario[20];
+    char password[20];
+    char turno[20];
+    int salario = user->salario;
 
-		strcpy(nombre, user->nombre);
-		strcpy(rol, user->rol);
-		strcpy(usuario, user->usuario);
-		strcpy(password, user->password);
-		strcpy(turno, user->turno);
+    strcpy(nombre, user->nombre);
+    strcpy(rol, user->rol);
+    strcpy(usuario, user->usuario);
+    strcpy(password, user->password);
+    strcpy(turno, user->turno);
 
-		sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
-		sqlite3_bind_text(stmt, 1, nombre, strlen(nombre), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 2, rol, strlen(rol), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 6, usuario, strlen(usuario), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 3, password, strlen(password), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 4, turno, strlen(turno), SQLITE_STATIC);
-		sqlite3_bind_int(stmt, 5, salario);
+    sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, nombre, strlen(nombre), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, rol, strlen(rol), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, password, strlen(password), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, turno, strlen(turno), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 5, salario);
+    sqlite3_bind_text(stmt, 6, usuario, strlen(usuario), SQLITE_STATIC); // Nombre de usuario es la clave primaria
 
-		result = sqlite3_step(stmt);
-		if (result != SQLITE_DONE) {
-			printf("Error al modificar el usuario: %s\n", sqlite3_errmsg(db));
-			fflush(stdout);
-		} else {
-			printf("Usuario '%s' modificado correctamente\n", user->usuario);
-			fflush(stdout);
-		}
-
-		sqlite3_finalize(stmt);
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error al modificar el usuario: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    } else {
+        printf("Usuario '%s' modificado correctamente\n", user->usuario);
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 1;
+    }
 }
 
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user) {
