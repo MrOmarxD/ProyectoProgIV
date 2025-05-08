@@ -361,21 +361,26 @@ int recuperarClienteBD(const char *dniCliente, Cliente *client) {
     }
 }
 
-void listarClientes(){
-	char sql2[] = "select dni, nombre from clientes";
+char* listarClientes(){
+	static char resultBuffer[4096]; // Buffer estático para almacenar resultados
+	    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
 
-		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+	    char sql2[] = "select dni, nombre from clientes";
+	    sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
 
-		printf("\n");
-		do {
-			result = sqlite3_step(stmt);
-			if (result == SQLITE_ROW) {
-				printf("%s, %s\n", (char*) sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1));
-			}
-		} while (result == SQLITE_ROW);
-		printf("\n");
+	    strcat(resultBuffer, "Lista de clientes:\n");
 
-		sqlite3_finalize(stmt);
+	    do {
+	        result = sqlite3_step(stmt);
+	        if (result == SQLITE_ROW) {
+	            char temp[256];
+	            sprintf(temp, "%s, %s\n", (char*)sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1));
+	            strcat(resultBuffer, temp);
+	        }
+	    } while (result == SQLITE_ROW);
+
+	    sqlite3_finalize(stmt);
+	    return resultBuffer;
 }
 
 

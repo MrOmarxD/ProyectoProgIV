@@ -31,7 +31,7 @@ int crearClienteBD(Cliente *client);
 int comprobarCliente(const char *cliente);
 void modificarClienteBD(Cliente *client);
 int recuperarClienteBD(const char *dniCliente, Cliente *client);
-void listaClientes();
+char* listaClientes();
 void buscarClientesBD(const char *dniCliente, SOCKET comm_socket);
 
 // Funciones Habitaciones
