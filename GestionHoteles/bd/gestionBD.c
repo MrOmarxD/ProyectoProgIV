@@ -116,47 +116,7 @@ int comprobarUsuario(const char *usuario){
 		    sqlite3_finalize(stmt);
 		    return count > 0;
 }
-int crearClienteBD(Cliente *cliente) {
-    char sql[] = "INSERT INTO clientes (dni, nombre, apellido, telefono, email) VALUES (?, ?, ?, ?, ?)";
 
-    // Verificar primero si el cliente ya existe
-    if (comprobarCliente(cliente->dni)) {
-        printf("Error: El cliente con DNI %s ya existe en la base de datos\n", cliente->dni);
-        fflush(stdout);
-        return 0;
-    }
-
-    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
-        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
-        fflush(stdout);
-        return 0;
-    }
-
-    sqlite3_bind_text(stmt, 1, cliente->dni, strlen(cliente->dni), SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, cliente->nombre, strlen(cliente->nombre), SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, cliente->apellido, strlen(cliente->apellido), SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, cliente->telefono, strlen(cliente->telefono), SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 5, cliente->email, strlen(cliente->email), SQLITE_STATIC);
-
-    // Iniciar una transacción
-    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
-
-    int result = sqlite3_step(stmt);
-    if (result != SQLITE_DONE) {
-        printf("Error insertando el cliente: %s\n", sqlite3_errmsg(db));
-        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL); // Hacer rollback en caso de error
-        fflush(stdout);
-        sqlite3_finalize(stmt);
-        return 0;
-    } else {
-        printf("Cliente %s %s insertado con éxito\n", cliente->nombre, cliente->apellido);
-        // Ejecutar COMMIT para asegurar que los cambios se guarden
-        sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-        fflush(stdout);
-        sqlite3_finalize(stmt);
-        return 1;
-    }
-}
 
 
 int crearUsuarioBD(Usuario *user) {
@@ -331,7 +291,47 @@ char* buscarUsuarioBD(const char *nombreUsuario) {
 }
 
 // FUNCIONALIDAD PARA CLIENTE ----------------------------------------------------------------------------------------------------------------------------------------
+int crearClienteBD(Cliente *cliente) {
+    char sql[] = "INSERT INTO clientes (dni, nombre, apellido, telefono, email) VALUES (?, ?, ?, ?, ?)";
 
+    // Verificar primero si el cliente ya existe
+    if (comprobarCliente(cliente->dni)) {
+        printf("Error: El cliente con DNI %s ya existe en la base de datos\n", cliente->dni);
+        fflush(stdout);
+        return 0;
+    }
+
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, cliente->dni, strlen(cliente->dni), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, cliente->nombre, strlen(cliente->nombre), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, cliente->apellido, strlen(cliente->apellido), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, cliente->telefono, strlen(cliente->telefono), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, cliente->email, strlen(cliente->email), SQLITE_STATIC);
+
+    // Iniciar una transacción
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error insertando el cliente: %s\n", sqlite3_errmsg(db));
+        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL); // Hacer rollback en caso de error
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    } else {
+        printf("Cliente %s %s insertado con éxito\n", cliente->nombre, cliente->apellido);
+        // Ejecutar COMMIT para asegurar que los cambios se guarden
+        sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 1;
+    }
+}
 
 int comprobarCliente(const char *cliente){
 	char sql2[] = "select count(*) from clientes where email = ?";
@@ -349,39 +349,42 @@ int comprobarCliente(const char *cliente){
 		return count > 0;
 }
 
-void modificarClienteBD(Cliente *client){
-	    char sql[] = "UPDATE clientes SET nombre = ?, apellido = ?, telefono = ?, email = ? WHERE dni = ?";
-	    sqlite3_stmt *stmt;
+int modificarClienteBD(Cliente *cliente) {
+    char sql[] = "UPDATE clientes SET nombre = ?, apellido = ?, telefono = ?, email = ? WHERE dni = ?";
+    sqlite3_stmt *stmt;
 
-	    char dni[10];
-		char nombre[50];
-		char apellido[50];
-		char telefono[15];
-		char email[50];
+    if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        return 0;
+    }
 
-		strcpy(dni, client->dni);
-		strcpy(nombre, client->nombre);
-		strcpy(apellido, client->apellido);
-		strcpy(telefono, client->telefono);
-		strcpy(email, client->email);
+    sqlite3_bind_text(stmt, 1, cliente->nombre, strlen(cliente->nombre), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, cliente->apellido, strlen(cliente->apellido), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, cliente->telefono, strlen(cliente->telefono), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, cliente->email, strlen(cliente->email), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, cliente->dni, strlen(cliente->dni), SQLITE_STATIC);
 
-		sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
-		sqlite3_bind_text(stmt, 1, nombre, strlen(nombre), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 2, apellido, strlen(apellido), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 3, telefono, strlen(telefono), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 4, email, strlen(email), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 5, dni, strlen(dni), SQLITE_STATIC);
-
-		result = sqlite3_step(stmt);
-		if (result != SQLITE_DONE) {
-			printf("Error al modificar el cliente: %s\n", sqlite3_errmsg(db));
-			fflush(stdout);
-		} else {
-			printf("Cliente '%s' modificado correctamente\n", client->dni);
-			fflush(stdout);
-		}
-
-		sqlite3_finalize(stmt);
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error al actualizar el cliente: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+        sqlite3_finalize(stmt);
+        return 0;
+    } else {
+        int changes = sqlite3_changes(db);
+        if (changes == 0) {
+            printf("No se encontró cliente con DNI '%s' para actualizar o no hubo cambios\n", cliente->dni);
+            fflush(stdout);
+            sqlite3_finalize(stmt);
+            return 0;
+        } else {
+            printf("Cliente con DNI '%s' actualizado correctamente\n", cliente->dni);
+            fflush(stdout);
+            sqlite3_finalize(stmt);
+            return 1;
+        }
+    }
 }
 
 int recuperarClienteBD(const char *dniCliente, Cliente *client) {

@@ -29,7 +29,7 @@ char* buscarUsuarioBD(const char *nombreUsuario);
 // Funciones Clientes
 int crearClienteBD(Cliente *client);
 int comprobarCliente(const char *cliente);
-void modificarClienteBD(Cliente *client);
+int modificarClienteBD(Cliente *client);
 int recuperarClienteBD(const char *dniCliente, Cliente *client);
 char* listaClientes();
 void buscarClientesBD(const char *dniCliente, SOCKET comm_socket);

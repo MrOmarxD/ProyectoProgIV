@@ -28,7 +28,7 @@ int mostrarMenuPrincipal(SOCKET s) {
                 	gestionUsuarios(s);
                     break;
                 case 2:
-//                    gestionClientes(usuario_actual, g_config.log_file);
+                	gestionClienteAdmin(s);
                     break;
                 case 3:
                     gestionHabitaciones(s);

@@ -5,6 +5,7 @@
 #include <winsock2.h>
 #include "gestorUsuarios.h"
 #include "gestorCliente.h"
+#include "gestorClienteAdmin.h"
 #include "gestorHabitaciones.h"
 #include "gestorReservas.h"
 #include "gestorFacturas.h"
