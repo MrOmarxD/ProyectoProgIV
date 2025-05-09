@@ -1,137 +1,163 @@
 #include "gestorClientes.h"
 
-void crearCliente(Cliente *client) {
-    printf("Ingrese DNI: ");
-    fflush(stdout);
+void obtenrClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff){
+	char* listaDeClientes = listarClientes();
+	strncpy(sendBuff, listaDeClientes, 511);
+	sendBuff[511] = '\0'; // Aseguramos que termine con nulo
+	send(comm_socket, sendBuff, strlen(sendBuff), 0);
+}
 
-    while (getchar() != '\n');
+void crearCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+	// Informar al cliente que estamos listos para recibir datos
+	strcpy(sendBuff, "SOLICITAR_DATOS");
+	send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-    fgets(client->dni, 50, stdin);
-    client->dni[strcspn(client->dni, "\n")] = '\0'; // Eliminar el salto de línea
+	// Recibir los datos del cliente a crear
+	memset(recvBuff, 0, 512);
+	int bytes = recv(comm_socket, recvBuff, 512, 0);
+	if (bytes > 0) {
+		recvBuff[bytes] = '\0'; // Asegurar terminación
+		printf("Datos del cliente recibidos: %s\n", recvBuff);
 
-    printf("Ingrese nombre completo: ");
-    fflush(stdout);
+		// Extraer datos del cliente
+		Cliente *nuevoCliente = (Cliente*) malloc(sizeof(Cliente));
+		memset(nuevoCliente, 0, sizeof(Cliente));
 
+		// Parsear los datos separados por '|'
+		char *token;
+		char *rest = recvBuff;
 
-    fgets(client->nombre, 50, stdin);
-    client->nombre[strcspn(client->nombre, "\n")] = '\0'; // Eliminar el salto de línea
+		// DNI
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevoCliente->dni, token);
 
-    printf("Ingrese apellido: ");
-    fflush(stdout);
+		// Nombre
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevoCliente->nombre, token);
 
-    fgets(client->apellido, 50, stdin);
-    client->apellido[strcspn(client->apellido, "\n")] = '\0'; // Eliminar el salto de línea
+		// Apellido
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevoCliente->apellido, token);
 
-    printf("Ingrese telefono: ");
-    fflush(stdout);
+		// Teléfono
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevoCliente->telefono, token);
 
+		// Email
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevoCliente->email, token);
 
-    fgets(client->telefono, 50, stdin);
-    client->telefono[strcspn(client->telefono, "\n")] = '\0'; // Eliminar el salto de línea
+		printf("Datos extraídos - DNI: %s, Nombre: %s, Apellido: %s, Teléfono: %s, Email: %s\n",
+			  nuevoCliente->dni, nuevoCliente->nombre, nuevoCliente->apellido,
+			  nuevoCliente->telefono, nuevoCliente->email);
 
-    do {
-		printf("Ingrese email: ");
-		fflush(stdout);
-
-		//while (getchar() != '\n');
-
-		fgets(client->email, 50, stdin);
-		client->email[strcspn(client->email, "\n")] = '\0'; // Eliminar el salto de línea
-		if (comprobarUsuario(client->email)) {
-			printf("El nombre de usuario ya existe. Por favor, elija otro.\n\n");
-			fflush(stdout);
+		// Verificar si el cliente ya existe por DNI
+		if (comprobarCliente(nuevoCliente->email)) {
+			strcpy(sendBuff, "ERROR|El cliente con este email ya existe");
+			printf("Cliente con email %s ya existe en la BD\n", nuevoCliente->email);
 		} else {
-			break;
+			// Crear cliente en la BD
+			if (crearClienteBD(nuevoCliente) != 1) {
+				strcpy(sendBuff, "ERROR|Cliente no registrado correctamente");
+				printf("Cliente %s no ha quedado registrado en la BD\n", nuevoCliente->dni);
+			} else {
+				strcpy(sendBuff, "OK|Cliente registrado correctamente");
+				printf("Cliente %s registrado en la BD\n", nuevoCliente->dni);
+			}
 		}
-	} while (1);
 
-
-    crearClienteBD(client);
+		free(nuevoCliente);
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
+	}
 }
 
-void modificarCliente(char *dni_recibido, int socket_cliente) {
-    Cliente client;
-    char buffer[1024];
-    int bytes_recibidos;
+void modificarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+	// Solicitar el DNI del cliente a modificar
+	memset(recvBuff, 0, 512);
+	int bytes = recv(comm_socket, recvBuff, 512, 0);
+	if (bytes > 0) {
+		recvBuff[bytes] = '\0'; // Asegurar terminación
+		char dni[20];
+		strncpy(dni, recvBuff, sizeof(dni)-1);
+		dni[sizeof(dni)-1] = '\0';
 
-    // Eliminar posible salto de línea en el DNI
-    dni_recibido[strcspn(dni_recibido, "\n")] = '\0';
+		// Verificar si el cliente existe
+		Cliente *c = (Cliente*) malloc(sizeof(Cliente));
+		memset(c, 0, sizeof(Cliente));
 
-    // Verificar si el cliente existe en la base de datos
-    if (!recuperarClienteBD(dni_recibido, &client)) {
-        // Informar al cliente que no se encontró
-        char respuesta[] = "CLIENTE_NO_ENCONTRADO";
-        send(socket_cliente, respuesta, strlen(respuesta), 0);
-        printf("Cliente con DNI %s no encontrado.\n", dni_recibido);
-        fflush(stdout);
-        return;
-    }
+		if (recuperarClienteBD(dni, c) == 0) {
+			strcpy(sendBuff, "ERROR|El cliente no existe en la base de datos");
+			printf("Cliente con DNI %s no existe en la BD\n", dni);
+			free(c);
+		} else {
+			// Enviar los datos actuales del cliente al cliente (frontend)
+			memset(sendBuff, 0, 512);
+			sprintf(sendBuff, "DATOS_CLIENTE|%s|%s|%s|%s|%s",
+				c->dni, c->nombre, c->apellido, c->telefono, c->email);
+			send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-    // Enviar los datos actuales al cliente
-    sprintf(buffer, "CLIENTE_ENCONTRADO:%s:%s:%s:%s:%s",
-            client.dni, client.nombre, client.apellido, client.telefono, client.email);
-    send(socket_cliente, buffer, strlen(buffer), 0);
+			// Recibir los datos actualizados del cliente
+			memset(recvBuff, 0, 512);
+			bytes = recv(comm_socket, recvBuff, 512, 0);
+			if (bytes > 0) {
+				recvBuff[bytes] = '\0'; // Asegurar terminación
+				printf("Datos actualizados del cliente recibidos: %s\n", recvBuff);
 
-    printf("Cliente con DNI %s encontrado. Esperando modificaciones.\n", dni_recibido);
-    fflush(stdout);
+				// Verificar si recibimos el formato esperado
+				if (strncmp(recvBuff, "UPDATE_CLIENTE|", 15) == 0) {
+					// Parsear los datos separados por '|'
+					char *token;
+					char *rest = recvBuff + 15; // Saltar el prefijo "UPDATE_CLIENTE|"
 
-    // Esperar a recibir los datos modificados
-    memset(buffer, 0, sizeof(buffer));
-    bytes_recibidos = recv(socket_cliente, buffer, sizeof(buffer), 0);
-    if (bytes_recibidos <= 0) {
-        printf("Error recibiendo datos modificados.\n");
-        fflush(stdout);
-        return;
-    }
-    buffer[bytes_recibidos] = '\0';
+					// Nombre
+					token = strtok_s(rest, "|", &rest);
+					if (token != NULL) strcpy(c->nombre, token);
 
-    // Verificar que es una modificación
-    if (strncmp(buffer, "DATOS_MODIFICADOS:", 17) != 0) {
-        printf("Formato incorrecto de datos recibidos.\n");
-        fflush(stdout);
-        return;
-    }
+					// Apellido
+					token = strtok_s(rest, "|", &rest);
+					if (token != NULL) strcpy(c->apellido, token);
 
-    // Parsear los datos recibidos
-    char datos[1024];
-    strcpy(datos, buffer + 17); // Saltar el prefijo "DATOS_MODIFICADOS:"
+					// Teléfono
+					token = strtok_s(rest, "|", &rest);
+					if (token != NULL) strcpy(c->telefono, token);
 
-    // Formato: dni:nombre:apellido:telefono:email
-    sscanf(datos, "%[^:]:%[^:]:%[^:]:%[^:]:%[^:]",
-           client.dni, client.nombre, client.apellido, client.telefono, client.email);
+					// Email
+					token = strtok_s(rest, "|", &rest);
+					if (token != NULL) strcpy(c->email, token);
 
-    printf("Datos recibidos para modificación:\n");
-    printf("DNI: %s\n", client.dni);
-    printf("Nombre: %s\n", client.nombre);
-    printf("Apellido: %s\n", client.apellido);
-    printf("Teléfono: %s\n", client.telefono);
-    printf("Email: %s\n", client.email);
-    fflush(stdout);
+					// DNI no cambia, es la clave primaria
 
-    // Modificar en la base de datos
-    modificarClienteBD(&client);
+					// Actualizar el cliente en la BD
+					// SOLUCIÓN 1: Asumir que modificarClienteBD ahora devuelve un entero
+					if (modificarClienteBD(c) != 1) {
+						strcpy(sendBuff, "ERROR|Cliente no modificado correctamente");
+						printf("Error al modificar el cliente %s en la BD\n", c->dni);
+					} else {
+						strcpy(sendBuff, "OK|Cliente modificado correctamente");
+						printf("Cliente %s modificado en la BD\n", c->dni);
+					}
 
-    // Enviar confirmación de modificación exitosa
-    char respuesta[] = "MODIFICACION_EXITOSA";
-    send(socket_cliente, respuesta, strlen(respuesta), 0);
+					/* SOLUCIÓN 2 (alternativa): Si no se puede modificar la función
+					modificarClienteBD(c);
+					// Asumimos que la modificación fue exitosa si llegamos aquí
+					strcpy(sendBuff, "OK|Cliente modificado correctamente");
+					printf("Cliente %s modificado en la BD\n", c->dni);
+					*/
+				} else {
+					strcpy(sendBuff, "ERROR|Formato de datos incorrecto");
+					printf("Formato de datos incorrecto al modificar el cliente %s\n", c->dni);
+				}
 
-    printf("Cliente con DNI %s modificado correctamente.\n", client.dni);
-    fflush(stdout);
+				send(comm_socket, sendBuff, strlen(sendBuff), 0);
+			}
+		}
+
+		free(c);
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
+	}
 }
 
-void buscarCliente(Cliente *client){
-	char dni[20];
-
-	printf("\n--- BUSCAR CLIENTE ---\n");
-	printf("Ingrese el dni de cliente que quiera buscar: ");
-	fflush(stdout);
-
-	while (getchar() != '\n');
-
-	fgets(dni, 20, stdin);
-	dni[strcspn(dni, "\n")] = '\0';
-
-	buscarClientesBD(dni);
+void buscarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff){
 }
 
 

@@ -2,6 +2,7 @@
 #define GESTORHABITACIONES_H_
 
 #include "gestorRegistros.h"
+#include <winsock2.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,6 +17,7 @@ typedef struct {
     char descripcion[100];
 } Habitacion;
 
+void obtenerHabitaciones(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void crearHabitacion(Habitacion *habitacion);
 void modificarHabitacion(Habitacion *habitacion);
 void establecerEstadoHabitacion(Habitacion *habitacion);

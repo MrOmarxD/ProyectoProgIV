@@ -2,6 +2,7 @@
 #define GESTORCLIENTES_H
 
 #include "gestorRegistros.h"
+#include <winsock2.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -14,8 +15,9 @@ typedef struct {
     char email[50];
 }Cliente;
 
-void crearCliente(Cliente *client);
-void modificarCliente(char *dni_recibido, int socket_cliente);
-void buscarCliente(Cliente *client);
+void crearCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void obtenrClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void modificarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void buscarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 
 #endif /* GESTORCLIENTES_H */

@@ -1,60 +1,70 @@
 #include "gestorReservas.h"
+#include "gestorClientes.h"
 #include "gestorRegistros.h"
 #include <stdio.h>
 
 void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    Reserva nueva_reserva;
-    memset(&nueva_reserva, 0, sizeof(Reserva));
+	// Procesar registro de nuevo usuario
+	memset(recvBuff, 0, 512);
+	int bytes = recv(comm_socket, recvBuff, 512, 0);
+	if (bytes > 0) {
+		recvBuff[bytes] = '\0'; // Asegurar terminación
+		printf("Datos de la reserva recibidos: %s\n", recvBuff);
 
-    // Solicitar DNI del cliente
-    strcpy(sendBuff, "INPUT|Ingrese DNI del cliente: ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    strncpy(nueva_reserva.dni_cliente, recvBuff, strlen(recvBuff) + 1);
+		// Extraer datos de la reserva
+		Reserva *nuevaReserva = (Reserva*) malloc(sizeof(Reserva));
+		memset(nuevaReserva, 0, sizeof(Reserva));
 
-    // Solicitar ID de habitación
-    strcpy(sendBuff, "INPUT|Ingrese ID de habitación: ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    nueva_reserva.id_habitacion = atoi(recvBuff);
+		// Parsear los datos separados por '|'
+		char *token;
+		char *rest = recvBuff;
 
-    // Solicitar fecha de entrada
-    strcpy(sendBuff, "INPUT|Ingrese fecha de entrada (formato YYYY-MM-DD): ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    strncpy(nueva_reserva.fecha_entrada, recvBuff, strlen(recvBuff) + 1);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevaReserva->dni_cliente, token);
 
-    // Solicitar fecha de salida
-    strcpy(sendBuff, "INPUT|Ingrese fecha de salida (formato YYYY-MM-DD): ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    strncpy(nueva_reserva.fecha_salida, recvBuff, strlen(recvBuff) + 1);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevaReserva->fecha_entrada, token);
 
-    // Solicitar estado de la reserva
-    strcpy(sendBuff, "INPUT|Ingrese estado de la reserva (confirmada/pendiente/cancelada): ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    strncpy(nueva_reserva.estado, recvBuff, strlen(recvBuff) + 1);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevaReserva->fecha_salida, token);
 
-    // Solicitar monto
-    strcpy(sendBuff, "INPUT|Ingrese monto de la reserva: ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    nueva_reserva.monto = atoi(recvBuff);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevaReserva->estado, token);
 
-    // Solicitar observaciones
-    strcpy(sendBuff, "INPUT|Ingrese observaciones (opcional): ");
-    send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    recv(comm_socket, recvBuff, 512, 0);
-    strncpy(nueva_reserva.observaciones, recvBuff, strlen(recvBuff) + 1);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) strcpy(nuevaReserva->observaciones, token);
 
-    // Guardar la reserva en la base de datos
-    crearReservaBD(&nueva_reserva);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) nuevaReserva->id_habitacion = atoi(token);
 
-    // Informar al cliente del resultado
-    sprintf(sendBuff, "INFO|Reserva ID %d creada exitosamente", nueva_reserva.id);
+		token = strtok_s(rest, "|", &rest);
+		if (token != NULL) nuevaReserva->monto = atoi(token);
 
-    printf("Reserva creada con ID: %d\n", nueva_reserva.id);
+		printf("Datos extraídos - dni_cliente: %s, fecha_entrada: %s, fecha_salida: %s, estado: %s, observaciones: %s, id_habitacion: %d, monto: %d\n",
+			  nuevaReserva->dni_cliente, nuevaReserva->fecha_entrada, nuevaReserva->fecha_salida,
+			  nuevaReserva->estado, nuevaReserva->observaciones, nuevaReserva->id_habitacion, nuevaReserva->monto);
+
+		// Verificar si el cliente existe
+		Cliente *cli = (Cliente*) malloc(sizeof(Cliente));
+		if (recuperarClienteBD(nuevaReserva->dni_cliente, cli) == 0) {
+			strcpy(sendBuff, "ERROR: El dni_cliente no existe");
+			printf("DNI %s no existe en la BD\n", nuevaReserva->dni_cliente);
+		} else {
+			// Crear reserva en la BD
+			if (crearReservaBD(nuevaReserva) != 1) {
+				strcpy(sendBuff, "Reserva no registrada correctamente");
+				printf("Reserva del cliente: %s no a quedado registrada en la BD\n", nuevaReserva->dni_cliente);
+			} else {
+				strcpy(sendBuff, "Reserva registrada correctamente");
+				printf("Reserva del cliente: %s registrada en la BD\n", nuevaReserva->dni_cliente);
+
+			}
+		}
+
+		free(nuevaReserva);
+		free(cli);
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
+	}
 }
 
 void modificarReserva(Reserva *r){

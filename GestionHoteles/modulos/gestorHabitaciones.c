@@ -1,6 +1,12 @@
 #include "gestorHabitaciones.h"
-#include "gestorRegistros.h"
 #include <stdio.h>
+
+void obtenerHabitaciones(SOCKET comm_socket, char *recvBuff, char *sendBuff){
+	char* listaDeHabitaciones = listarHabitaciones();
+	strncpy(sendBuff, listaDeHabitaciones, 511);
+	sendBuff[511] = '\0'; // Aseguramos que termine con nulo
+	send(comm_socket, sendBuff, strlen(sendBuff), 0);
+}
 
 void crearHabitacion(Habitacion *habitacion) {
 	printf("Ingrese el número de la habitación: \n");
