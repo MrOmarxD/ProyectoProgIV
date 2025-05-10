@@ -20,6 +20,7 @@ typedef struct {
 } Reserva;
 
 void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
-void modificarReserva(Reserva *r);
-void buscarReservas(Reserva *r);
+void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void buscarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+
 #endif /* MODULOS_GESTORRESERVAS_H_ */

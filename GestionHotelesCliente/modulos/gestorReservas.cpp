@@ -15,7 +15,7 @@ void gestionReservas(SOCKET s) {
     cout<<"2. Modificar reserva\n";
     cout<<"3. Borrar reserva\n";
     cout<<"4. Buscar reservas por cliente\n";
-    cout<<"5. Listar reservas activas\n";
+    cout<<"5. Listar reservas\n";
     cout<<"0. Volver al menú principal\n";
     cout<<"Seleccione una opción: " <<endl;
 	cin >> opcion;
@@ -34,7 +34,7 @@ void gestionReservas(SOCKET s) {
                 	buscarReservas(s);
                     break;
                 case 5:
-                	listarReserva(s);
+                	listaReservas(s);
                     break;
                 case 0:
                 	mostrarMenuPrincipal(s);
@@ -142,16 +142,18 @@ void buscarReservas(SOCKET s) {
     cin.get();
 }
 
-void listarReserva(SOCKET s) {
-    char recvBuff[512];
+void listaReservas(SOCKET s) {
+    char recvBuff[4096]; // Aumentar el tamaño del buffer para recibir más datos
     char sendBuff[512];
+
+    cout << "\n=== LISTADO DE RESERVAS ===\n";
 
     // Limpiar buffers
     memset(recvBuff, 0, sizeof(recvBuff));
     memset(sendBuff, 0, sizeof(sendBuff));
 
     // Enviar comando al servidor
-    strcpy(sendBuff, "GET_ACTIVE_RESERVATIONS");
+    strcpy(sendBuff, "GET_RESERVATIONS");
     int sendResult = send(s, sendBuff, strlen(sendBuff), 0);
 
     if (sendResult == SOCKET_ERROR) {
@@ -159,23 +161,25 @@ void listarReserva(SOCKET s) {
         return;
     }
 
-    // Esperar respuesta del servidor
+    cout << "Solicitud enviada. Esperando respuesta del servidor...\n";
+
+    // Esperar respuesta del servidor con un tiempo de espera más largo
     int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
 
     if (bytes > 0) {
         recvBuff[bytes] = '\0'; // Asegurar terminación
-        cout << "\n=== RESERVAS ACTIVAS ===\n";
+        cout << "Respuesta recibida (" << bytes << " bytes):\n";
         cout << recvBuff << endl;
-
-        // Añadir una pausa para que el usuario pueda leer el mensaje
-        cout << "Presiona Enter para continuar...";
-        cin.ignore(1000, '\n');
-        cin.get();
     } else if (bytes == 0) {
         cout << "El servidor ha cerrado la conexión" << endl;
     } else {
         cout << "Error al recibir datos: " << WSAGetLastError() << endl;
     }
+
+    // Añadir una pausa para que el usuario pueda leer el mensaje
+    cout << "\nPresiona Enter para continuar...";
+    cin.ignore(1000, '\n');
+    cin.get();
 }
 
 void modificarReserva(SOCKET s) {
@@ -187,6 +191,9 @@ void modificarReserva(SOCKET s) {
     send(s, sendBuff, strlen(sendBuff), 0);
 
     int idReserva;
+    // Limpiar el buffer de entrada antes de usar getline
+    cin.ignore(1000, '\n');
+
     cout << "\n=== MODIFICAR RESERVA ===\n";
     cout << "Introduce el ID de la reserva a modificar: ";
     cin >> idReserva;
@@ -215,15 +222,20 @@ void modificarReserva(SOCKET s) {
         }
 
         // Parsear los datos recibidos de la reserva
-        char dni_cliente[10], fecha_entrada[20], fecha_salida[20], estado[20], observaciones[100];
+        char dni_cliente[10];
+        char fecha_entrada[20], fecha_salida[20], estado[20], observaciones[100];
         int id_habitacion, monto;
 
         // Separar la cadena por '|'
         char *token;
         char *rest = recvBuff;
 
-        // DNI Cliente
+        // ID Reserva
         token = strtok(rest, "|");
+        int id = atoi(token);
+
+        // DNI Cliente
+        token = strtok(NULL, "|");
         if (token != NULL) strcpy(dni_cliente, token);
 
         // ID Habitación
@@ -251,6 +263,7 @@ void modificarReserva(SOCKET s) {
         if (token != NULL) strcpy(observaciones, token);
 
         cout << "\nDatos actuales de la reserva:\n";
+        cout << "ID de reserva: " << id << endl;
         cout << "DNI del cliente: " << dni_cliente << endl;
         cout << "ID de habitación: " << id_habitacion << endl;
         cout << "Fecha de entrada: " << fecha_entrada << endl;
@@ -375,7 +388,9 @@ void modificarReserva(SOCKET s) {
 
         // Enviar los datos actualizados al servidor
         memset(sendBuff, 0, sizeof(sendBuff));
-        sprintf(sendBuff, "%s|%d|%s|%s|%s|%d|%s", dni_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones);
+        sprintf(sendBuff, "%d|%s|%d|%s|%s|%s|%d|%s",
+                id, dni_cliente, id_habitacion, fecha_entrada,
+                fecha_salida, estado, monto, observaciones);
         send(s, sendBuff, strlen(sendBuff), 0);
 
         // Recibir respuesta final del servidor

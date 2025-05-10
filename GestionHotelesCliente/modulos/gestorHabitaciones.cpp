@@ -203,6 +203,10 @@ void modificarHabitacion(SOCKET s) {
         char *token;
         char *rest = recvBuff;
 
+        // Número
+		token = strtok(rest, "|");
+		if (token != NULL) strcpy(numero, token);
+
         // Tipo
         token = strtok(NULL, "|");
         if (token != NULL) strcpy(tipo, token);
@@ -293,6 +297,7 @@ void modificarHabitacion(SOCKET s) {
                 cout << "1. Disponible\n";
                 cout << "2. Ocupada\n";
                 cout << "3. Mantenimiento\n";
+                cout << "4. Limpieza\n";
                 cout << "Seleccione una opción: ";
 
                 cin >> opcion;
@@ -309,6 +314,10 @@ void modificarHabitacion(SOCKET s) {
                     case 3:
                         cout << "\nHa seleccionado: Mantenimiento\n\n";
                         strcpy(estado, "Mantenimiento");
+                        break;
+                    case 4:
+                        cout << "\nHa seleccionado: Limpieza\n\n";
+                        strcpy(estado, "Limpieza");
                         break;
                     default:
                         cout << "\nOpción no válida. Por favor, intente de nuevo.\n";

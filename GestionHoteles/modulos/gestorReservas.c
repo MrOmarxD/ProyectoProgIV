@@ -67,122 +67,157 @@ void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 	}
 }
 
-void modificarReserva(Reserva *r){
+void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Solicitar el ID de la reserva a modificar
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        int id_reserva = atoi(recvBuff);
 
-	char idUReserva[10];
+        // Verificar si la reserva existe
+        Reserva *r = (Reserva*) malloc(sizeof(Reserva));
+        memset(r, 0, sizeof(Reserva));
 
-	printf("\n--- MODEFICAR RESERVA ---\n");
-	printf("Ingrese el id de la reserva a modificar: ");
-	fflush(stdout);
+        if (recuperarReservaPorIdBD(id_reserva, r) == 0) {
+            strcpy(sendBuff, "ERROR: No existe reserva con ese ID");
+            printf("Reserva con ID %d no existe en la BD\n", id_reserva);
+            free(r);
+        } else {
+            // Enviar los datos actuales de la reserva al cliente
+            memset(sendBuff, 0, 512);
+            sprintf(sendBuff, "%d|%s|%d|%s|%s|%s|%d|%s",
+                r->id, r->dni_cliente, r->id_habitacion, r->fecha_entrada,
+                r->fecha_salida, r->estado, r->monto, r->observaciones);
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-	while (getchar() != '\n');
+            // Recibir los datos actualizados de la reserva
+            memset(recvBuff, 0, 512);
+            bytes = recv(comm_socket, recvBuff, 512, 0);
+            if (bytes > 0) {
+                recvBuff[bytes] = '\0'; // Asegurar terminación
+                printf("Datos actualizados de la reserva recibidos: %s\n", recvBuff);
 
-	fgets(idUReserva, 10, stdin);
-	idUReserva[strcspn(idUReserva, "\n")] = '\0';
+                // Parsear los datos separados por '|'
+                char *token;
+                char *rest = recvBuff;
 
-	if (!recuperarReservaBD(idUReserva, r)) {
-		return;
-	}
+                // ID (no cambia, es la clave primaria)
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) r->id = atoi(token);
 
-	printf("Reserva encontrada. Dejar en blanco para no modificar.\n");
+                // DNI Cliente
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(r->dni_cliente, token);
 
-	printf("Ingrese nuevo id usuario: ");
-		fflush(stdout);
-		char nuevoId[20];
+                // ID Habitación
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) r->id_habitacion = atoi(token);
 
+                // Fecha Entrada
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(r->fecha_entrada, token);
 
-		fgets(nuevoId, 20, stdin);
-		nuevoId[strcspn(nuevoId, "\n")] = '\0';
-		if (strlen(nuevoId) > 0) {
-			strcpy(r->dni_cliente, nuevoId);
-		}
+                // Fecha Salida
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(r->fecha_salida, token);
 
-	printf("Id habitacion actual: %d\n", r->id_habitacion);
-	printf("Ingrese nuevo id habitacion: ");
-	fflush(stdout);
-		char idHaStr[20];
-		fgets(idHaStr, 20, stdin);
-		idHaStr[strcspn(idHaStr, "\n")] = '\0'; // Eliminar el salto de línea
-		sscanf(idHaStr, "%d", &r->id_habitacion);
-	printf("fecha entrada actual: %s\n", r->fecha_entrada);
-			printf("Ingrese nueva fecha entrada: ");
-			fflush(stdout);
-			char fE[50];
+                // Estado
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(r->estado, token);
 
-			fgets(fE, 50, stdin);
-			fE[strcspn(fE, "\n")] = '\0';
-			if (strlen(fE) > 0) {
-				strcpy(r->fecha_entrada, fE);
-			}
-   printf("fecha salida actual: %s\n", r->fecha_salida);
-					printf("Ingrese nueva fecha salida: ");
-					fflush(stdout);
-					char fS[50];
+                // Monto
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) r->monto = atoi(token);
 
-					fgets(fS, 50, stdin);
-					fS[strcspn(fS, "\n")] = '\0';
-					if (strlen(fS) > 0) {
-						strcpy(r->fecha_salida, fS);
-					}
+                // Observaciones
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(r->observaciones, token);
 
-	printf("Estado actual: %s\n", r->estado);
-	printf("Elija el nuevo estado de la reserva.\n");
-	printf("1. Confirmada\n");
-	printf("2. Pendiente\n");
-	printf("Seleccione una opcion: ");
-	fflush(stdout);
-	int opcion;
-	if (scanf("%d", &opcion) == 1) {
-		while (getchar() != '\n'); // Limpiar el buffer de entrada
-		switch(opcion) {
-			case 1:
-				strcpy(r->estado, "Confirmada");
-				break;
-			case 2:
-				strcpy(r->estado, "Pendiente");
-				break;
-			default:
-				printf("No se modificará el rol.\n");
-				fflush(stdout);
-				break;
-		}
-	} else {
-		while (getchar() != '\n'); // Limpiar el buffer de entrada
-	}
+                // Actualizar la reserva en la BD
+                if (modificarReservaBD(r) != 1) {
+                    strcpy(sendBuff, "Reserva no modificada correctamente");
+                    printf("Error al modificar la reserva con ID %d en la BD\n", r->id);
+                } else {
+                    strcpy(sendBuff, "Reserva modificada correctamente");
+                    printf("Reserva con ID %d modificada en la BD\n", r->id);
+                }
+            }
+            free(r);
+        }
 
-	printf("Ingrese monto en euros €: ");
-	fflush(stdout);
-	char montoStr[20];
-	fgets(montoStr, 20, stdin);
-	montoStr[strcspn(montoStr, "\n")] = '\0'; // Eliminar el salto de línea
-	sscanf(montoStr, "%d", &r->monto);
-
-	printf("Ingrese nueva observacion: ");
-	fflush(stdout);
-	char observacionStr[20];
-
-
-	fgets(observacionStr, 20, stdin);
-	observacionStr[strcspn(observacionStr, "\n")] = '\0';
-	if (strlen(observacionStr) > 0) {
-		strcpy(r->observaciones, observacionStr);
-	}
-
-	modificarReservaBD(r);
-}
-void buscarReservas(Reserva *r){
-	char id_usuario[20];
-
-	printf("\n--- BUSCAR RESERVA ---\n");
-	printf("Ingrese el dni del cliente que quiera buscar: ");
-	fflush(stdout);
-
-	while (getchar() != '\n');
-
-	fgets(id_usuario, 20, stdin);
-	id_usuario[strcspn(id_usuario, "\n")] = '\0';
-
-	buscarReservaBD(id_usuario);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
 }
 
+void buscarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Recibir el DNI del cliente cuya reserva se busca
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        printf("Búsqueda de reserva para el cliente con DNI: %s\n", recvBuff);
 
+        // Verificar si la reserva existe
+        if (!comprobarReserva(recvBuff)) {
+            strcpy(sendBuff, "ERROR: No existe reserva para el cliente con ese DNI");
+            printf("Reserva para el cliente %s no existe en la BD\n", recvBuff);
+        } else {
+            // Buscar la reserva en la BD
+            Reserva *r = (Reserva*) malloc(sizeof(Reserva));
+            memset(r, 0, sizeof(Reserva));
+
+            if (recuperarReservaPorIdBD(recvBuff, r) == 1) {
+                // Formatear los datos de la reserva para enviarlos al cliente
+                memset(sendBuff, 0, 512);
+                sprintf(sendBuff, "%d|%s|%d|%s|%s|%s|%d|%s",
+                    r->id, r->dni_cliente, r->id_habitacion, r->fecha_entrada,
+                    r->fecha_salida, r->estado, r->monto, r->observaciones);
+                printf("Reserva encontrada para el cliente %s\n", recvBuff);
+            } else {
+                strcpy(sendBuff, "ERROR: Error al recuperar la reserva");
+                printf("Error al recuperar la reserva para el cliente %s\n", recvBuff);
+            }
+            free(r);
+        }
+
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Resultados de búsqueda enviados al cliente\n");
+    }
+}
+
+void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    printf("Ejecutando listarReservas en el servidor...\n");
+
+    // Inicializar buffer de envío
+    memset(sendBuff, 0, sizeof(sendBuff)); // Asegúrate de que sendBuff tenga tamaño adecuado
+
+    // Obtener lista de reservas directamente
+    char* listaReservas = listarReservasBD();
+
+    if (listaReservas == NULL || strlen(listaReservas) == 0) {
+        printf("No se obtuvieron datos de la base de datos\n");
+        strcpy(sendBuff, "No hay datos disponibles.");
+    } else {
+        printf("Datos obtenidos de la BD (%d bytes)\n", (int)strlen(listaReservas));
+
+        // Copiar al buffer de envío, asegurando no exceder su tamaño
+        size_t maxCopy = sizeof(sendBuff) - 1; // Asume que sendBuff es un arreglo
+        if (strlen(listaReservas) < maxCopy) {
+            strcpy(sendBuff, listaReservas);
+        } else {
+            strncpy(sendBuff, listaReservas, maxCopy);
+            sendBuff[maxCopy] = '\0'; // Asegurar terminación
+            printf("Advertencia: Datos truncados al copiar al buffer\n");
+        }
+    }
+
+    // Enviar datos al cliente
+    int sentBytes = send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+    if (sentBytes == SOCKET_ERROR) {
+        printf("Error al enviar datos: %d\n", WSAGetLastError());
+    } else {
+        printf("Datos enviados correctamente (%d bytes)\n", sentBytes);
+    }
+}

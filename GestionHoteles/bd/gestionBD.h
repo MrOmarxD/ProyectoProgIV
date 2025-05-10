@@ -42,7 +42,6 @@ int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion);
 void cambiarEstadoHabitacionBD();
 char* listarHabitaciones();
 char* buscarHabitacionPorNumeroBD(const char *numHabitacion);
-int eliminarHabitacionBD(char* numeroHabitacion);
 
 // Funciones Facturas
 void crearFacturaBD(Factura *factura);
@@ -50,10 +49,10 @@ int buscarFacturaBD(const char *numero_factura, Factura *factura);
 
 // Funciones Reservas
 int crearReservaBD(Reserva *r);
-void modificarReservaBD(Reserva *r);
-int recuperarReservaBD(const char *idUR, Reserva *r);
-void eliminarReservaBD();
-void buscarReservaBD(const char *reserva);
-void listarReservaBD();
+int modificarReservaBD(Reserva *r);
+int recuperarReservaPorIdBD(int id_reserva, Reserva *r);
+void eliminarReservaBD(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void buscarReservaBD(const char *idCliente, char *resultBuffer, int bufferSize);
+char* listarReservaBD();
 
 #endif /* GESTIONBD_H_ */

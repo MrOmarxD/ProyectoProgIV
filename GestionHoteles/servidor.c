@@ -57,18 +57,18 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     } else if (strcmp(recvBuff, "BUSCAR_HABITACION") == 0) {
         buscarHabitacionBD(comm_socket, recvBuff, sendBuff);
     }
-    /*// Reservas
+    // Reservas
     else if (strcmp(recvBuff, "MODIFICAR_RESERVA") == 0) {
         modificarReserva(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "DELETE_RESERVATION") == 0) {
-        eliminarReserva(comm_socket, recvBuff, sendBuff);
+        eliminarReservaBD(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "BUSCAR_RESERVAS_CLIENTE") == 0) {
-        buscarReservasCliente(comm_socket, recvBuff, sendBuff);
-    } else if (strcmp(recvBuff, "GET_ACTIVE_RESERVATIONS") == 0) {
-        listarReservasActivas(comm_socket, recvBuff, sendBuff);
-    } else if (strcmp(recvBuff, "GET_AVAILABLE_ROOMS") == 0) {
-        obtenerHabitacionesDisponibles(comm_socket, recvBuff, sendBuff);
-    } */else if (strcmp(recvBuff, "SALIR") == 0) {
+        buscarReserva(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "GET_RESERVATIONS") == 0) {
+        listarReservasBD(comm_socket, recvBuff, sendBuff);
+    }
+    // Resto
+    else if (strcmp(recvBuff, "SALIR") == 0) {
         // Cliente solicita terminar la conexión
         strcpy(sendBuff, "Cerrando conexión");
         send(comm_socket, sendBuff, strlen(sendBuff), 0);

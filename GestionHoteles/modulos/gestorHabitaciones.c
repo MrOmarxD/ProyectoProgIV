@@ -113,7 +113,9 @@ void modificarHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
                 char *token;
                 char *rest = recvBuff;
 
-                // Número (no cambia, es la clave primaria)
+                // Número
+                token = strtok_s(rest, "|", &rest);
+				if (token != NULL) strcpy(h->numero, token);
 
                 // Tipo
                 token = strtok_s(rest, "|", &rest);
