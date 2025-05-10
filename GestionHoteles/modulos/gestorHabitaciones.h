@@ -18,9 +18,9 @@ typedef struct {
 } Habitacion;
 
 void obtenerHabitaciones(SOCKET comm_socket, char *recvBuff, char *sendBuff);
-void crearHabitacion(Habitacion *habitacion);
-void modificarHabitacion(Habitacion *habitacion);
-void establecerEstadoHabitacion(Habitacion *habitacion);
-void buscarHabitacion(Habitacion *habitacion);
+void crearHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void modificarHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void cambiarEstadoHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void buscarHabitacionBD(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

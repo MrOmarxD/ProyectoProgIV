@@ -35,12 +35,14 @@ char* listaClientes();
 void buscarClientesBD(const char *dniCliente, SOCKET comm_socket);
 
 // Funciones Habitaciones
+int comprobarHabitacion(const char *numeroHabitacion);
 void crearHabitacionBD(Habitacion *habitacion);
 void modificarHabitacionBD(Habitacion *habitacion);
 int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion);
 void cambiarEstadoHabitacionBD();
 char* listarHabitaciones();
-void buscarHabitacionBD(const char *numHabitacion);
+char* buscarHabitacionPorNumeroBD(const char *numHabitacion);
+int eliminarHabitacionBD(char* numeroHabitacion);
 
 // Funciones Facturas
 void crearFacturaBD(Factura *factura);

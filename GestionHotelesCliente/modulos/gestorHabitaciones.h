@@ -18,5 +18,10 @@ typedef struct {
 } Habitacion;
 
 void gestionHabitaciones(SOCKET s);
+void crearHabitacion(SOCKET s);
+void modificarHabitacion(SOCKET s);
+void establecerEstadoHabitacion(SOCKET s);
+void listarHabitaciones(SOCKET s);
+void buscarHabitacion(SOCKET s);
 
 #endif /* MODULOS_GESTORHABITACIONES_H_ */

@@ -1,296 +1,224 @@
 #include "gestorHabitaciones.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-void obtenerHabitaciones(SOCKET comm_socket, char *recvBuff, char *sendBuff){
-	char* listaDeHabitaciones = listarHabitaciones();
-	strncpy(sendBuff, listaDeHabitaciones, 511);
-	sendBuff[511] = '\0'; // Aseguramos que termine con nulo
-	send(comm_socket, sendBuff, strlen(sendBuff), 0);
+void obtenerHabitaciones(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Obtener la lista de habitaciones desde la BD
+    char* listaDeHabitaciones = listarHabitaciones();
+
+    // Asegurarse de que no exceda el tamaño del buffer
+    strncpy(sendBuff, listaDeHabitaciones, 511);
+    sendBuff[511] = '\0'; // Garantizar terminación con NULL
+
+    // Enviar la respuesta al cliente
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
+
+    printf("Enviada lista de habitaciones al cliente\n");
 }
 
-void crearHabitacion(Habitacion *habitacion) {
-	printf("Ingrese el número de la habitación: \n");
-	fflush(stdout);
+void crearHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Procesar registro de nueva habitación
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        printf("Datos de habitación recibidos: %s\n", recvBuff);
 
-	while (getchar() != '\n');
+        // Extraer datos de la habitación
+        Habitacion *nuevaHabitacion = (Habitacion*) malloc(sizeof(Habitacion));
+        memset(nuevaHabitacion, 0, sizeof(Habitacion));
 
-	fgets(habitacion->numero, 10, stdin);
-	habitacion->numero[strcspn(habitacion->numero, "\n")] = '\0'; // Eliminar el salto de línea
+        // Parsear los datos separados por '|'
+        char *token;
+        char *rest = recvBuff;
 
-	int tipo;
-	    do {
-	        printf("Elija el tipo de la Habitacion\n");
-	        printf("1. Individual\n");
-	        printf("2. Doble\n");
-	        printf("3. Suite\n");
-	        printf("4. Familiar\n");
-	        printf("Seleccione una opcion: ");
-	        fflush(stdout);
-	        scanf("%d", &tipo);
+        // Número
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) strcpy(nuevaHabitacion->numero, token);
 
-	        // Limpiar el buffer de entrada
-	        while (getchar() != '\n');
+        // Tipo
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) strcpy(nuevaHabitacion->tipo, token);
 
-	        switch(tipo) {
-	            case 1:
-	                printf("\nHa seleccionado: Individual\n\n");
-	                fflush(stdout);
-	                strcpy(habitacion->tipo, "Individual");
-	                break;
-	            case 2:
-	                printf("\nHa seleccionado: Doble\n\n");
-	                fflush(stdout);
-	                strcpy(habitacion->tipo, "Doble");
-	                break;
-	            case 3:
-	                printf("\nHa seleccionado: Suite\n\n");
-	                fflush(stdout);
-	                strcpy(habitacion->tipo, "Suite");
-	                break;
-	            case 4:
-	                printf("\nHa seleccionado: Familiar\n\n");
-	                fflush(stdout);
-	                strcpy(habitacion->tipo, "Familiar");
-	                break;
-	            default:
-	                printf("\nTipo no valida. Por favor, intente de nuevo.\n");
-	                fflush(stdout);
-	                tipo = 0;
-	                break;
-	        }
-	    } while(tipo == 0);
+        // Precio
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) nuevaHabitacion->precio = atoi(token);
 
-	    printf("Ingrese precio en euros €: ");
-		fflush(stdout);
-		char precioStr[20];
-		fgets(precioStr, 20, stdin);
-		precioStr[strcspn(precioStr, "\n")] = '\0'; // Eliminar el salto de línea
-		sscanf(precioStr, "%d", &habitacion->precio);
+        // Estado
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) strcpy(nuevaHabitacion->estado, token);
 
-		int estado;
-			do {
-				printf("Elija el estado de la Habitacion\n");
-				printf("1. Disponible\n");
-				printf("2. Ocupada\n");
-				printf("3. Mantenimiento\n");
-				printf("Seleccione una opcion: ");
-				fflush(stdout);
-				scanf("%d", &estado);
+        // Capacidad
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) nuevaHabitacion->capacidad = atoi(token);
 
-				// Limpiar el buffer de entrada
-				while (getchar() != '\n');
+        // Descripción
+        token = strtok_s(rest, "|", &rest);
+        if (token != NULL) strcpy(nuevaHabitacion->descripcion, token);
 
-				switch(estado) {
-					case 1:
-						printf("\nHa seleccionado: Disponible\n\n");
-						fflush(stdout);
-						strcpy(habitacion->estado, "Disponible");
-						break;
-					case 2:
-						printf("\nHa seleccionado: Ocupada\n\n");
-						fflush(stdout);
-						strcpy(habitacion->estado, "Ocupada");
-						break;
-					case 3:
-						printf("\nHa seleccionado: Mantenimiento\n\n");
-						fflush(stdout);
-						strcpy(habitacion->tipo, "Mantenimiento");
-						break;
-					default:
-						printf("\nEstado no valida. Por favor, intente de nuevo.\n");
-						fflush(stdout);
-						estado = 0;
-						break;
-				}
-			} while(estado == 0);
+        printf("Datos extraídos - Número: %s, Tipo: %s, Precio: %d, Estado: %s, Capacidad: %d, Descripción: %s\n",
+              nuevaHabitacion->numero, nuevaHabitacion->tipo, nuevaHabitacion->precio,
+              nuevaHabitacion->estado, nuevaHabitacion->capacidad, nuevaHabitacion->descripcion);
 
-		printf("Ingrese capacidad: ");
-		fflush(stdout);
-		char capacidadStr[20];
-		fgets(capacidadStr, 20, stdin);
-		capacidadStr[strcspn(capacidadStr, "\n")] = '\0'; // Eliminar el salto de línea
-		sscanf(capacidadStr, "%d", &habitacion->capacidad);
+        // Verificar si la habitación ya existe - Esta función la debes implementar en gestorBD.c
+        Habitacion habitacionExistente;
+        if (recuperarHabitacionBD(nuevaHabitacion->numero, &habitacionExistente)) {
+            strcpy(sendBuff, "ERROR: El número de habitación ya existe");
+            printf("Habitación %s ya existe en la BD\n", nuevaHabitacion->numero);
+        } else {
+            // Crear habitación en la BD
+            crearHabitacionBD(nuevaHabitacion);
+            strcpy(sendBuff, "Habitación registrada correctamente");
+            printf("Habitación %s registrada en la BD\n", nuevaHabitacion->numero);
+        }
 
-		printf("Ingrese la descripcion: \n");
-		fflush(stdout);
-
-		fgets(habitacion->descripcion, 100, stdin);
-		habitacion->descripcion[strcspn(habitacion->descripcion, "\n")] = '\0'; // Eliminar el salto de línea
-
-    crearHabitacionBD(habitacion);
+        free(nuevaHabitacion);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
 }
 
-void modificarHabitacion(Habitacion *habitacion){
-	char numero[20];
+void modificarHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Solicitar el número de habitación a modificar
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        char numeroHabitacion[10];
+        strncpy(numeroHabitacion, recvBuff, sizeof(numeroHabitacion)-1);
+        numeroHabitacion[sizeof(numeroHabitacion)-1] = '\0';
 
-	printf("\n--- MODEFICAR HABITACION ---\n");
-		printf("Ingrese el numero de la habitacion a modificar: ");
-	    fflush(stdout);
+        // Verificar si la habitación existe
+        Habitacion *h = (Habitacion*) malloc(sizeof(Habitacion));
+        memset(h, 0, sizeof(Habitacion));
 
-	    while (getchar() != '\n');
+        if (recuperarHabitacionBD(numeroHabitacion, h) == 0) {
+            strcpy(sendBuff, "ERROR: La habitación no existe en la base de datos");
+            printf("Habitación %s no existe en la BD\n", numeroHabitacion);
+            free(h);
+        } else {
+            // Enviar los datos actuales de la habitación al cliente
+            memset(sendBuff, 0, 512);
+            sprintf(sendBuff, "%s|%s|%d|%s|%d|%s",
+                h->numero, h->tipo, h->precio, h->estado, h->capacidad, h->descripcion);
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-	    fgets(numero, 20, stdin);
-	    numero[strcspn(numero, "\n")] = '\0';
+            // Recibir los datos actualizados de la habitación
+            memset(recvBuff, 0, 512);
+            bytes = recv(comm_socket, recvBuff, 512, 0);
+            if (bytes > 0) {
+                recvBuff[bytes] = '\0'; // Asegurar terminación
+                printf("Datos actualizados de la habitación recibidos: %s\n", recvBuff);
 
-	    if (!recuperarHabitacionBD(numero, habitacion)) {
-	        return;
-	    }
+                // Parsear los datos separados por '|'
+                char *token;
+                char *rest = recvBuff;
 
-	    printf("Habitacion encontrada. Dejar en blanco para no modificar.\n");
+                // Número (no cambia, es la clave primaria)
 
-	    int tipo;
-	    printf("Tipo actual: %s\n", habitacion->tipo);
-	    printf("Elija el nuevo tipo de la habitacion\n");
-	    printf("1. Individual\n");
-		printf("2. Doble\n");
-		printf("3. Suite\n");
-		printf("4. Familiar\n");
-		printf("Seleccione una opcion: ");
-		fflush(stdout);
-	    if (scanf("%d", &tipo) == 1) {
-	        while (getchar() != '\n'); // Limpiar el buffer de entrada
-	        switch(tipo) {
-	            case 1:
-	                strcpy(habitacion->tipo, "Individual");
-	                break;
-	            case 2:
-	                strcpy(habitacion->tipo, "Doble");
-	                break;
-	            case 3:
-	                strcpy(habitacion->tipo, "Suite");
-	                break;
-	            case 4:
-	                strcpy(habitacion->tipo, "Familiar");
-	                break;
-	            default:
-	                printf("No se modificará el tipo.\n");
-	                fflush(stdout);
-	                break;
-	        }
-	    } else {
-	        while (getchar() != '\n'); // Limpiar el buffer de entrada
-	    }
+                // Tipo
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(h->tipo, token);
 
-	    printf("Ingrese nuevo precio en euros €: ");
-		fflush(stdout);
-		char precioStr[20];
-		fgets(precioStr, 20, stdin);
-		precioStr[strcspn(precioStr, "\n")] = '\0'; // Eliminar el salto de línea
-		sscanf(precioStr, "%d", &habitacion->precio);
+                // Precio
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) h->precio = atoi(token);
 
-		int estado;
-			    printf("Estado actual: %s\n", habitacion->estado);
-			    printf("Elija el nuevo estado de la habitacion.\n");
-			    printf("1. Disponible\n");
-				printf("2. Ocupada\n");
-				printf("3. Mantenimiento\n");
-				printf("Seleccione una opcion: ");
-				fflush(stdout);
-			    if (scanf("%d", &estado) == 1) {
-			        while (getchar() != '\n'); // Limpiar el buffer de entrada
-			        switch(estado) {
-			            case 1:
-			                strcpy(habitacion->estado, "Disponible");
-			                break;
-			            case 2:
-			                strcpy(habitacion->estado, "Ocupada");
-			                break;
-			            case 3:
-			                strcpy(habitacion->estado, "Mantenimiento");
-			                break;
-			            default:
-			                printf("No se modificará el estado.\n");
-			                fflush(stdout);
-			                break;
-			        }
-			    } else {
-			        while (getchar() != '\n'); // Limpiar el buffer de entrada
-			    }
+                // Estado
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(h->estado, token);
 
-		printf("Ingrese la nueva capacidad: ");
-		fflush(stdout);
-		char capacidadStr[20];
-		fgets(capacidadStr, 20, stdin);
-		capacidadStr[strcspn(capacidadStr, "\n")] = '\0'; // Eliminar el salto de línea
-		sscanf(capacidadStr, "%d", &habitacion->capacidad);
+                // Capacidad
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) h->capacidad = atoi(token);
 
-	    printf("Ingrese nueva descripcion: ");
-	    fflush(stdout);
-	    char nuevaDescripcion[100];
+                // Descripción
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) strcpy(h->descripcion, token);
 
+                // Actualizar la habitación en la BD
+                modificarHabitacionBD(h);
+                strcpy(sendBuff, "Habitación modificada correctamente");
+                printf("Habitación %s modificada en la BD\n", h->numero);
+            }
+            free(h);
+        }
 
-	    fgets(nuevaDescripcion, 20, stdin);
-	    nuevaDescripcion[strcspn(nuevaDescripcion, "\n")] = '\0';
-	    if (strlen(nuevaDescripcion) > 0) {
-	    	strcpy(habitacion->descripcion, nuevaDescripcion);
-	    }
-
-
-	    modificarHabitacionBD(habitacion);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
 }
 
+void cambiarEstadoHabitacion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Solicitar el número de habitación para cambiar su estado
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        char numeroHabitacion[10];
+        strncpy(numeroHabitacion, recvBuff, sizeof(numeroHabitacion)-1);
+        numeroHabitacion[sizeof(numeroHabitacion)-1] = '\0';
 
-void establecerEstadoHabitacion(Habitacion *habitacion){
-	char numero[20];
+        // Verificar si la habitación existe
+        Habitacion *h = (Habitacion*) malloc(sizeof(Habitacion));
+        memset(h, 0, sizeof(Habitacion));
 
-		printf("\n--- MODEFICAR ESTADO DE LA HABITACION ---\n");
-			printf("Ingrese el numero de la habitacion a modificar: ");
-		    fflush(stdout);
+        if (recuperarHabitacionBD(numeroHabitacion, h) == 0) {
+            strcpy(sendBuff, "ERROR: La habitación no existe en la base de datos");
+            printf("Habitación %s no existe en la BD\n", numeroHabitacion);
+            free(h);
+        } else {
+            // Enviar los datos actuales de la habitación al cliente (principalmente el estado actual)
+            memset(sendBuff, 0, 512);
+            sprintf(sendBuff, "%s|%s", h->numero, h->estado);
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-		    while (getchar() != '\n');
+            // Recibir el nuevo estado
+            memset(recvBuff, 0, 512);
+            bytes = recv(comm_socket, recvBuff, 512, 0);
+            if (bytes > 0) {
+                recvBuff[bytes] = '\0'; // Asegurar terminación
+                printf("Nuevo estado recibido: %s\n", recvBuff);
 
-		    fgets(numero, 20, stdin);
-		    numero[strcspn(numero, "\n")] = '\0';
+                // Actualizar el estado
+                strcpy(h->estado, recvBuff);
 
-		    if (!recuperarHabitacionBD(numero, habitacion)) {
-		        return;
-		    }
+                // Actualizar la habitación en la BD
+                modificarHabitacionBD(h);
+                strcpy(sendBuff, "Estado de habitación modificado correctamente");
+                printf("Estado de habitación %s modificado a %s en la BD\n", h->numero, h->estado);
+            }
+            free(h);
+        }
 
-		    printf("Habitacion encontrada. Dejar en blanco para no modificar.\n");
-
-
-		    int estado;
-			printf("Estado actual: %s\n", habitacion->estado);
-			printf("Elija el nuevo estado de la habitacion.\n");
-			printf("1. Disponible\n");
-			printf("2. Ocupada\n");
-			printf("3. Mantenimiento\n");
-			printf("Seleccione una opcion: ");
-			fflush(stdout);
-			if (scanf("%d", &estado) == 1) {
-				while (getchar() != '\n'); // Limpiar el buffer de entrada
-				switch(estado) {
-					case 1:
-						strcpy(habitacion->estado, "Disponible");
-						break;
-					case 2:
-						strcpy(habitacion->estado, "Ocupada");
-						break;
-					case 3:
-						strcpy(habitacion->estado, "Mantenimiento");
-						break;
-					default:
-						printf("No se modificará el estado.\n");
-						fflush(stdout);
-						break;
-				}
-			} else {
-				while (getchar() != '\n'); // Limpiar el buffer de entrada
-			}
-			modificarHabitacionBD(habitacion);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
 }
 
-void buscarHabitacion(Habitacion *habitacion){
-	char numero[20];
+void buscarHabitacionBD(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Recibir el número de habitación a buscar
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        char numeroHabitacion[10];
+        strncpy(numeroHabitacion, recvBuff, sizeof(numeroHabitacion)-1);
+        numeroHabitacion[sizeof(numeroHabitacion)-1] = '\0';
 
-	printf("\n--- BUSCAR HABITACION ---\n");
-	printf("Ingrese el numero de la habitacion que quiera buscar: ");
-	fflush(stdout);
+        // Verificar si la habitación existe
+        Habitacion *h = (Habitacion*) malloc(sizeof(Habitacion));
+        memset(h, 0, sizeof(Habitacion));
 
-	while (getchar() != '\n');
+        if (recuperarHabitacionBD(numeroHabitacion, h) == 0) {
+            strcpy(sendBuff, "ERROR: La habitación no existe en la base de datos");
+            printf("Habitación %s no existe en la BD\n", numeroHabitacion);
+        } else {
+            // Enviar la información de la habitación
+            memset(sendBuff, 0, 512);
+            sprintf(sendBuff, "Número: %s\nTipo: %s\nPrecio: %d €\nEstado: %s\nCapacidad: %d\nDescripción: %s",
+                h->numero, h->tipo, h->precio, h->estado, h->capacidad, h->descripcion);
+            printf("Información de habitación %s enviada al cliente\n", h->numero);
+        }
+        free(h);
 
-	fgets(numero, 20, stdin);
-	numero[strcspn(numero, "\n")] = '\0';
-
-	buscarHabitacionBD(numero);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
 }

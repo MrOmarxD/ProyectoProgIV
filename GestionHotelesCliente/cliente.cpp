@@ -5,11 +5,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-//#include "modulos/gestorUsuarios.h"
-//#include "modulos/gestorHabitaciones.h"
-//#include "modulos/gestorReservas.h"
-//#include "modulos/gestorFacturas.h"
-//#include "modulos/gestorRegistros.h"
 #include "modulos/gestorMenus.h"
 
 using namespace std;
@@ -143,12 +138,14 @@ int main(int argc, char *argv[]) {
 
                             cout << "Bienvenido, " << usuarioActual->nombre << " (" << usuarioActual->rol << ")" << endl;
 
-                            // Comprobar el rol en lugar del nombre de usuario
-                            if (strcmp(usuarioActual->rol, "Administrador") == 0) {
-                                mostrarMenuPrincipal(s);
-                            } else {
-                                mostrarMenuPrincipalCliente(s);
-                            }
+                            int salir = 1;
+                            do{
+                            	// Comprobar el rol en lugar del nombre de usuario
+								if (strcmp(usuarioActual->rol, "Administrador") == 0)
+									salir = mostrarMenuPrincipal(s);
+								else
+									salir = mostrarMenuPrincipalCliente(s);
+                            }while(salir !=0);
                         }
 					} else if (resul == 1) {
 						cout << "La contraseña no es correcta" << endl;

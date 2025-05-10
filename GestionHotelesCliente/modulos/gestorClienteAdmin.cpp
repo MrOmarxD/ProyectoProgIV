@@ -4,7 +4,7 @@ using namespace std;
 
 void gestionClienteAdmin(SOCKET s) {
     int opcion;
-    cout<<"\n--- GESTIÓN DE USUARIOS ---\n";
+    cout<<"\n--- GESTIÓN DE CLIENTES ---\n";
     cout<<"1. Crear nuevo cliente\n";
     cout<<"2. Modificar cliente existente\n";
     cout<<"3. Listar clientes\n";

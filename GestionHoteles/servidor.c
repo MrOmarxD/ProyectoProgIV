@@ -19,38 +19,59 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     memset(sendBuff, 0, 512);
 
     if (strcmp(recvBuff, "GET_USERS") == 0) {
-		// Obtener la lista de usuarios desde la BD
-    	listarUsuarios(comm_socket, recvBuff, sendBuff);
-	} else if (strcmp(recvBuff, "BUSCAR_USUARIO") == 0) {
-		buscarUsuario(comm_socket, recvBuff, sendBuff);
-	} else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
-		modificarUsuario(comm_socket, recvBuff, sendBuff);
+        listarUsuarios(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "BUSCAR_USUARIO") == 0) {
+        buscarUsuario(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
+        modificarUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-    	obtenrClientes(comm_socket, recvBuff, sendBuff);
+        obtenrClientes(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "DELETE_USER") == 0) {
-    	eliminarUsuario(comm_socket, recvBuff, sendBuff);
+        eliminarUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
-    	crearReserva(comm_socket, recvBuff, sendBuff);
+        crearReserva(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
-    	obtenerHabitaciones(comm_socket, recvBuff, sendBuff);
+        obtenerHabitaciones(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "CREATE_CLIENT") == 0) {
-    	crearCliente(comm_socket, recvBuff, sendBuff);
+        crearCliente(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "MODIFICAR_CLIENTE") == 0) {
-    	modificarCliente(comm_socket, recvBuff, sendBuff);
+        modificarCliente(comm_socket, recvBuff, sendBuff);
+    // Iniciar sesion - Reistro
     } else if (strcmp(recvBuff, "2") == 0) {
-    	crearUsuario(comm_socket, recvBuff, sendBuff);
+        crearUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "1") == 0) {
         iniciarSesion(comm_socket, recvBuff, sendBuff);
-    } else if (strcmp(recvBuff, "SALIR") == 0) {
-    	// Cliente solicita terminar la conexión
-    	strcpy(sendBuff, "Cerrando conexión");
-    	send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    	printf("Cliente solicitó terminar la conexión\n");
+    }
+    // Habitaciones
+    else if (strcmp(recvBuff, "CREATE_ROOM") == 0) {
+    	crearHabitacion(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "MODIFICAR_HABITACION") == 0) {
+        modificarHabitacion(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "CAMBIAR_ESTADO_HABITACION") == 0) {
+        cambiarEstadoHabitacion(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "BUSCAR_HABITACION") == 0) {
+        buscarHabitacionBD(comm_socket, recvBuff, sendBuff);
+    }
+    /*// Reservas
+    else if (strcmp(recvBuff, "MODIFICAR_RESERVA") == 0) {
+        modificarReserva(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "DELETE_RESERVATION") == 0) {
+        eliminarReserva(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "BUSCAR_RESERVAS_CLIENTE") == 0) {
+        buscarReservasCliente(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "GET_ACTIVE_RESERVATIONS") == 0) {
+        listarReservasActivas(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "GET_AVAILABLE_ROOMS") == 0) {
+        obtenerHabitacionesDisponibles(comm_socket, recvBuff, sendBuff);
+    } */else if (strcmp(recvBuff, "SALIR") == 0) {
+        // Cliente solicita terminar la conexión
+        strcpy(sendBuff, "Cerrando conexión");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Cliente solicitó terminar la conexión\n");
     } else {
-    	// Unknown command
-    	sprintf(sendBuff, "Comando desconocido: %s", recvBuff);
-    	send(comm_socket, sendBuff, strlen(sendBuff), 0);
-    	printf("Comando desconocido recibido: %s\n", recvBuff);
+        sprintf(sendBuff, "Comando desconocido: %s", recvBuff);
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Comando desconocido recibido: %s\n", recvBuff);
     }
 }
 

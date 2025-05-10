@@ -477,8 +477,31 @@ void buscarClientesBD(const char *dniCliente, SOCKET comm_socket) {
 
 // FUNCIONALIDAD PARA HABITACIONES ----------------------------------------------------------------------------------------------------------------------------------------
 
+// Función para comprobar si una habitación existe en la base de datos
+int comprobarHabitacion(const char *numeroHabitacion) {
+    char sql[] = "SELECT count(*) FROM habitaciones WHERE numero = ?";
+    sqlite3_stmt *stmt;
+    int result;
+
+    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, numeroHabitacion, strlen(numeroHabitacion), SQLITE_STATIC);
+
+    result = sqlite3_step(stmt);
+    int count = 0;
+    if (result == SQLITE_ROW) {
+        count = sqlite3_column_int(stmt, 0);
+    }
+
+    sqlite3_finalize(stmt);
+    return count > 0;
+}
+
+// Función para crear una habitación en la base de datos
 void crearHabitacionBD(Habitacion *habitacion) {
     char sql[] = "INSERT INTO habitaciones (numero, tipo, precio, estado, capacidad, descripcion) VALUES (?, ?, ?, ?, ?, ?)";
+    sqlite3_stmt *stmt;
+    int result;
+
     sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
 
     sqlite3_bind_text(stmt, 1, habitacion->numero, strlen(habitacion->numero), SQLITE_STATIC);
@@ -500,42 +523,45 @@ void crearHabitacionBD(Habitacion *habitacion) {
     sqlite3_finalize(stmt);
 }
 
-void modificarHabitacionBD(Habitacion *habitacion){
-	char sql[] = "UPDATE habitaciones SET tipo = ?, precio = ?, estado = ?, capacidad = ?, descripcion = ? WHERE numero = ?";
-		    sqlite3_stmt *stmt;
+// Función para modificar una habitación en la base de datos
+void modificarHabitacionBD(Habitacion *habitacion) {
+    char sql[] = "UPDATE habitaciones SET tipo = ?, precio = ?, estado = ?, capacidad = ?, descripcion = ? WHERE numero = ?";
+    sqlite3_stmt *stmt;
+    int result;
 
-		    char numero[10];
-		    char tipo[20];
-		    int precio = habitacion->precio;
-		    char estado[15]; // Disponible, Ocupada, Mantenimiento
-		    int capacidad = habitacion->capacidad;
-		    char descripcion[100];
+    char numero[10];
+    char tipo[20];
+    int precio = habitacion->precio;
+    char estado[15]; // Disponible, Ocupada, Mantenimiento
+    int capacidad = habitacion->capacidad;
+    char descripcion[100];
 
-			strcpy(numero, habitacion->numero);
-			strcpy(tipo, habitacion->tipo);
-			strcpy(estado, habitacion->estado);
-			strcpy(descripcion, habitacion->descripcion);
+    strcpy(numero, habitacion->numero);
+    strcpy(tipo, habitacion->tipo);
+    strcpy(estado, habitacion->estado);
+    strcpy(descripcion, habitacion->descripcion);
 
-			sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
-			sqlite3_bind_text(stmt, 1, tipo, strlen(tipo), SQLITE_STATIC);
-			sqlite3_bind_int(stmt, 2, precio);
-			sqlite3_bind_text(stmt, 3, estado, strlen(estado), SQLITE_STATIC);
-			sqlite3_bind_int(stmt, 4, capacidad);
-			sqlite3_bind_text(stmt, 5, descripcion, strlen(descripcion), SQLITE_STATIC);
-			sqlite3_bind_text(stmt, 6, numero, strlen(numero), SQLITE_STATIC);
+    sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, tipo, strlen(tipo), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, precio);
+    sqlite3_bind_text(stmt, 3, estado, strlen(estado), SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 4, capacidad);
+    sqlite3_bind_text(stmt, 5, descripcion, strlen(descripcion), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 6, numero, strlen(numero), SQLITE_STATIC);
 
-			result = sqlite3_step(stmt);
-			if (result != SQLITE_DONE) {
-				printf("Error al modificar la habitacion: %s\n", sqlite3_errmsg(db));
-				fflush(stdout);
-			} else {
-				printf("Habitacion '%s' modificada correctamente\n", habitacion->numero);
-				fflush(stdout);
-			}
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        printf("Error al modificar la habitacion: %s\n", sqlite3_errmsg(db));
+        fflush(stdout);
+    } else {
+        printf("Habitacion '%s' modificada correctamente\n", habitacion->numero);
+        fflush(stdout);
+    }
 
-			sqlite3_finalize(stmt);
+    sqlite3_finalize(stmt);
 }
 
+// Función para recuperar una habitación de la base de datos
 int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion) {
     char sql[] = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero = ?";
     sqlite3_stmt *stmt;
@@ -559,57 +585,135 @@ int recuperarHabitacionBD(const char *numHabitacion, Habitacion *habitacion) {
         sqlite3_finalize(stmt);
         return 1;
     } else {
-        printf("Cliente no encontrado.\n");
+        printf("Habitación no encontrada.\n");
         fflush(stdout);
         sqlite3_finalize(stmt);
         return 0;
     }
 }
 
-char* listarHabitaciones(){
-	static char resultBuffer[4096]; // Buffer estático para almacenar resultados
-	resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+// Función para listar todas las habitaciones
+char* listarHabitaciones() {
+    static char resultBuffer[4096]; // Buffer estático para almacenar resultados
+    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+    sqlite3_stmt *stmt;
+    int result;
 
-	char sql2[] = "select numero from habitaciones";
-	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
+    char sql[] = "SELECT numero, tipo, precio, estado, capacidad FROM habitaciones";
+    sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 
-	strcat(resultBuffer, "Lista de Habitaciones:\n");
+    strcat(resultBuffer, "Lista de Habitaciones:\n");
+    strcat(resultBuffer, "Número | Tipo | Precio | Estado | Capacidad\n");
+    strcat(resultBuffer, "----------------------------------------\n");
 
-	do {
-		result = sqlite3_step(stmt);
-		if (result == SQLITE_ROW) {
-			char temp[256];
-			sprintf(temp, "Habitacion - %s\n", (char*)sqlite3_column_text(stmt, 0));
-			strcat(resultBuffer, temp);
-		}
-	} while (result == SQLITE_ROW);
+    do {
+        result = sqlite3_step(stmt);
+        if (result == SQLITE_ROW) {
+            char temp[256];
+            sprintf(temp, "%s | %s | %d € | %s | %d personas\n",
+                (char*)sqlite3_column_text(stmt, 0),    // número
+                (char*)sqlite3_column_text(stmt, 1),    // tipo
+                sqlite3_column_int(stmt, 2),            // precio
+                (char*)sqlite3_column_text(stmt, 3),    // estado
+                sqlite3_column_int(stmt, 4));           // capacidad
 
-	sqlite3_finalize(stmt);
-	return resultBuffer;
+            strcat(resultBuffer, temp);
+        }
+    } while (result == SQLITE_ROW);
+
+    sqlite3_finalize(stmt);
+    return resultBuffer;
 }
 
-void buscarHabitacionBD(const char *numHabitacion){
-	char sql2[] = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero = ?";
+// Función para buscar una habitación por número
+char* buscarHabitacionPorNumeroBD(const char *numHabitacion) {
+    static char resultBuffer[1024]; // Buffer estático para almacenar resultados
+    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+    sqlite3_stmt *stmt;
+    int result;
 
-	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+    const char *sql = "SELECT numero, tipo, precio, estado, capacidad, descripcion FROM habitaciones WHERE numero LIKE ?";
 
-	sqlite3_bind_text(stmt, 1, numHabitacion, strlen(numHabitacion), SQLITE_STATIC);
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        return resultBuffer;
+    }
 
-	printf("\n");
-	do {
-		result = sqlite3_step(stmt);
-		if (result == SQLITE_ROW) {
-			printf("%s, %s, %d, %s, %d, %s\n", (char*) 	sqlite3_column_text(stmt, 0),
-														sqlite3_column_text(stmt, 1),
-														sqlite3_column_int(stmt, 2),
-														sqlite3_column_text(stmt, 3),
-														sqlite3_column_int(stmt, 4),
-														sqlite3_column_text(stmt, 5));
-		}
-	} while (result == SQLITE_ROW);
-	printf("\n");
+    // Agregar comodines para búsqueda parcial
+    char searchPattern[100];
+    sprintf(searchPattern, "%%%s%%", numHabitacion); // %numHabitacion%
 
-	sqlite3_finalize(stmt);
+    if (sqlite3_bind_text(stmt, 1, searchPattern, strlen(searchPattern), SQLITE_STATIC) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al enlazar parámetros: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return resultBuffer;
+    }
+
+    strcat(resultBuffer, "Resultados de la búsqueda:\n");
+    strcat(resultBuffer, "Número | Tipo | Precio | Estado | Capacidad | Descripción\n");
+    strcat(resultBuffer, "-----------------------------------------------------------\n");
+
+    bool foundResult = false;
+
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+        foundResult = true;
+        char temp[512];
+        sprintf(temp, "%s | %s | %d € | %s | %d | %s\n",
+            (const char*)sqlite3_column_text(stmt, 0),  // número
+            (const char*)sqlite3_column_text(stmt, 1),  // tipo
+            sqlite3_column_int(stmt, 2),                // precio
+            (const char*)sqlite3_column_text(stmt, 3),  // estado
+            sqlite3_column_int(stmt, 4),                // capacidad
+            (const char*)sqlite3_column_text(stmt, 5)); // descripción
+
+        strcat(resultBuffer, temp);
+    }
+
+    if (!foundResult) {
+        strcat(resultBuffer, "No se encontraron habitaciones que coincidan con el criterio de búsqueda.\n");
+    }
+
+    if (result != SQLITE_DONE && result != SQLITE_ROW) {
+        char temp[256];
+        sprintf(temp, "Error al ejecutar la consulta: %s\n", sqlite3_errmsg(db));
+        strcat(resultBuffer, temp);
+    }
+
+    sqlite3_finalize(stmt);
+    return resultBuffer;
+}
+
+// Función para eliminar una habitación de la base de datos
+int eliminarHabitacionBD(char* numeroHabitacion) {
+    sqlite3_stmt *stmt;
+    int result;
+
+    // Query SQL para eliminar la habitación
+    char sql[100] = "DELETE FROM habitaciones WHERE numero = ?";
+
+    // Preparar la declaración SQL
+    if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
+        printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+        return 0;
+    }
+
+    // Vincular el parámetro (número de habitación)
+    sqlite3_bind_text(stmt, 1, numeroHabitacion, strlen(numeroHabitacion), SQLITE_STATIC);
+
+    // Ejecutar la consulta
+    result = sqlite3_step(stmt);
+
+    // Finalizar la declaración
+    sqlite3_finalize(stmt);
+
+    // Verificar el resultado
+    if (result != SQLITE_DONE) {
+        printf("Error al eliminar la habitación: %s\n", sqlite3_errmsg(db));
+        return 0;
+    }
+
+    // Si llegamos aquí, la habitación se eliminó correctamente
+    return 1;
 }
 // FUNCIONALIDAD PARA FACTURAS ------------------------------------------------------------------------------
 

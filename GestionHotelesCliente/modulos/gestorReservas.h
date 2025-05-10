@@ -20,5 +20,11 @@ typedef struct {
 } Reserva;
 
 void gestionReservas(SOCKET s);
+void modificarReserva(SOCKET s);
+void eliminarReservaBD(SOCKET s);
+void buscarReservas(SOCKET s);
+void listarReserva(SOCKET s);
+
+
 
 #endif /* MODULOS_GESTORRESERVAS_H_ */
