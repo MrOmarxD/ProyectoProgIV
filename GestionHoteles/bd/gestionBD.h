@@ -32,7 +32,7 @@ int comprobarCliente(const char *cliente);
 int modificarClienteBD(Cliente *client);
 int recuperarClienteBD(const char *dniCliente, Cliente *client);
 char* listaClientes();
-void buscarClientesBD(const char *dniCliente, SOCKET comm_socket);
+char* buscarClientesBD(const char *dniCliente);
 
 // Funciones Habitaciones
 int comprobarHabitacion(const char *numeroHabitacion);

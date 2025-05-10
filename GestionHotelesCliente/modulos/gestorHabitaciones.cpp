@@ -514,37 +514,14 @@ void buscarHabitacion(SOCKET s) {
     char recvBuff[512];
     char sendBuff[512];
     string criterio;
-    int tipoBusqueda;
 
     // Limpiar buffers
     memset(recvBuff, 0, sizeof(recvBuff));
     memset(sendBuff, 0, sizeof(sendBuff));
 
-    cout << "\n=== BÚSQUEDA DE HABITACIONES ===\n";
-    cout << "1. Buscar por número\n";
-    cout << "2. Buscar por tipo\n";
-    cout << "3. Buscar por estado\n";
-    cout << "Seleccione una opción: ";
-    cin >> tipoBusqueda;
-
-    // Limpiar buffer de entrada
-    cin.ignore(1000, '\n');
-
-    switch(tipoBusqueda) {
-        case 1:
-            cout << "Introduce el número de habitación a buscar: ";
-            break;
-        case 2:
-            cout << "Introduce el tipo de habitación a buscar (Individual, Doble, Suite, Familiar): ";
-            break;
-        case 3:
-            cout << "Introduce el estado a buscar (Disponible, Ocupada, Mantenimiento): ";
-            break;
-        default:
-            cout << "Opción no válida. Volviendo al menú anterior." << endl;
-            return;
-    }
-
+    cout << "\n=== BÚSQUEDA DE HABITACION ===\n";
+    cout << "Introduce el numero de la habitacion a buscar: ";
+    cin.ignore(1000, '\n'); // Limpiar buffer de entrada
     getline(cin, criterio);
 
     // Enviar comando al servidor
@@ -552,14 +529,6 @@ void buscarHabitacion(SOCKET s) {
     send(s, sendBuff, strlen(sendBuff), 0);
 
     // Pequeña pausa para asegurar que el servidor procese el comando
-    Sleep(100);
-
-    // Enviar tipo de búsqueda
-    memset(sendBuff, 0, sizeof(sendBuff));
-    sprintf(sendBuff, "%d", tipoBusqueda);
-    send(s, sendBuff, strlen(sendBuff), 0);
-
-    // Pequeña pausa para asegurar que el servidor procese el tipo
     Sleep(100);
 
     // Enviar criterio de búsqueda

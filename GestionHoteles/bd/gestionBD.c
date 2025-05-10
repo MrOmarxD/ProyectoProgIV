@@ -439,16 +439,24 @@ char* listarClientes(){
 }
 
 
-void buscarClientesBD(const char *dniCliente, SOCKET comm_socket) {
-    Cliente cliente; // Crear un objeto Cliente para almacenar los datos
-    memset(&cliente, 0, sizeof(Cliente)); // Inicializar el objeto a valores predeterminados
+char* buscarClientesBD(const char *dniCliente) {
+    static char resultadoBusqueda[512]; // Buffer estático para devolver resultado
+    Cliente cliente;
+    memset(&cliente, 0, sizeof(Cliente)); // Inicializar el objeto
+    memset(resultadoBusqueda, 0, sizeof(resultadoBusqueda)); // Inicializar buffer resultado
 
-    char sql2[] = "SELECT dni, nombre, apellido, telefono, email, fecha_registro FROM clientes WHERE dni = ?";
+    char sql[] = "SELECT dni, nombre, apellido, telefono, email, fecha_registro FROM clientes WHERE dni = ?";
+    sqlite3_stmt *stmt;
 
-    sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL);
+    int rc = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        sprintf(resultadoBusqueda, "ERROR|Error en la consulta: %s", sqlite3_errmsg(db));
+        return resultadoBusqueda;
+    }
+
     sqlite3_bind_text(stmt, 1, dniCliente, strlen(dniCliente), SQLITE_STATIC);
 
-    result = sqlite3_step(stmt);
+    int result = sqlite3_step(stmt);
     if (result == SQLITE_ROW) {
         // Asignar los valores obtenidos de la base de datos al objeto Cliente
         strcpy(cliente.dni, (const char *)sqlite3_column_text(stmt, 0));
@@ -456,22 +464,19 @@ void buscarClientesBD(const char *dniCliente, SOCKET comm_socket) {
         strcpy(cliente.apellido, (const char *)sqlite3_column_text(stmt, 2));
         strcpy(cliente.telefono, (const char *)sqlite3_column_text(stmt, 3));
         strcpy(cliente.email, (const char *)sqlite3_column_text(stmt, 4));
-        // Serializar el objeto Cliente en un buffer
-        char sendBuff[512];
-        snprintf(sendBuff, sizeof(sendBuff), "CLIENTE|%s|%s|%s|%s|%s",
-                 cliente.dni, cliente.nombre, cliente.apellido,
-                 cliente.telefono, cliente.email);
 
-        // Enviar el buffer al cliente
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        // Formatear el resultado
+        snprintf(resultadoBusqueda, sizeof(resultadoBusqueda), "CLIENTE|%s|%s|%s|%s|%s",
+                cliente.dni, cliente.nombre, cliente.apellido,
+                cliente.telefono, cliente.email);
     } else {
-        // Enviar un mensaje indicando que no se encontró el cliente
-        const char *notFoundMsg = "ERROR|Cliente no encontrado";
-        send(comm_socket, notFoundMsg, strlen(notFoundMsg), 0);
+        strcpy(resultadoBusqueda, "ERROR|Cliente no encontrado");
     }
 
     sqlite3_finalize(stmt);
+    return resultadoBusqueda;
 }
+
 
 
 
@@ -641,7 +646,7 @@ char* buscarHabitacionPorNumeroBD(const char *numHabitacion) {
 
     // Agregar comodines para búsqueda parcial
     char searchPattern[100];
-    sprintf(searchPattern, "%%%s%%", numHabitacion); // %numHabitacion%
+    sprintf(searchPattern, "%s", numHabitacion); // %numHabitacion%
 
     if (sqlite3_bind_text(stmt, 1, searchPattern, strlen(searchPattern), SQLITE_STATIC) != SQLITE_OK) {
         sprintf(resultBuffer, "Error al enlazar parámetros: %s\n", sqlite3_errmsg(db));

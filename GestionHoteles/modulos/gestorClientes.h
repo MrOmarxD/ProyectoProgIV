@@ -16,7 +16,7 @@ typedef struct {
 }Cliente;
 
 void crearCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
-void obtenrClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void obtenerClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void modificarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void buscarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 

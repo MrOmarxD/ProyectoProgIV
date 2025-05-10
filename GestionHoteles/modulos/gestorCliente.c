@@ -1,6 +1,6 @@
 #include "gestorClientes.h"
 
-void obtenrClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff){
+void obtenerClientes(SOCKET comm_socket, char *recvBuff, char *sendBuff){
 	char* listaDeClientes = listarClientes();
 	strncpy(sendBuff, listaDeClientes, 511);
 	sendBuff[511] = '\0'; // Aseguramos que termine con nulo
@@ -157,7 +157,25 @@ void modificarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 	}
 }
 
-void buscarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff){
+void buscarCliente(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Recibir el criterio de búsqueda
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        printf("Búsqueda de cliente por criterio: %s\n", recvBuff);
+
+        // Realizar la búsqueda en la base de datos
+        char* resultadoBusqueda = buscarClientesBD(recvBuff);
+
+        // Enviar resultados al cliente
+        memset(sendBuff, 0, 512);
+        strncpy(sendBuff, resultadoBusqueda, 511);
+        sendBuff[511] = '\0'; // Asegurar terminación
+
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+        printf("Resultados de búsqueda enviados al cliente\n");
+    }
 }
 
 

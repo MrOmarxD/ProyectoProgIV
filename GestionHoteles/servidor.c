@@ -24,20 +24,25 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
         buscarUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "MODIFICAR_USUARIO") == 0) {
         modificarUsuario(comm_socket, recvBuff, sendBuff);
-    } else if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
-        obtenrClientes(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "DELETE_USER") == 0) {
         eliminarUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "CREATE_RESERVATION") == 0) {
         crearReserva(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "GET_ROOMS") == 0) {
         obtenerHabitaciones(comm_socket, recvBuff, sendBuff);
-    } else if (strcmp(recvBuff, "CREATE_CLIENT") == 0) {
+    }
+    //Cliente Admin
+    else if (strcmp(recvBuff, "CREATE_CLIENT") == 0) {
         crearCliente(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "MODIFICAR_CLIENTE") == 0) {
         modificarCliente(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "GET_CLIENTS") == 0) {
+        obtenerClientes(comm_socket, recvBuff, sendBuff);
+    } else if (strcmp(recvBuff, "BUSCAR_CLIENTE") == 0) {
+        buscarCliente(comm_socket, recvBuff, sendBuff);
+    }
     // Iniciar sesion - Reistro
-    } else if (strcmp(recvBuff, "2") == 0) {
+    else if (strcmp(recvBuff, "2") == 0) {
         crearUsuario(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "1") == 0) {
         iniciarSesion(comm_socket, recvBuff, sendBuff);
