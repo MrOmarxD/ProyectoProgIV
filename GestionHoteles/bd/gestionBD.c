@@ -104,17 +104,17 @@ int eliminarUsuarioBD(char* nombreUsuario) {
 int comprobarUsuario(const char *usuario){
 	char sql2[] = "select count(*) from usuarios where nombre_usuario = ?";
 
-		sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
-		sqlite3_bind_text(stmt, 1, usuario, strlen(usuario), SQLITE_STATIC);
+	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+	sqlite3_bind_text(stmt, 1, usuario, strlen(usuario), SQLITE_STATIC);
 
-		result = sqlite3_step(stmt);
-		    int count = 0;
-		    if (result == SQLITE_ROW) {
-		        count = sqlite3_column_int(stmt, 0);
-		    }
+	result = sqlite3_step(stmt);
+		int count = 0;
+		if (result == SQLITE_ROW) {
+			count = sqlite3_column_int(stmt, 0);
+		}
 
-		    sqlite3_finalize(stmt);
-		    return count > 0;
+		sqlite3_finalize(stmt);
+		return count > 0;
 }
 
 
@@ -853,71 +853,45 @@ int recuperarReservaBD(int idReserva, Reserva *r) {
     }
 }
 
-void eliminarReservaBD(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    // Recibir el ID de la reserva a eliminar
-    memset(recvBuff, 0, 512);
-    int bytes = recv(comm_socket, recvBuff, 512, 0);
-    if (bytes > 0) {
-        recvBuff[bytes] = '\0'; // Asegurar terminación
-        int id_reserva = atoi(recvBuff);
-
-        Reserva *r = (Reserva*) malloc(sizeof(Reserva));
-		memset(r, 0, sizeof(Reserva));
-
-        // Verificar si la reserva existe
-        if (recuperarReservaBD(id_reserva, r) != 0) {
-            strcpy(sendBuff, "ERROR: No existe reserva con ese ID");
-            printf("Reserva con ID %d no existe en la BD\n", id_reserva);
-        } else {
-            // Eliminar la reserva de la BD
-            char sql[] = "DELETE FROM reservas WHERE id = ?";
-            sqlite3_stmt *stmt;
-
-            if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
-                strcpy(sendBuff, "ERROR: Error al preparar la consulta de eliminación");
-                printf("Error al preparar la consulta de eliminación: %s\n", sqlite3_errmsg(db));
-            } else {
-                sqlite3_bind_int(stmt, 1, id_reserva);
-                int result = sqlite3_step(stmt);
-
-                if (result != SQLITE_DONE) {
-                    strcpy(sendBuff, "Reserva no eliminada correctamente");
-                    printf("Error al eliminar la reserva: %s\n", sqlite3_errmsg(db));
-                } else {
-                    strcpy(sendBuff, "Reserva eliminada correctamente");
-                    printf("Reserva con ID %d eliminada de la BD\n", id_reserva);
-                }
-
-                sqlite3_finalize(stmt);
-            }
-        }
-
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
-        free(r);
-    }
-
-}
-
-int comprobarReserva(const char *idCliente) {
-    char sql[] = "SELECT count(*) FROM reservas WHERE id_cliente = ?";
+int eliminarReservaBD(int idReserva) {
     sqlite3_stmt *stmt;
-    int count = 0;
+    int result;
+    char sql[] = "DELETE FROM reservas WHERE id = ?";
 
+    // Preparar la declaración SQL
     if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
         printf("Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
-        fflush(stdout);
+        return 0;
+    }
+    sqlite3_bind_int(stmt, 1, idReserva);
+
+    result = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    if (result != SQLITE_DONE) {
+        printf("Error al eliminar la reserva: %s\n", sqlite3_errmsg(db));
         return 0;
     }
 
-    sqlite3_bind_text(stmt, 1, idCliente, strlen(idCliente), SQLITE_STATIC);
-    int result = sqlite3_step(stmt);
+    // Si llegamos aquí, la reserva se eliminó correctamente
+    return 1;
+}
 
-    if (result == SQLITE_ROW) {
-        count = sqlite3_column_int(stmt, 0);
-    }
+int comprobarReserva(int idReserva) {
+    char sql2[] = "SELECT count(*) FROM reservas WHERE id = ?";
 
-    sqlite3_finalize(stmt);
-    return count > 0;
+	sqlite3_prepare_v2(db, sql2, strlen(sql2), &stmt, NULL) ;
+	sqlite3_bind_int(stmt, 1, idReserva);
+
+	result = sqlite3_step(stmt);
+	int count = 0;
+	if (result == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt, 0);
+	}
+
+	sqlite3_finalize(stmt);
+	return count > 0;
 }
 
 char* buscarReservaBD(int id_reserva) {

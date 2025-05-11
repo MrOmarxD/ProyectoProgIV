@@ -61,7 +61,7 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     else if (strcmp(recvBuff, "MODIFICAR_RESERVA") == 0) {
         modificarReserva(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "DELETE_RESERVATION") == 0) {
-        eliminarReservaBD(comm_socket, recvBuff, sendBuff);
+        eliminarReserva(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "BUSCAR_RESERVAS") == 0) {
         buscarReservas(comm_socket, recvBuff, sendBuff);
     } else if (strcmp(recvBuff, "LISTAR_RESERVAS") == 0) {

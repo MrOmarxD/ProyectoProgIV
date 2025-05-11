@@ -23,6 +23,7 @@ void gestionReservas(SOCKET s);
 void modificarReserva(SOCKET s);
 void listaReservas(SOCKET s);
 void buscarReserva(SOCKET s);
+void eliminarReserva(SOCKET s);
 
 
 

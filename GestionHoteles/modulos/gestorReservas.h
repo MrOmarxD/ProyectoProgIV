@@ -23,5 +23,6 @@ void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void buscarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void eliminarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 
 #endif /* MODULOS_GESTORRESERVAS_H_ */

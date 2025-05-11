@@ -21,7 +21,7 @@ int comprobarUsuario(const char *usuario);
 int crearUsuarioBD(Usuario *user);
 int modificarUsuarioBD(Usuario *user);
 char* listaUsuarios();
-int eliminarUsuarioBD();
+int eliminarUsuarioBD(char* nombreUsuario);
 int comprobarUsuario(const char *usuario);
 int recuperarUsuarioBD(const char *nombreUsuario, Usuario *user);
 char* buscarUsuarioBD(const char *nombreUsuario);
@@ -51,7 +51,7 @@ int buscarFacturaBD(const char *numero_factura, Factura *factura);
 int crearReservaBD(Reserva *r);
 int modificarReservaBD(Reserva *r);
 int recuperarReservaBD(int idReserva, Reserva *r);
-void eliminarReservaBD(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+int eliminarReservaBD(int idReserva);
 char* buscarReservaBD(int id_reserva);
 char* listaReservasBD();
 

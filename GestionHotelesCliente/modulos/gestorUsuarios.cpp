@@ -207,6 +207,7 @@ void eliminarUsuario(SOCKET s){
         cin.get();
     }
 }
+
 void listaUsuarios(SOCKET s) {
     char recvBuff[512];
     char sendBuff[512];

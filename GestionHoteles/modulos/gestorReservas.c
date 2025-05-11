@@ -209,3 +209,30 @@ void buscarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff){
 		printf("Resultados de búsqueda enviados al cliente\n");
 	}
 }
+
+void eliminarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Recibir id reserva a eliminar
+    memset(recvBuff, 0, 512);
+    int bytes = recv(comm_socket, recvBuff, 512, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0'; // Asegurar terminación
+        int id_reserva = atoi(recvBuff);
+
+        // Verificar si la reserva existe
+        if (comprobarReserva(id_reserva) == 0) {
+            strcpy(sendBuff, "ERROR: La reserva no existe en la base de datos");
+            printf("Reserva con ID %d no existe en la BD\n", id_reserva);
+        } else {
+            // Eliminar la reserva de la BD
+            if (eliminarReservaBD(id_reserva) != 1) {  // Aquí está la corrección principal
+                strcpy(sendBuff, "Reserva no eliminada correctamente");
+                printf("Error al eliminar la reserva con ID %d de la BD\n", id_reserva);
+            } else {
+                strcpy(sendBuff, "Reserva eliminada correctamente");  // Corregido el mensaje
+                printf("Reserva con ID %d eliminada de la BD\n", id_reserva);
+            }
+        }
+
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    }
+}

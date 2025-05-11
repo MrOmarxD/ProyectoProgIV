@@ -28,7 +28,7 @@ void gestionReservas(SOCKET s) {
                 	modificarReserva(s);
                     break;
                 case 3:
-                	//eliminarReservaBD(s);
+                	eliminarReserva(s);
                     break;
                 case 4:
                 	buscarReserva(s);
@@ -369,4 +369,54 @@ void buscarReserva(SOCKET s) {
     // Añadir una pausa para que el usuario pueda leer el mensaje
     cout << "\nPresiona Enter para continuar...";
     cin.get();
+}
+
+void eliminarReserva(SOCKET s){
+    char recvBuff[512];
+    char sendBuff[512];
+
+    // Enviar comando al servidor
+    strcpy(sendBuff, "DELETE_RESERVATION");
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    int id_reserva;
+    // Limpiar el buffer de entrada antes de usar getline
+    cin.ignore(1000, '\n');
+
+    cout << "\n=== ELIMINAR RESERVA ===\n";
+    cout << "Introduce el ID de la reserva que desea eliminar: ";
+    cin >> id_reserva;
+
+    // Confirmar la eliminación
+    char confirmacion;
+    cout << "¿Está seguro de que desea eliminar la reserva '" << id_reserva << "'? (S/N): ";
+    cin >> confirmacion;
+
+    if (toupper(confirmacion) != 'S') {
+        cout << "Operación cancelada." << endl;
+        cout << "Presiona Enter para continuar...";
+        cin.ignore(1000, '\n'); // Limpiar buffer
+        cin.get();
+        return;
+    }
+
+    // Limpiar buffer después de usar cin >>
+    cin.ignore(1000, '\n');
+
+    // Enviar el id de la reserva al servidor
+    memset(sendBuff, 0, sizeof(sendBuff));
+    sprintf(sendBuff, "%d", id_reserva);
+    send(s, sendBuff, strlen(sendBuff), 0);
+
+    // Recibir respuesta del servidor
+    memset(recvBuff, 0, sizeof(recvBuff));
+    int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+    if (bytes > 0) {
+        recvBuff[bytes] = '\0';
+        cout << recvBuff << endl;
+
+        // Añadir una pausa para que el usuario pueda leer el mensaje
+        cout << "Presiona Enter para continuar...";
+        cin.get();
+    }
 }
