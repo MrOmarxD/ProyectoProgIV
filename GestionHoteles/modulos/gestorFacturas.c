@@ -158,45 +158,10 @@ void generarNuevaFactura(int* usuario_actual) {
     fflush(stdout);
 }
 
-void buscarFactura(int* usuario_actual) {
-    char *numero_factura = (char *)malloc(20 * sizeof(char));
-    if (numero_factura == NULL) {
-        printf("Error: No se pudo asignar memoria.\n");
-        exit(1);
-    }
+void buscarFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 
-    Factura factura_encontrada;
-    Cliente cliente;
+}
 
-    printf("\n--- BUSCAR Factura ---\n");
-    printf("Ingrese el numero de factura que quiera buscar: ");
-    fflush(stdout);
+void crearFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 
-    while (getchar() != '\n');
-
-    fgets(numero_factura, 20, stdin);
-    numero_factura[strcspn(numero_factura, "\n")] = '\0';
-
-    if (buscarFacturaBD(numero_factura, &factura_encontrada)) {
-        if (recuperarClienteBD(factura_encontrada.dni_cliente, &cliente)) {
-            printf("\n=== FACTURA ENCONTRADA ===\n");
-            printf("ID: %d\n", factura_encontrada.id);
-            printf("DNI Cliente: %s\n", factura_encontrada.dni_cliente);
-            printf("Nombre Cliente: %s %s\n", cliente.nombre, cliente.apellido);
-            printf("Monto: %.2f €\n", factura_encontrada.monto);
-            printf("Metodo de Pago: %s\n", factura_encontrada.metodo_pago);
-            printf("Fecha: %s\n", factura_encontrada.fecha);
-            printf("Numero Factura: %s\n", factura_encontrada.numero_Factura);
-            printf("Estado: %s\n", factura_encontrada.estado);
-            printf("=========================\n");
-            fflush(stdout);
-        } else {
-            printf("Error: No se pudo encontrar informacion del cliente con DNI %s.\n", factura_encontrada.dni_cliente);
-            fflush(stdout);
-        }
-    } else {
-        printf("No se encontrado ninguna factura con el numero %s.\n", factura_encontrada.numero_Factura);
-        fflush(stdout);
-    }
-    free(numero_factura);
 }

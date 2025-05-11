@@ -67,6 +67,12 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     } else if (strcmp(recvBuff, "LISTAR_RESERVAS") == 0) {
     	listarReservas(comm_socket, recvBuff, sendBuff);
     }
+    //FACTURAS
+    else if (strcmp(recvBuff, "CREAR_FACTURA") == 0) {
+		crearFactura(comm_socket, recvBuff, sendBuff);
+	} else if (strcmp(recvBuff, "BUSCAR_FACTURA") == 0) {
+		buscarFactura(comm_socket, recvBuff, sendBuff);
+	}
     // Resto
     else if (strcmp(recvBuff, "SALIR") == 0) {
         // Cliente solicita terminar la conexión

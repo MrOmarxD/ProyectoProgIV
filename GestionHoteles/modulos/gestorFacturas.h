@@ -2,6 +2,12 @@
 #define GESTOR_FACTURAS_H
 
 #include "gestorClientes.h"
+#include "gestorRegistros.h"
+#include <winsock2.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
 typedef struct {
     int id;
     char id_reserva[10];
@@ -14,6 +20,7 @@ typedef struct {
 }Factura;
 
 void generarNuevaFactura(int* usuario_actual);
-void buscarFactura(int* usuario_actual);
+void buscarFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void crearFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 
 #endif /* GESTOR_FACTURAS_H */
