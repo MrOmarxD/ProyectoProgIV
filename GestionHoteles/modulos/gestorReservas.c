@@ -73,15 +73,15 @@ void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     int bytes = recv(comm_socket, recvBuff, 512, 0);
     if (bytes > 0) {
         recvBuff[bytes] = '\0'; // Asegurar terminación
-        int id_reserva = atoi(recvBuff);
+        int idReserva = atoi(recvBuff);
 
         // Verificar si la reserva existe
         Reserva *r = (Reserva*) malloc(sizeof(Reserva));
         memset(r, 0, sizeof(Reserva));
 
-        if (recuperarReservaPorIdBD(id_reserva, r) == 0) {
-            strcpy(sendBuff, "ERROR: No existe reserva con ese ID");
-            printf("Reserva con ID %d no existe en la BD\n", id_reserva);
+        if (recuperarReservaBD(idReserva, r) == 0) {
+            strcpy(sendBuff, "ERROR: La reserva no existe en la base de datos");
+            printf("Reserva con ID %d no existe en la BD\n", idReserva);
             free(r);
         } else {
             // Enviar los datos actuales de la reserva al cliente
@@ -101,10 +101,6 @@ void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
                 // Parsear los datos separados por '|'
                 char *token;
                 char *rest = recvBuff;
-
-                // ID (no cambia, es la clave primaria)
-                token = strtok_s(rest, "|", &rest);
-                if (token != NULL) r->id = atoi(token);
 
                 // DNI Cliente
                 token = strtok_s(rest, "|", &rest);
@@ -134,6 +130,10 @@ void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
                 token = strtok_s(rest, "|", &rest);
                 if (token != NULL) strcpy(r->observaciones, token);
 
+                // ID (último parámetro para confirmar)
+                token = strtok_s(rest, "|", &rest);
+                if (token != NULL) r->id = atoi(token);
+
                 // Actualizar la reserva en la BD
                 if (modificarReservaBD(r) != 1) {
                     strcpy(sendBuff, "Reserva no modificada correctamente");
@@ -150,74 +150,41 @@ void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     }
 }
 
-void buscarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    // Recibir el DNI del cliente cuya reserva se busca
-    memset(recvBuff, 0, 512);
-    int bytes = recv(comm_socket, recvBuff, 512, 0);
-    if (bytes > 0) {
-        recvBuff[bytes] = '\0'; // Asegurar terminación
-        printf("Búsqueda de reserva para el cliente con DNI: %s\n", recvBuff);
+void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Obtener la lista de reservas desde la BD
+    char* listaDeReservas = listaReservasBD();
 
-        // Verificar si la reserva existe
-        if (!comprobarReserva(recvBuff)) {
-            strcpy(sendBuff, "ERROR: No existe reserva para el cliente con ese DNI");
-            printf("Reserva para el cliente %s no existe en la BD\n", recvBuff);
-        } else {
-            // Buscar la reserva en la BD
-            Reserva *r = (Reserva*) malloc(sizeof(Reserva));
-            memset(r, 0, sizeof(Reserva));
+	// Asegurarse de que no exceda el tamaño del buffer
+	strncpy(sendBuff, listaDeReservas, 511);
+	sendBuff[511] = '\0'; // Garantizar terminación con NULL
 
-            if (recuperarReservaPorIdBD(recvBuff, r) == 1) {
-                // Formatear los datos de la reserva para enviarlos al cliente
-                memset(sendBuff, 0, 512);
-                sprintf(sendBuff, "%d|%s|%d|%s|%s|%s|%d|%s",
-                    r->id, r->dni_cliente, r->id_habitacion, r->fecha_entrada,
-                    r->fecha_salida, r->estado, r->monto, r->observaciones);
-                printf("Reserva encontrada para el cliente %s\n", recvBuff);
-            } else {
-                strcpy(sendBuff, "ERROR: Error al recuperar la reserva");
-                printf("Error al recuperar la reserva para el cliente %s\n", recvBuff);
-            }
-            free(r);
-        }
+	// Enviar la respuesta al cliente
+	send(comm_socket, sendBuff, strlen(sendBuff), 0);
 
-        send(comm_socket, sendBuff, strlen(sendBuff), 0);
-        printf("Resultados de búsqueda enviados al cliente\n");
-    }
+	printf("Enviada lista de reservas al cliente\n");
+
 }
 
-void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
-    printf("Ejecutando listarReservas en el servidor...\n");
+void buscarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff){
+	// Recibir el criterio de búsqueda
+	memset(recvBuff, 0, 512);
+	int bytes = recv(comm_socket, recvBuff, 512, 0);
+	if (bytes > 0) {
+		recvBuff[bytes] = '\0'; // Asegurar terminación
+		printf("Búsqueda de reservas por criterio: %s\n", recvBuff);
 
-    // Inicializar buffer de envío
-    memset(sendBuff, 0, sizeof(sendBuff)); // Asegúrate de que sendBuff tenga tamaño adecuado
+		// Convertir el criterio a entero para buscar por ID
+		int id_reserva = atoi(recvBuff);
 
-    // Obtener lista de reservas directamente
-    char* listaReservas = listarReservasBD();
+		// Realizar la búsqueda en la base de datos
+		char* resultadoBusqueda = buscarReservaBD(id_reserva);
 
-    if (listaReservas == NULL || strlen(listaReservas) == 0) {
-        printf("No se obtuvieron datos de la base de datos\n");
-        strcpy(sendBuff, "No hay datos disponibles.");
-    } else {
-        printf("Datos obtenidos de la BD (%d bytes)\n", (int)strlen(listaReservas));
+		// Enviar resultados al cliente
+		memset(sendBuff, 0, 512);
+		strncpy(sendBuff, resultadoBusqueda, 511);
+		sendBuff[511] = '\0'; // Asegurar terminación
 
-        // Copiar al buffer de envío, asegurando no exceder su tamaño
-        size_t maxCopy = sizeof(sendBuff) - 1; // Asume que sendBuff es un arreglo
-        if (strlen(listaReservas) < maxCopy) {
-            strcpy(sendBuff, listaReservas);
-        } else {
-            strncpy(sendBuff, listaReservas, maxCopy);
-            sendBuff[maxCopy] = '\0'; // Asegurar terminación
-            printf("Advertencia: Datos truncados al copiar al buffer\n");
-        }
-    }
-
-    // Enviar datos al cliente
-    int sentBytes = send(comm_socket, sendBuff, strlen(sendBuff), 0);
-
-    if (sentBytes == SOCKET_ERROR) {
-        printf("Error al enviar datos: %d\n", WSAGetLastError());
-    } else {
-        printf("Datos enviados correctamente (%d bytes)\n", sentBytes);
-    }
+		send(comm_socket, sendBuff, strlen(sendBuff), 0);
+		printf("Resultados de búsqueda enviados al cliente\n");
+	}
 }

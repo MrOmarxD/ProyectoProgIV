@@ -21,9 +21,8 @@ typedef struct {
 
 void gestionReservas(SOCKET s);
 void modificarReserva(SOCKET s);
-void eliminarReservaBD(SOCKET s);
-void buscarReservas(SOCKET s);
 void listaReservas(SOCKET s);
+void buscarReserva(SOCKET s);
 
 
 

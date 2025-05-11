@@ -246,9 +246,9 @@ char* buscarUsuarioBD(const char *nombreUsuario) {
         return resultBuffer;
     }
 
-    // Agregar comodines para búsqueda parcial
+
     char searchPattern[100];
-    sprintf(searchPattern, "%s", nombreUsuario); // %nombreUsuario%
+    sprintf(searchPattern, "%s", nombreUsuario); // nombreUsuario
 
     if (sqlite3_bind_text(stmt, 1, searchPattern, strlen(searchPattern), SQLITE_STATIC) != SQLITE_OK) {
         sprintf(resultBuffer, "Error al enlazar parámetros: %s\n", sqlite3_errmsg(db));
@@ -787,7 +787,7 @@ int crearReservaBD(Reserva *reserva){
     }
 }
 int modificarReservaBD(Reserva *r) {
-    char sql[] = "UPDATE reservas SET dni_cliente = ?, id_habitacion = ?, fecha_entrada = ?, fecha_salida = ?, estado = ?, monto = ?, observaciones = ? WHERE id = ?";
+    char sql[] = "UPDATE reservas SET id_cliente = ?, id_habitacion = ?, fecha_entrada = ?, fecha_salida = ?, estado = ?, monto = ?, observaciones = ? WHERE id = ?";
     sqlite3_stmt *stmt;
     int result;
 
@@ -821,8 +821,8 @@ int modificarReservaBD(Reserva *r) {
     }
 }
 
-int recuperarReservaPorIdBD(int id_reserva, Reserva *r) {
-    char sql[] = "SELECT id, dni_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas WHERE id = ?";
+int recuperarReservaBD(int idReserva, Reserva *r) {
+    char sql[] = "SELECT * FROM reservas WHERE id = ?";
     sqlite3_stmt *stmt;
 
     if (sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) != SQLITE_OK) {
@@ -831,69 +831,23 @@ int recuperarReservaPorIdBD(int id_reserva, Reserva *r) {
         return 0;
     }
 
-    sqlite3_bind_int(stmt, 1, id_reserva);
+    // Vincular el ID de la reserva a la consulta
+    sqlite3_bind_int(stmt, 1, idReserva);
 
-    int result = sqlite3_step(stmt);
-    if (result == SQLITE_ROW) {
-        // Recuperamos todos los campos de la reserva
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        // Recuperamos los datos de la reserva
         r->id = sqlite3_column_int(stmt, 0);
-
-        // Copiamos el dni_cliente con manejo seguro
-        const char *dni = (const char *)sqlite3_column_text(stmt, 1);
-        if (dni != NULL) {
-            strncpy(r->dni_cliente, dni, sizeof(r->dni_cliente) - 1);
-            r->dni_cliente[sizeof(r->dni_cliente) - 1] = '\0'; // Asegurar terminación
-        } else {
-            r->dni_cliente[0] = '\0';
-        }
-
+        strcpy(r->dni_cliente, (const char*)sqlite3_column_text(stmt, 1));
         r->id_habitacion = sqlite3_column_int(stmt, 2);
-
-        // Copiamos fecha_entrada con manejo seguro
-        const char *fecha_e = (const char *)sqlite3_column_text(stmt, 3);
-        if (fecha_e != NULL) {
-            strncpy(r->fecha_entrada, fecha_e, sizeof(r->fecha_entrada) - 1);
-            r->fecha_entrada[sizeof(r->fecha_entrada) - 1] = '\0';
-        } else {
-            r->fecha_entrada[0] = '\0';
-        }
-
-        // Copiamos fecha_salida con manejo seguro
-        const char *fecha_s = (const char *)sqlite3_column_text(stmt, 4);
-        if (fecha_s != NULL) {
-            strncpy(r->fecha_salida, fecha_s, sizeof(r->fecha_salida) - 1);
-            r->fecha_salida[sizeof(r->fecha_salida) - 1] = '\0';
-        } else {
-            r->fecha_salida[0] = '\0';
-        }
-
-        // Copiamos estado con manejo seguro
-        const char *est = (const char *)sqlite3_column_text(stmt, 5);
-        if (est != NULL) {
-            strncpy(r->estado, est, sizeof(r->estado) - 1);
-            r->estado[sizeof(r->estado) - 1] = '\0';
-        } else {
-            r->estado[0] = '\0';
-        }
-
+        strcpy(r->fecha_entrada, (const char*)sqlite3_column_text(stmt, 3));
+        strcpy(r->fecha_salida, (const char*)sqlite3_column_text(stmt, 4));
+        strcpy(r->estado, (const char*)sqlite3_column_text(stmt, 5));
         r->monto = sqlite3_column_int(stmt, 6);
-
-        // Copiamos observaciones con manejo seguro
-        const char *obs = (const char *)sqlite3_column_text(stmt, 7);
-        if (obs != NULL) {
-            strncpy(r->observaciones, obs, sizeof(r->observaciones) - 1);
-            r->observaciones[sizeof(r->observaciones) - 1] = '\0';
-        } else {
-            r->observaciones[0] = '\0';
-        }
+        strcpy(r->observaciones, (const char*)sqlite3_column_text(stmt, 7));
 
         sqlite3_finalize(stmt);
-        printf("Reserva con ID %d recuperada correctamente\n", id_reserva);
-        fflush(stdout);
         return 1;
     } else {
-        printf("No se encontró ninguna reserva con ID %d\n", id_reserva);
-        fflush(stdout);
         sqlite3_finalize(stmt);
         return 0;
     }
@@ -911,7 +865,7 @@ void eliminarReservaBD(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 		memset(r, 0, sizeof(Reserva));
 
         // Verificar si la reserva existe
-        if (recuperarReservaPorIdBD(id_reserva, r) != 0) {
+        if (recuperarReservaBD(id_reserva, r) != 0) {
             strcpy(sendBuff, "ERROR: No existe reserva con ese ID");
             printf("Reserva con ID %d no existe en la BD\n", id_reserva);
         } else {
@@ -966,107 +920,100 @@ int comprobarReserva(const char *idCliente) {
     return count > 0;
 }
 
-void buscarReservaBD(const char *idCliente, char *resultBuffer, int bufferSize) {
-    char sql[] = "SELECT id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas WHERE id_cliente = ?";
-    sqlite3_stmt *stmt;
-    resultBuffer[0] = '\0';  // Inicializar el buffer de resultados
+char* buscarReservaBD(int id_reserva) {
+	 static char resultBuffer[1024]; // Buffer estático para almacenar resultados
+	resultBuffer[0] = '\0'; // Inicializar el buffer vacío
+	sqlite3_stmt *stmt;
+	int result;
+    const char *sql = "SELECT id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas WHERE id = ?";
 
-    if (sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL) != SQLITE_OK) {
-        snprintf(resultBuffer, bufferSize, "Error al preparar la consulta: %s", sqlite3_errmsg(db));
-        fflush(stdout);
-        return;
-    }
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+	  sprintf(resultBuffer, "Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
+	  return resultBuffer;
+	}
 
-    sqlite3_bind_text(stmt, 1, idCliente, strlen(idCliente), SQLITE_STATIC);
-    int result;
-    int encontrado = 0;
 
-    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
-        encontrado = 1;
-        char temp[512];
-        snprintf(temp, sizeof(temp), "%d|%s|%d|%s|%s|%s|%d|%s",
-            sqlite3_column_int(stmt, 0),
-            sqlite3_column_text(stmt, 1),
-            sqlite3_column_int(stmt, 2),
-            sqlite3_column_text(stmt, 3),
-            sqlite3_column_text(stmt, 4),
-            sqlite3_column_text(stmt, 5),
-            sqlite3_column_int(stmt, 6),
-            sqlite3_column_text(stmt, 7));
 
-        // Concatenar al buffer de resultados si hay espacio
-        if (strlen(resultBuffer) + strlen(temp) + 2 < bufferSize) {
-            if (strlen(resultBuffer) > 0) {
-                strcat(resultBuffer, "#");  // Separador entre múltiples resultados
-            }
-            strcat(resultBuffer, temp);
-        }
-    }
+	if (sqlite3_bind_int(stmt, 1, id_reserva) != SQLITE_OK) {
+	  sprintf(resultBuffer, "Error al enlazar parámetros: %s\n", sqlite3_errmsg(db));
+	  sqlite3_finalize(stmt);
+	  return resultBuffer;
+	}
 
-    if (!encontrado) {
-        snprintf(resultBuffer, bufferSize, "No se encontraron reservas para el cliente %s", idCliente);
-    }
+	strcat(resultBuffer, "Resultados de la búsqueda:\n");
+	strcat(resultBuffer, "ID  Cliente  Habitación  Entrada      Salida       Estado      Monto    Observaciones\n");
+	strcat(resultBuffer, "-----------------------------------------------------------\n");
 
-    sqlite3_finalize(stmt);
+	bool foundResult = false;
+
+	while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+	  foundResult = true;
+	  char temp[512];
+	  snprintf(temp, sizeof(temp), "%d|%s|%d|%s|%s|%s|%f|%s",
+				  sqlite3_column_int(stmt, 0),
+				  sqlite3_column_text(stmt, 1),
+				  sqlite3_column_int(stmt, 2),
+				  sqlite3_column_text(stmt, 3),
+				  sqlite3_column_text(stmt, 4),
+				  sqlite3_column_text(stmt, 5),
+				  sqlite3_column_double(stmt, 6),
+				  sqlite3_column_text(stmt, 7));
+
+	  strcat(resultBuffer, temp);
+	}
+
+	if (!foundResult) {
+		strcat(resultBuffer, "No se encontraron reservas que coincidan con el criterio de búsqueda.\n");
+	}
+
+	if (result != SQLITE_DONE && result != SQLITE_ROW) {
+		char temp[256];
+		sprintf(temp, "Error al ejecutar la consulta: %s\n", sqlite3_errmsg(db));
+		strcat(resultBuffer, temp);
+	}
+
+	sqlite3_finalize(stmt);
+	return resultBuffer;
 }
 
-char* listarReservasBD() {
-    static char resultBuffer[4096];
-    memset(resultBuffer, 0, sizeof(resultBuffer));
-
-    // Agregar un encabezado
-    strcpy(resultBuffer, "=== LISTADO DE RESERVAS ===\n\n");
-
-    // Consulta SQL simplificada
-    const char *sql = "SELECT id, dni_cliente, id_habitacion, fecha_entrada, fecha_salida, estado FROM reservas ORDER BY id";
-
+char* listaReservasBD() {
+    static char resultBuffer[8192]; // Buffer estático para almacenar resultados
+    resultBuffer[0] = '\0'; // Inicializar el buffer vacío
     sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    int result;
 
-    if (rc != SQLITE_OK) {
-        sprintf(resultBuffer + strlen(resultBuffer),
-                "Error al preparar la consulta: %s\n",
-                sqlite3_errmsg(db));
+    const char *sql = "SELECT id, id_cliente, id_habitacion, fecha_entrada, fecha_salida, estado, monto, observaciones FROM reservas ORDER BY id";
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        sprintf(resultBuffer, "Error al preparar la consulta: %s\n", sqlite3_errmsg(db));
         return resultBuffer;
     }
 
-    // Agregar encabezados de columnas
-    strcat(resultBuffer, "ID | DNI Cliente | Habitación | Entrada | Salida | Estado\n");
-    strcat(resultBuffer, "--------------------------------------------------\n");
+    strcat(resultBuffer, "Lista de reservas:\n");
+    strcat(resultBuffer, "ID  Cliente  Habitación  Entrada      Salida       Estado      Monto    Observaciones\n");
+    strcat(resultBuffer, "---------------------------------------------------------------------------------\n");
 
-    // Variable para contar registros
-    int count = 0;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+    	char temp[8192];
+		sprintf(temp, "%d, %s, %d, %s, %s, %s, %f, %s\n",
+				sqlite3_column_int(stmt, 0),
+				(const char*)sqlite3_column_text(stmt, 1),
+				sqlite3_column_int(stmt, 2),
+				(const char*)sqlite3_column_text(stmt, 3),
+				(const char*)sqlite3_column_text(stmt, 4),
+				(const char*)sqlite3_column_text(stmt, 5),
+				sqlite3_column_double(stmt, 6),
+				(const char*)sqlite3_column_text(stmt, 7));
 
-    // Iterar sobre los resultados
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        count++;
-        char row[512];
-
-        // Formatear cada fila
-        sprintf(row, "%d | %s | %d | %s | %s | %s\n",
-                sqlite3_column_int(stmt, 0),
-                sqlite3_column_text(stmt, 1) ? (const char*)sqlite3_column_text(stmt, 1) : "N/A",
-                sqlite3_column_int(stmt, 2),
-                sqlite3_column_text(stmt, 3) ? (const char*)sqlite3_column_text(stmt, 3) : "N/A",
-                sqlite3_column_text(stmt, 4) ? (const char*)sqlite3_column_text(stmt, 4) : "N/A",
-                sqlite3_column_text(stmt, 5) ? (const char*)sqlite3_column_text(stmt, 5) : "N/A");
-
-        // Agregar la fila al buffer de resultados
-        strcat(resultBuffer, row);
+        strcat(resultBuffer, temp);
     }
 
-    // Si no hay registros, mostrar un mensaje
-    if (count == 0) {
-        strcat(resultBuffer, "No hay reservas registradas en el sistema.\n");
-    }
+        if (result != SQLITE_DONE) {
+            char temp[256];
+            sprintf(temp, "Error al ejecutar la consulta: %s\n", sqlite3_errmsg(db));
+            strcat(resultBuffer, temp);
+        }
 
-    // Agregar un resumen
-    char summary[100];
-    sprintf(summary, "\nTotal de reservas: %d\n", count);
-    strcat(resultBuffer, summary);
-
-    // Finalizar la sentencia
-    sqlite3_finalize(stmt);
-
-    return resultBuffer;
+        sqlite3_finalize(stmt);
+        return resultBuffer;
 }

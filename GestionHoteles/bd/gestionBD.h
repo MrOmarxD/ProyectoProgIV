@@ -50,9 +50,9 @@ int buscarFacturaBD(const char *numero_factura, Factura *factura);
 // Funciones Reservas
 int crearReservaBD(Reserva *r);
 int modificarReservaBD(Reserva *r);
-int recuperarReservaPorIdBD(int id_reserva, Reserva *r);
+int recuperarReservaBD(int idReserva, Reserva *r);
 void eliminarReservaBD(SOCKET comm_socket, char *recvBuff, char *sendBuff);
-void buscarReservaBD(const char *idCliente, char *resultBuffer, int bufferSize);
-char* listarReservaBD();
+char* buscarReservaBD(int id_reserva);
+char* listaReservasBD();
 
 #endif /* GESTIONBD_H_ */

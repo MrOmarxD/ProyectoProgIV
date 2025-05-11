@@ -1,11 +1,11 @@
 #ifndef GESTORRESERVAS_H_
 #define GESTORRESERVAS_H_
 
-#include "gestorRegistros.h"
 #include <winsock2.h>
+#include <stdbool.h>
+#include "gestorRegistros.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 
 typedef struct {
     int id;
@@ -21,6 +21,7 @@ typedef struct {
 
 void crearReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 void modificarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
-void buscarReserva(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff);
+void buscarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff);
 
 #endif /* MODULOS_GESTORRESERVAS_H_ */
