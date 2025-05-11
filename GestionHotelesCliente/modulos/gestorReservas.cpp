@@ -253,8 +253,11 @@ void modificarReserva(SOCKET s) {
 }
 
 void listaReservas(SOCKET s) {
-    char recvBuff[8192]; // Buffer más grande para recibir listas largas
+    // Buffer más grande para recibir la respuesta completa
+    char recvBuff[4096];
     char sendBuff[512];
+    static char responseBuffer[8192]; // Buffer para acumular respuestas en fragmentos
+    responseBuffer[0] = '\0'; // Inicializar respuesta acumulada
 
     // Limpiar buffers
     memset(recvBuff, 0, sizeof(recvBuff));
@@ -264,28 +267,65 @@ void listaReservas(SOCKET s) {
     strcpy(sendBuff, "LISTAR_RESERVAS");
     int sendResult = send(s, sendBuff, strlen(sendBuff), 0);
 
-	if (sendResult == SOCKET_ERROR) {
-		cout << "Error al enviar solicitud al servidor: " << WSAGetLastError() << endl;
-		return;
-	}
+    if (sendResult == SOCKET_ERROR) {
+        cout << "Error al enviar solicitud al servidor: " << WSAGetLastError() << endl;
+        return;
+    }
 
-	// Esperar respuesta del servidor
-	int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
+    int totalBytes = 0;
+    bool moreData = true;
 
-	if (bytes > 0) {
-		recvBuff[bytes] = '\0'; // Asegurar terminación
-		cout << recvBuff << endl;
+    // Recibir respuesta en múltiples fragmentos si es necesario
+    while (moreData) {
+        int bytes = recv(s, recvBuff, sizeof(recvBuff) - 1, 0);
 
-		// Añadir una pausa para que el usuario pueda leer el mensaje
-		cout << "Presiona Enter para continuar...";
-		cin.ignore(1000, '\n');
-		cin.get();
-	} else if (bytes == 0) {
-		cout << "El servidor ha cerrado la conexión" << endl;
-	} else {
-		cout << "Error al recibir datos: " << WSAGetLastError() << endl;
-	}
+        if (bytes > 0) {
+            recvBuff[bytes] = '\0'; // Asegurar terminación
+
+            // Verificar espacio disponible en el buffer de respuesta
+            if (totalBytes + bytes < sizeof(responseBuffer) - 1) {
+                strcat(responseBuffer, recvBuff);
+                totalBytes += bytes;
+            } else {
+                // Si el buffer de respuesta está lleno, detener la recepción
+                strcat(responseBuffer, "... (respuesta truncada por exceder el límite)\n");
+                break;
+            }
+
+            // Verificar si hay más datos disponibles para leer
+            // (usando select() para una espera corta)
+            fd_set readSet;
+            FD_ZERO(&readSet);
+            FD_SET(s, &readSet);
+
+            struct timeval timeout;
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 100000; // 100 ms de espera
+
+            // Si no hay más datos en el socket, terminamos el bucle
+            if (select(0, &readSet, NULL, NULL, &timeout) <= 0) {
+                moreData = false;
+            }
+        } else if (bytes == 0) {
+            cout << "El servidor ha cerrado la conexión" << endl;
+            break;
+        } else {
+            cout << "Error al recibir datos: " << WSAGetLastError() << endl;
+            break;
+        }
+    }
+
+    // Mostrar la respuesta completa
+    if (totalBytes > 0) {
+        cout << responseBuffer << endl;
+
+        // Añadir una pausa para que el usuario pueda leer el mensaje
+        cout << "Presiona Enter para continuar...";
+        cin.ignore(1000, '\n');
+        cin.get();
+    }
 }
+
 
 void buscarReserva(SOCKET s) {
     char recvBuff[4096];

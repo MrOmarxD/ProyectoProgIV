@@ -154,16 +154,37 @@ void listarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     // Obtener la lista de reservas desde la BD
     char* listaDeReservas = listaReservasBD();
 
-	// Asegurarse de que no exceda el tamaño del buffer
-	strncpy(sendBuff, listaDeReservas, 511);
-	sendBuff[511] = '\0'; // Garantizar terminación con NULL
+    // Buffer más grande para la respuesta
+    static char responseBuffer[4096];
 
-	// Enviar la respuesta al cliente
-	send(comm_socket, sendBuff, strlen(sendBuff), 0);
+    // Copiar la respuesta al buffer local
+    strncpy(responseBuffer, listaDeReservas, sizeof(responseBuffer) - 1);
+    responseBuffer[sizeof(responseBuffer) - 1] = '\0'; // Garantizar terminación
 
-	printf("Enviada lista de reservas al cliente\n");
+    // Si la respuesta es demasiado grande para enviarse de una vez,
+    // dividirla en partes (chunks)
+    const int MAX_SEND_SIZE = 1024;
+    int remaining = strlen(responseBuffer);
+    int sent = 0;
 
+    while (remaining > 0) {
+        int chunk_size = (remaining > MAX_SEND_SIZE) ? MAX_SEND_SIZE : remaining;
+
+        // Enviar un fragmento de la respuesta
+        int result = send(comm_socket, responseBuffer + sent, chunk_size, 0);
+
+        if (result == SOCKET_ERROR) {
+            printf("Error al enviar datos al cliente: %d\n", WSAGetLastError());
+            break;
+        }
+
+        sent += result;
+        remaining -= result;
+    }
+
+    printf("Enviada lista de reservas al cliente (%d bytes)\n", sent);
 }
+
 
 void buscarReservas(SOCKET comm_socket, char *recvBuff, char *sendBuff){
 	// Recibir el criterio de búsqueda

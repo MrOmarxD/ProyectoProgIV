@@ -977,7 +977,7 @@ char* buscarReservaBD(int id_reserva) {
 }
 
 char* listaReservasBD() {
-    static char resultBuffer[8192]; // Buffer estático para almacenar resultados
+    static char resultBuffer[4096]; // Buffer estático para almacenar resultados
     resultBuffer[0] = '\0'; // Inicializar el buffer vacío
     sqlite3_stmt *stmt;
     int result;
@@ -994,7 +994,7 @@ char* listaReservasBD() {
     strcat(resultBuffer, "---------------------------------------------------------------------------------\n");
 
     while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
-    	char temp[8192];
+    	char temp[512];
 		sprintf(temp, "%d, %s, %d, %s, %s, %s, %f, %s\n",
 				sqlite3_column_int(stmt, 0),
 				(const char*)sqlite3_column_text(stmt, 1),
@@ -1005,7 +1005,13 @@ char* listaReservasBD() {
 				sqlite3_column_double(stmt, 6),
 				(const char*)sqlite3_column_text(stmt, 7));
 
-        strcat(resultBuffer, temp);
+		// Verificar si hay espacio suficiente en el buffer antes de concatenar
+		if (strlen(resultBuffer) + strlen(temp) < sizeof(resultBuffer) - 1) {
+			strcat(resultBuffer, temp);
+		} else {
+			strcat(resultBuffer, "... (demasiadas reservas para mostrar)\n");
+			break; // Salir del bucle si el buffer está lleno
+		}
     }
 
         if (result != SQLITE_DONE) {
