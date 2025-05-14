@@ -159,9 +159,119 @@ void generarNuevaFactura(int* usuario_actual) {
 }
 
 void buscarFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    char numero_factura[20];
 
+    // Recibir número de factura desde el cliente
+    memset(recvBuff, 0, 512);
+    int bytesRecibidos = recv(comm_socket, recvBuff, 511, 0);
+
+    if (bytesRecibidos > 0) {
+        recvBuff[bytesRecibidos] = '\0';
+        strcpy(numero_factura, recvBuff);
+
+        // Buscar factura en la BD
+        Factura factura;
+        if (buscarFacturaBD(numero_factura, &factura)) {
+            // Recuperar información del cliente
+            Cliente cliente;
+            if (recuperarClienteBD(factura.dni_cliente, &cliente)) {
+                // Formatear datos para enviar al cliente
+                sprintf(sendBuff,
+                        "%s|%s|%s|%s|%s|%s %s|%s|%s|%.2f",
+                        factura.numero_Factura,
+                        factura.estado,
+                        factura.id_reserva,
+                        factura.dni_cliente,
+                        cliente.nombre,
+                        cliente.apellido,
+                        factura.fecha,
+                        factura.metodo_pago,
+                        factura.monto);
+            } else {
+                // Si no se encuentra el cliente, enviar datos sin nombre
+                sprintf(sendBuff,
+                        "%s|%s|%s|%s|NO_ENCONTRADO|NO_ENCONTRADO|%s|%s|%.2f",
+                        factura.numero_Factura,
+                        factura.estado,
+                        factura.id_reserva,
+                        factura.dni_cliente,
+                        factura.fecha,
+                        factura.metodo_pago,
+                        factura.monto);
+            }
+        } else {
+            // Factura no encontrada
+            strcpy(sendBuff, "NOT_FOUND");
+        }
+    } else {
+        strcpy(sendBuff, "ERROR_RECV");
+    }
+
+    // Enviar resultado al cliente
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
 }
 
 void crearFactura(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
+    // Variables para almacenar los datos de la factura
+    int id_reserva, monto_total;
+    char dni_cliente[10], fecha_emision[20], metodo_pago[20], estado[20], detalles[100];
+    char id_reserva_str[20]; // Para almacenar el id_reserva como texto
 
+    // Recibir datos de factura del cliente
+    memset(recvBuff, 0, 512);
+    int bytesRecibidos = recv(comm_socket, recvBuff, 511, 0);
+
+    if (bytesRecibidos > 0) {
+        recvBuff[bytesRecibidos] = '\0'; // Asegurar terminación
+
+        // Parsear los datos recibidos (formato: id_reserva|dni_cliente|fecha_emision|metodo_pago|estado|monto_total|detalles)
+        sscanf(recvBuff, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%[^\n]",
+               &id_reserva, dni_cliente, fecha_emision, metodo_pago, estado, &monto_total, detalles);
+
+        // Convertir id_reserva a string para la estructura Factura
+        sprintf(id_reserva_str, "%d", id_reserva);
+
+        // Crear una estructura de factura
+        Factura nueva_factura;
+        nueva_factura.id = 0; // El ID se generará automáticamente en la BD
+        strcpy(nueva_factura.id_reserva, id_reserva_str);
+        strcpy(nueva_factura.dni_cliente, dni_cliente);
+        strcpy(nueva_factura.fecha, fecha_emision);
+        strcpy(nueva_factura.metodo_pago, metodo_pago);
+        strcpy(nueva_factura.estado, estado);
+        nueva_factura.monto = (float)monto_total;
+
+        // Generar un número único para la factura
+        time_t t = time(NULL);
+        sprintf(nueva_factura.numero_Factura, "F%ld", t);
+
+        // Verificar si el cliente existe
+        Cliente cliente;
+        if (!recuperarClienteBD(nueva_factura.dni_cliente, &cliente)) {
+            strcpy(sendBuff, "ERROR|El cliente con el DNI proporcionado no existe en la base de datos.");
+            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+            return;
+        }
+
+        // Guardar la factura en la base de datos
+        crearFacturaBD(&nueva_factura);
+
+        // Enviar los datos necesarios para que el cliente cree el archivo
+        sprintf(sendBuff, "OK|%s|%s|%s|%s|%s|%s|%s|%s|%.2f|%s",
+                nueva_factura.numero_Factura,
+                nueva_factura.estado,
+                nueva_factura.id_reserva,
+                nueva_factura.dni_cliente,
+                cliente.nombre,
+                cliente.apellido,
+                nueva_factura.fecha,
+                nueva_factura.metodo_pago,
+                nueva_factura.monto,
+                detalles);
+    } else {
+        strcpy(sendBuff, "ERROR|Error al recibir los datos de la factura.");
+    }
+
+    // Enviar respuesta al cliente
+    send(comm_socket, sendBuff, strlen(sendBuff), 0);
 }
