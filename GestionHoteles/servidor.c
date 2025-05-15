@@ -73,6 +73,14 @@ void procesarPeticion(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
 	} else if (strcmp(recvBuff, "BUSCAR_FACTURA") == 0) {
 		buscarFactura(comm_socket, recvBuff, sendBuff);
 	}
+    // Registros
+	else if (strcmp(recvBuff, "LISTAR_REGISTROS") == 0) {
+		listarRegistros(comm_socket, recvBuff, sendBuff);
+	} else if (strcmp(recvBuff, "BUSCAR_REGISTROS_USUARIO") == 0) {
+		buscarRegistrosPorUsuario(comm_socket, recvBuff, sendBuff);
+	} else if (strcmp(recvBuff, "BUSCAR_REGISTROS_FECHA") == 0) {
+		obtenerRegistrosPorFecha(comm_socket, recvBuff, sendBuff);
+	}
     // Resto
     else if (strcmp(recvBuff, "SALIR") == 0) {
         // Cliente solicita terminar la conexión

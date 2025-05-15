@@ -1,18 +1,28 @@
-#ifndef GESTORREGISTROS_H_
-#define GESTORREGISTROS_H_
+#ifndef GESTOR_REGISTROS_H
+#define GESTOR_REGISTROS_H
+
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <winsock2.h>
 
 typedef struct {
     int id;
     int id_usuario;
     char fecha[20];
-    char operacion[100];
-} Registro;
+    char operacion[50];
+    char detalles[255];
+} RegistroActividad;
 
-void registrarActividad(int id_usuario, const char* operacion, const char* LOG_FILE);
-void verRegistrosActividad(int usuario_actual, const char* LOG_FILE);
-bool guardarDatos(const char* archivo, void* datos, size_t tamano, int cantidad);
-bool cargarDatos(const char* archivo, void* datos, size_t tamano, int* cantidad);
+int registrarActividad(int id_usuario, const char* operacion, const char* detalles, const char* log_file);
 
-#endif /* MODULOS_GESTORREGISTROS_H_ */
+int obtenerUltimoIdRegistro(const char* log_file);
+
+void listarRegistros(SOCKET s, char* recvBuff, char* sendBuff);
+
+void buscarRegistrosPorUsuario(SOCKET s, char* recvBuff, char* sendBuff);
+
+void obtenerRegistrosPorFecha(SOCKET s, char* recvBuff, char* sendBuff);
+
+#endif
