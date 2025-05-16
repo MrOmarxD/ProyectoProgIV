@@ -26,28 +26,35 @@ int mostrarMenuPrincipal(SOCKET s) {
             switch (opcion) {
                 case 1:
                 	gestionUsuarios(s);
+                	registrarActividad(usuario_actual, "Acceso", "Acceso a gestión de usuarios", g_config.log_file);
                     break;
                 case 2:
                 	gestionClienteAdmin(s);
+                	registrarActividad(usuario_actual, "Acceso", "Acceso a gestión de usuarios", g_config.log_file);
                     break;
                 case 3:
                     gestionHabitaciones(s);
+                    registrarActividad(usuario_actual, "Acceso", "Acceso a gestión de habitaciones", g_config.log_file);
                     break;
                 case 4:
                     gestionReservas(s);
+                    registrarActividad(usuario_actual, "Acceso", "Acceso a gestión de reservas", g_config.log_file);
                     break;
                 case 5:
                     gestionFacturacion(s);
+                    registrarActividad(usuario_actual, "Acceso", "Acceso a gestión de facturación", g_config.log_file);
                     break;
                 case 6:
-//                    verRegistrosActividad(usuario_actual, g_config.log_file);
+                    mostrarMenuRegistros(s);
+                    registrarActividad(usuario_actual, "Acceso", "Acceso a registros de actividad", g_config.log_file);
                     break;
                 case 7:
                     configuracionSistema(s);
+                    registrarActividad(usuario_actual, "Acceso", "Acceso a configuración del sistema", g_config.log_file);
                     break;
                 case 0:
                 	cout<<"Cerrando sesión y saliendo del sistema...\n";
-//                    registrarActividad(usuario_actual, "Cierre de sesión", g_config.log_file);
+                    registrarActividad(usuario_actual, "Cierre de sesión", "El usuario ha cerrado la sesión", g_config.log_file);
                     return 0;
                     break;
             }
@@ -86,18 +93,23 @@ void configuracionSistema(SOCKET s) {
     switch (opcion) {
 		case 1:
 			cambiarRutasArchivos(s);
+			registrarActividad(usuario_actual, "Configuración", "Cambio de rutas de archivos", g_config.log_file);
 			break;
 		case 2:
 			configurarConexion();
+			registrarActividad(usuario_actual, "Configuración", "Cambio de parámetros de conexión", g_config.log_file);
 			break;
 		case 3:
 			hacerCopiaSeguridad();
+			registrarActividad(usuario_actual, "Configuración", "Creación de copia de seguridad", g_config.log_file);
 			break;
 		case 4:
 			restaurarCopiaSeguridad();
+			registrarActividad(usuario_actual, "Configuración", "Restauración desde copia de seguridad", g_config.log_file);
 			break;
 		case 5:
 			printConfig(&g_config);
+			registrarActividad(usuario_actual, "Configuración", "Visualización de configuración actual", g_config.log_file);
 			break;
 		case 0:
 			mostrarMenuPrincipal(s);
@@ -105,8 +117,6 @@ void configuracionSistema(SOCKET s) {
 		default:
 			cout<<"Opción no válida. Intente nuevamente.\n";
 	}
-
-//    registrarActividad(usuario_actual, "Acceso a configuración del sistema", g_config.log_file);
 }
 
 void cambiarRutasArchivos(SOCKET s) {
@@ -133,36 +143,42 @@ void cambiarRutasArchivos(SOCKET s) {
             cout << "Introduce nueva ruta: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.db_users_file, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de ruta de archivo de usuarios", g_config.log_file);
             break;
         case 2:
             cout << "Ruta actual: " << g_config.db_clients_file << endl;
             cout << "Introduce nueva ruta: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.db_clients_file, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de ruta de archivo de clientes", g_config.log_file);
             break;
         case 3:
             cout << "Ruta actual: " << g_config.db_rooms_file << endl;
             cout << "Introduce nueva ruta: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.db_rooms_file, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de ruta de archivo de habitaciones", g_config.log_file);
             break;
         case 4:
             cout << "Ruta actual: " << g_config.db_reservations_file << endl;
             cout << "Introduce nueva ruta: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.db_reservations_file, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de ruta de archivo de reservas", g_config.log_file);
             break;
         case 5:
             cout << "Ruta actual: " << g_config.log_file << endl;
             cout << "Introduce nueva ruta: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.log_file, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de ruta de archivo de registro de actividad", g_config.log_file);
             break;
         case 6:
             cout << "Directorio actual: " << g_config.backup_dir << endl;
             cout << "Introduce nuevo directorio: ";
             cin.getline(nueva_ruta, 100);
             strcpy(g_config.backup_dir, nueva_ruta);
+            registrarActividad(usuario_actual, "Configuración", "Cambio de directorio de copias de seguridad", g_config.log_file);
             break;
         case 0:
             configuracionSistema(s);
@@ -255,15 +271,19 @@ int mostrarMenuPrincipalCliente(SOCKET s){
 	switch (opcion) {
 		case 1:
 			mostrarClientes(s);
+			registrarActividad(usuario_actual, "Acceso", "Visualización de listado de clientes", g_config.log_file);
 			break;
 		case 2:
 			mostrarHabitaciones(s);
+			registrarActividad(usuario_actual, "Acceso", "Visualización de listado de habitaciones", g_config.log_file);
 			break;
 		case 3:
 			crearReserva(s);
+			registrarActividad(usuario_actual, "Operación", "Creación de nueva reserva", g_config.log_file);
 			break;
 		case 0:
 			cout<<"Salir\n";
+			registrarActividad(usuario_actual, "Cierre de sesión", "El usuario ha cerrado la sesión", g_config.log_file);
 			break;
 		default:
 			cout<<"Opción no válida. Intente nuevamente.\n";

@@ -127,6 +127,18 @@ bool createBackup(const ConfigData* config) {
         return false;
     }
 
+    char backup_log[200];
+    sprintf(backup_log, "%s/%s_actividad.bak", config->backup_dir, timestamp);
+
+    ifstream src_log(config->log_file, ios::binary);
+    ofstream dst_log(backup_log, ios::binary);
+    if (src_log && dst_log) {
+        dst_log << src_log.rdbuf();
+    } else {
+        cout << "Error al hacer copia de seguridad del registro de actividad" << endl;
+        // Decidir si esto debe ser fatal o no
+    }
+
     // Crear nombre para archivos de backup
     char backup_users[200], backup_clients[200], backup_rooms[200], backup_reservations[200];
     sprintf(backup_users, "%s/%s_usuarios.bak", config->backup_dir, timestamp);

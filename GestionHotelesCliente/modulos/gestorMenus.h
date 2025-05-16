@@ -9,6 +9,8 @@
 #include "gestorHabitaciones.h"
 #include "gestorReservas.h"
 #include "gestorFacturas.h"
+#include "gestorRegistro.h"
+#include "../../GestionHoteles/modulos/gestorRegistros.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include "config.h"
@@ -16,6 +18,7 @@
 // Variable global para la configuración
 extern ConfigData g_config;  // Declarar como extern para ser visible en todo el programa
 extern char CONFIG_FILE[];   // Ruta al archivo de configuración
+extern int usuario_actual;   // ID del usuario que ha iniciado sesión
 
 int mostrarMenuPrincipal(SOCKET s);
 char eleccionInicial();
