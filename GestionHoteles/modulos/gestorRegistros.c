@@ -110,21 +110,23 @@ int obtenerUltimoIdRegistro(const char* log_file) {
     return ultimo_id;
 }
 
-void listarRegistros(SOCKET s, char* recvBuff, char* sendBuff) {
+void listarRegistros(SOCKET comm_socket, char *recvBuff, char *sendBuff) {
     FILE* archivo;
     char linea[512];
-    char respuesta[8192] = ""; // Buffer grande para la respuesta
-    extern char g_config_log_file[100]; // Variable global definida en otro lugar
-    const char* log_file = g_config_log_file;
+    char respuesta[8192] = "";
+    const char* log_file = "actividad.log";
     int bytes_enviados;
 
     // Recibir parámetros adicionales si es necesario
-    recv(s, recvBuff, 512, 0);
+    int bytesRecibidos = recv(comm_socket, recvBuff, 511, 0);
+    if (bytesRecibidos > 0) {
+        recvBuff[bytesRecibidos] = '\0';
+    }
 
     archivo = fopen(log_file, "r");
     if (archivo == NULL) {
-        strcpy(sendBuff, "ERROR: No se pudo abrir el archivo de registros");
-        send(s, sendBuff, strlen(sendBuff), 0);
+        strcpy(sendBuff, "ERROR|No se pudo abrir el archivo de registros");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
         return;
     }
 
@@ -139,20 +141,21 @@ void listarRegistros(SOCKET s, char* recvBuff, char* sendBuff) {
         if (strlen(respuesta) + strlen(linea) >= sizeof(respuesta) - 1) {
             // El buffer está casi lleno, enviar lo que tenemos y continuar
             strcpy(sendBuff, respuesta);
-            bytes_enviados = send(s, sendBuff, strlen(sendBuff), 0);
+            bytes_enviados = send(comm_socket, sendBuff, strlen(sendBuff), 0);
             if (bytes_enviados == SOCKET_ERROR) {
                 fprintf(stderr, "Error al enviar datos: %d\n", WSAGetLastError());
                 fclose(archivo);
                 return;
             }
 
-            // Recibir confirmación antes de continuar
-            int bytes_recibidos = recv(s, recvBuff, 512, 0);
-            if (bytes_recibidos <= 0) {
+            // Esperar confirmación antes de continuar
+            bytesRecibidos = recv(comm_socket, recvBuff, 511, 0);
+            if (bytesRecibidos <= 0) {
                 fprintf(stderr, "Error o conexión cerrada al recibir confirmación\n");
                 fclose(archivo);
                 return;
             }
+            recvBuff[bytesRecibidos] = '\0';
 
             // Reiniciar el buffer de respuesta
             memset(respuesta, 0, sizeof(respuesta));
@@ -165,14 +168,19 @@ void listarRegistros(SOCKET s, char* recvBuff, char* sendBuff) {
     // Enviar el resto de la respuesta si hay algo
     if (strlen(respuesta) > 0) {
         strcpy(sendBuff, respuesta);
-        bytes_enviados = send(s, sendBuff, strlen(sendBuff), 0);
+        bytes_enviados = send(comm_socket, sendBuff, strlen(sendBuff), 0);
         if (bytes_enviados == SOCKET_ERROR) {
             fprintf(stderr, "Error al enviar datos finales: %d\n", WSAGetLastError());
         }
+    } else {
+        // Si no hay registros, enviar un mensaje adecuado
+        strcpy(sendBuff, "INFO|No hay registros disponibles en el archivo de actividad.");
+        send(comm_socket, sendBuff, strlen(sendBuff), 0);
     }
 
     fclose(archivo);
 }
+
 
 void buscarRegistrosPorUsuario(SOCKET s, char* recvBuff, char* sendBuff) {
     FILE* archivo;
